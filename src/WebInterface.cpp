@@ -119,7 +119,7 @@ namespace WebInterface
             esp_restart();
         }
 
-        static auto handleUpdate( AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final ) -> void
+        static auto handleFile( AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final ) -> void
         {
             if( request->url() != "/update" )
             {
@@ -242,7 +242,7 @@ namespace WebInterface
             server->on( "/configuration.json", HTTP_GET, Get::handleConfigurationJson );
 
             server->addHandler( new AsyncCallbackJsonWebHandler( "/configuration.json", Post::handleConfigurationJson, 2048 ) );
-            server->onFileUpload( Post::handleUpdate );
+            server->onFileUpload( Post::handleFile );
 
             ws.onEvent( wsEventHandler );
             server->addHandler( &ws );

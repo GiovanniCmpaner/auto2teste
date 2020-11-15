@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <SPIFFS.h>
 
 #include <esp_log.h>
 
@@ -6,8 +7,13 @@
 #include "Peripherals.hpp"
 #include "WebInterface.hpp"
 
+#undef PI
+#include "tiny_dnn/tiny_dnn.h"
+
 void setup()
 {
+    SPIFFS.begin( true );
+
     delay( 1000 );
     Serial.begin( 115200 );
     Serial.setDebugOutput( true );
