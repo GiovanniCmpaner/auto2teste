@@ -1,7 +1,7 @@
 {
-  "name":"tiny-dnn",
-  "description":"header only, dependency-free deep learning framework in C++14",
-  "keywords":"dnn",
+  "name": "tiny-dnn",
+  "description": "header only, dependency-free deep learning framework in C++14",
+  "keywords": ["tiny","dnn"],
   "authors":
   {
     "name": "evilmucedin",

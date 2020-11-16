@@ -8,6 +8,7 @@
 #include <ESPAsyncWebServer.h>
 #include <WiFi.h>
 #include <Update.h>
+#include <SPIFFS.h>
 
 #include <esp_log.h>
 #include <esp_task_wdt.h>
@@ -98,6 +99,97 @@ namespace WebInterface
         }
     }
 
+    namespace File
+    {
+        static auto handleFirmwareBin( AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final ) -> void
+        {
+            if( index == 0 )
+            {
+                log_d( "POST /firmware.bin" );
+
+                if( not filename.endsWith( ".bin" ) )
+                {
+                    request->send( 400, "text/plain", "File extension must be .bin" );
+                    return;
+                }
+
+                if( not Update.begin( request->contentLength() ) )
+                {
+                    request->send( 500, "text/plain", Update.errorString() );
+                    return;
+                }
+            }
+            if ( Update.write( data, len ) != len )
+            {
+                request->send( 500, "text/plain", Update.errorString() );
+                return;
+            }
+            if( final )
+            {
+                if( not Update.end( true ) )
+                {
+                    request->send( 500, "text/plain", Update.errorString() );
+                    return;
+                }
+                request->send( 200, "text/plain", "Success, rebooting in 3 seconds" );
+                delay( 3000 );
+                ESP.restart();
+            }
+        }
+
+        static auto handleNetJson( AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final ) -> void
+        {
+            static auto temp{fs::File{}};
+
+            if( index == 0 )
+            {
+                log_d( "POST /net.json" );
+
+                if( not filename.endsWith( ".json" ) )
+                {
+                    request->send( 400, "text/plain", "File extension must be .json" );
+                    return;
+                }
+
+                temp = SPIFFS.open( "/net_temp.json", "w" );
+                if( not temp )
+                {
+                    request->send( 500, "text/plain", "Error opening file" );
+                    return;
+                }
+            }
+            if ( temp.write( data, len ) != len )
+            {
+                request->send( 500, "text/plain", "Error writing to file" );
+
+                temp.close();
+                SPIFFS.remove( "/net_temp.json" );
+
+                return;
+            }
+            if( final )
+            {
+                if( temp.size() <= 16384 )
+                {
+                    temp.close();
+                    SPIFFS.remove( "/net.json" );
+                    SPIFFS.rename( "/net_temp.json", "/net.json" );
+
+                    request->send( 200, "text/plain", "Success, rebooting in 3 seconds" );
+                    delay( 3000 );
+                    ESP.restart();
+                }
+                else
+                {
+                    temp.close();
+                    SPIFFS.remove( "/net_temp.json" );
+
+                    request->send( 400, "text/plain", "File size must be 16384 bytes or less" );
+                }
+            }
+        }
+    }
+
     namespace Post
     {
         static auto handleConfigurationJson( AsyncWebServerRequest* request, JsonVariant& requestJson ) -> void
@@ -121,44 +213,17 @@ namespace WebInterface
 
         static auto handleFile( AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final ) -> void
         {
-            if( request->url() != "/update" )
+            if( request->url() == "/firmware.bin" )
+            {
+                File::handleFirmwareBin( request, filename, index, data, len, final );
+            }
+            else if( request->url() == "/net.json" )
+            {
+                File::handleNetJson( request, filename, index, data, len, final );
+            }
+            else
             {
                 request->send( 404 );
-                return;
-            }
-
-            log_d( "POST /update" );
-
-            if( filename != "firmware.bin" )
-            {
-                request->send( 400, "text/plain", "Invalid filename" );
-                return;
-            }
-            if( index == 0 )
-            {
-                Serial.printf( "UploadStart: %s\n", filename.c_str() );
-                if( not Update.begin( request->contentLength() ) )
-                {
-                    request->send( 500, "text/plain", Update.errorString() );
-                    return;
-                }
-
-            }
-            if ( Update.write( data, len ) != len )
-            {
-                request->send( 500, "text/plain", Update.errorString() );
-                return;
-            }
-            if( final )
-            {
-                if( not Update.end( true ) )
-                {
-                    request->send( 500, "text/plain", Update.errorString() );
-                    return;
-                }
-                request->send( 200, "text/plain", "Success, rebooting in 3 seconds" );
-                delay( 3000 );
-                ESP.restart();
             }
         }
     }
