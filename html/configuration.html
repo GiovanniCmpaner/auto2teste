@@ -18,6 +18,38 @@
     <a href="/control.html">Control</a>
   </nav>
   <h2> Configuration </h2>
+  <form id="neural_network">
+    <fieldset>
+      <legend> Neural Network </legend>
+      <table class="normal">
+        <tr>
+          <td>
+            <label for="neural_network_file"> File </label>
+          </td>
+          <td>
+            <input type="file" id="neural_network_file" accept=".json" required>
+          </td>
+        </tr>
+      </table>
+      <input type="submit" value="Upload">
+    </fieldset>
+  </form>
+  <form id="firmware">
+    <fieldset>
+      <legend> Firmware </legend>
+      <table class="normal">
+        <tr>
+          <td>
+            <label for="firmware_file"> File </label>
+          </td>
+          <td>
+            <input type="file" id="firmware_file" accept=".bin" required>
+          </td>
+        </tr>
+      </table>
+      <input type="submit" value="Upload">
+    </fieldset>
+  </form>
   <form id="access_point">
     <fieldset>
       <legend> Access Point </legend>

@@ -1,8 +1,25 @@
 $(document).ready(() => {
+    handleFiles();
     handleConfiguration();
 
     getConfiguration().then(() => clearMessage());
 });
+
+function handleFiles() {
+    $("#neural_network").submit((event) => {
+        event.preventDefault();
+        if ($("#neural_network")[0].checkValidity()) {
+            uploadNeuralNetwork().then(() => clearMessage());
+        }
+    });
+    
+    $("#firmware").submit((event) => {
+        event.preventDefault();
+        if ($("#firmware")[0].checkValidity()) {
+            uploadFirmware().then(() => clearMessage());
+        }
+    });
+}
 
 function handleConfiguration() {
     $("#access_point").submit((event) => {
@@ -60,11 +77,11 @@ function setConfiguration(cfg) {
         type: "POST",
         url: "/configuration.json",
         contentType: 'application/json',
-        timeout: 5000,
         data: JSON.stringify(cfg),
+        timeout: 5000,
         beforeSend: () => {
             $("input,select").prop("disabled", true);
-            infoMessage("Sending");
+            infoMessage("Saving");
         }
     })
         .done((msg) => {
@@ -78,11 +95,13 @@ function setConfiguration(cfg) {
         .always(() => {
             $("input,select").prop("disabled", false);
         });
+        
     return deferred.promise();
 }
 
 function getConfiguration() {
     var deferred = new $.Deferred();
+    
     $.ajax({
         type: "GET",
         url: "/configuration.json",
@@ -93,27 +112,68 @@ function getConfiguration() {
             infoMessage("Loading");
         }
     })
-        .done((cfg) => {
-            $("#access_point_enabled").prop("checked", cfg.access_point.enabled);
-            $("#access_point_mac").prop("value", cfg.access_point.mac.map((n) => n.toString(16).toUpperCase().padStart(2, "0")).join("-"));
-            $("#access_point_ip").prop("value", cfg.access_point.ip.map((n) => n.toString(10)).join("."));
-            $("#access_point_netmask").prop("value", cfg.access_point.netmask.map((n) => n.toString(10)).join("."));
-            $("#access_point_gateway").prop("value", cfg.access_point.gateway.map((n) => n.toString(10)).join("."));
-            $("#access_point_port").prop("value", cfg.access_point.port);
-            $("#access_point_user").prop("value", cfg.access_point.user);
-            $("#access_point_password").prop("value", cfg.access_point.password);
-            $("#access_point_duration").prop("value", cfg.access_point.duration);
+    .done((cfg) => {
+        $("#access_point_enabled").prop("checked", cfg.access_point.enabled);
+        $("#access_point_mac").prop("value", cfg.access_point.mac.map((n) => n.toString(16).toUpperCase().padStart(2, "0")).join("-"));
+        $("#access_point_ip").prop("value", cfg.access_point.ip.map((n) => n.toString(10)).join("."));
+        $("#access_point_netmask").prop("value", cfg.access_point.netmask.map((n) => n.toString(10)).join("."));
+        $("#access_point_gateway").prop("value", cfg.access_point.gateway.map((n) => n.toString(10)).join("."));
+        $("#access_point_port").prop("value", cfg.access_point.port);
+        $("#access_point_user").prop("value", cfg.access_point.user);
+        $("#access_point_password").prop("value", cfg.access_point.password);
+        $("#access_point_duration").prop("value", cfg.access_point.duration);
 
-            $("#station_enabled").prop("checked", cfg.station.enabled);
-            $("#station_mac").prop("value", cfg.station.mac.map((n) => n.toString(16).toUpperCase().padStart(2, "0")).join("-"));
-            $("#station_ip").prop("value", cfg.station.ip.map((n) => n.toString(10)).join("."));
-            $("#station_netmask").prop("value", cfg.station.netmask.map((n) => n.toString(10)).join("."));
-            $("#station_gateway").prop("value", cfg.station.gateway.map((n) => n.toString(10)).join("."));
-            $("#station_port").prop("value", cfg.station.port);
-            $("#station_user").prop("value", cfg.station.user);
-            $("#station_password").prop("value", cfg.station.password);
+        $("#station_enabled").prop("checked", cfg.station.enabled);
+        $("#station_mac").prop("value", cfg.station.mac.map((n) => n.toString(16).toUpperCase().padStart(2, "0")).join("-"));
+        $("#station_ip").prop("value", cfg.station.ip.map((n) => n.toString(10)).join("."));
+        $("#station_netmask").prop("value", cfg.station.netmask.map((n) => n.toString(10)).join("."));
+        $("#station_gateway").prop("value", cfg.station.gateway.map((n) => n.toString(10)).join("."));
+        $("#station_port").prop("value", cfg.station.port);
+        $("#station_user").prop("value", cfg.station.user);
+        $("#station_password").prop("value", cfg.station.password);
 
-            successMessage("Done");
+        successMessage("Done");
+        deferred.resolve();
+    })
+    .fail((xhr, status, error) => {
+        errorMessage(status == "timeout" ? "Fail: Timeout" : `Fail: ${xhr.status} ${xhr.statusText}`);
+        deferred.reject();
+    })
+    .always(() => {
+        $("input,select").prop("disabled", false);
+    });
+        
+    return deferred.promise();
+}
+
+function uploadNeuralNetwork(){
+    var deferred = new $.Deferred();
+
+    var file = $("#neural_network_file")[0].files[0];
+    if(file.size > 32768)
+    {
+        errorMessage("File size must be 32768 bytes or less");
+        deferred.reject();
+    }
+    else
+    {
+        var formData = new FormData();
+        formData.append("neural_network.json", file, file.name);
+
+        $.ajax({
+            type: "POST",
+            url: "/neural_network.json",
+            contentType: false,
+            processData: false,
+            data: formData,
+            timeout: 30000,
+            beforeSend: () => {
+                $("input,select").prop("disabled", true);
+                infoMessage("Uploading");
+            }
+        })
+        .done((msg) => {
+            successMessage(msg ?? "Done");
             deferred.resolve();
         })
         .fail((xhr, status, error) => {
@@ -123,6 +183,50 @@ function getConfiguration() {
         .always(() => {
             $("input,select").prop("disabled", false);
         });
+    }
+        
+    return deferred.promise();
+}
+
+function uploadFirmware(){
+    var deferred = new $.Deferred();
+
+    var file = $("#firmware_file")[0].files[0];
+    if(file.size > 1945600)
+    {
+        errorMessage("File size must be 1945600 bytes or less");
+        deferred.reject();
+    }
+    else
+    {
+        var formData = new FormData();
+        formData.append("firmware.bin", file, file.name);
+
+        $.ajax({
+            type: "POST",
+            url: "/firmware.bin",
+            contentType: false,
+            processData: false,
+            data: formData,
+            timeout: 300000,
+            beforeSend: () => {
+                $("input,select").prop("disabled", true);
+                infoMessage("Uploading");
+            }
+        })
+        .done((msg) => {
+            successMessage(msg ?? "Done");
+            deferred.resolve();
+        })
+        .fail((xhr, status, error) => {
+            errorMessage(status == "timeout" ? "Fail: Timeout" : `Fail: ${xhr.status} ${xhr.statusText}`);
+            deferred.reject();
+        })
+        .always(() => {
+            $("input,select").prop("disabled", false);
+        });
+    }
+        
     return deferred.promise();
 }
 

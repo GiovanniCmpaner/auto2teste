@@ -18,6 +18,4 @@ namespace Peripherals
             DIN2 = 39
         };
     }
-
-    auto init() -> void;
 }

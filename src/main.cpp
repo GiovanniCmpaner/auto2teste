@@ -1,57 +1,24 @@
 #include <Arduino.h>
-#include <SPIFFS.h>
 
 #include <esp_log.h>
 
 #include "Configuration.hpp"
 #include "Peripherals.hpp"
+#include "Control.hpp"
 #include "WebInterface.hpp"
-
-#undef PI
-#include "tiny_dnn/tiny_dnn.h"
 
 void setup()
 {
-    delay( 1000 );
     Serial.begin( 115200 );
     Serial.setDebugOutput( true );
+
     log_d( "begin" );
 
-    Peripherals::init();
     Configuration::init();
     Configuration::load( &cfg );
 
+    Control::init();
     WebInterface::init();
-
-#ifdef ESP32
-    teste
-#endif
-
-    if( SPIFFS.exists( "/net.json" ) )
-    {
-        log_d( "load net.json" );
-
-        using namespace tiny_dnn;
-        network<sequential> net{};
-
-        net.load( "/spiffs/net.json", content_type::weights_and_model, file_format::json );
-
-        assert( net.in_data_size() == 10 );
-        assert( net.out_data_size() == 4 );
-
-        //for( auto& layer : net )
-        //{
-        //    auto idx{0};
-        //    layer->load( {1.0, 2.0, 3.0}, idx );
-        //    for( auto& weight : layer->weights() )
-        //    {
-        //        weight
-        //    }
-        //}
-
-        //net.fast_load()
-    }
-
 
     log_d( "end" );
 }

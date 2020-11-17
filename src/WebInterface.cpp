@@ -139,11 +139,11 @@ namespace WebInterface
 
         static auto handleNetJson( AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final ) -> void
         {
-            static auto temp{fs::File{}};
+            static auto file{fs::File{}};
 
             if( index == 0 )
             {
-                log_d( "POST /net.json" );
+                log_d( "POST /neural_network.json" );
 
                 if( not filename.endsWith( ".json" ) )
                 {
@@ -151,29 +151,27 @@ namespace WebInterface
                     return;
                 }
 
-                temp = SPIFFS.open( "/net_temp.json", "w" );
-                if( not temp )
+                file = SPIFFS.open( "/neural_network.json", "w" );
+                if( not file )
                 {
                     request->send( 500, "text/plain", "Error opening file" );
                     return;
                 }
             }
-            if ( temp.write( data, len ) != len )
+            if ( file.write( data, len ) != len )
             {
-                request->send( 500, "text/plain", "Error writing to file" );
+                request->send( 500, "text/plain", "Error writing to file, probably there's no space left" );
 
-                temp.close();
-                SPIFFS.remove( "/net_temp.json" );
+                file.close();
+                SPIFFS.remove( "/neural_network.json" );
 
                 return;
             }
             if( final )
             {
-                if( temp.size() <= 16384 )
+                if( file.size() <= 32768 )
                 {
-                    temp.close();
-                    SPIFFS.remove( "/net.json" );
-                    SPIFFS.rename( "/net_temp.json", "/net.json" );
+                    file.close();
 
                     request->send( 200, "text/plain", "Success, rebooting in 3 seconds" );
                     delay( 3000 );
@@ -181,10 +179,10 @@ namespace WebInterface
                 }
                 else
                 {
-                    temp.close();
-                    SPIFFS.remove( "/net_temp.json" );
+                    file.close();
+                    SPIFFS.remove( "/neural_network.json" );
 
-                    request->send( 400, "text/plain", "File size must be 16384 bytes or less" );
+                    request->send( 400, "text/plain", "File size must be 32768 bytes or less" );
                 }
             }
         }
@@ -217,7 +215,7 @@ namespace WebInterface
             {
                 File::handleFirmwareBin( request, filename, index, data, len, final );
             }
-            else if( request->url() == "/net.json" )
+            else if( request->url() == "/neural_network.json" )
             {
                 File::handleNetJson( request, filename, index, data, len, final );
             }
@@ -376,6 +374,7 @@ namespace WebInterface
         }
 
         configureServer();
+
         return true;
     }
 
@@ -415,7 +414,7 @@ namespace WebInterface
         log_d( "password = %s", cfg.accessPoint.password.data() );
         log_d( "duration = %u", cfg.accessPoint.duration );
 
-        if ( not cfg.accessPoint.enabled or rtc_get_reset_reason( 0 ) == DEEPSLEEP_RESET )
+        if ( not cfg.accessPoint.enabled or rtc_get_reset_reason( 0 ) != POWERON_RESET )
         {
             WiFi.mode( WIFI_MODE_NULL );
             return false;
@@ -453,6 +452,11 @@ namespace WebInterface
     auto init() -> void
     {
         log_d( "begin" );
+
+        WiFi.mode( WIFI_MODE_APSTA );
+        WiFi.macAddress( cfg.station.mac.data() );
+        WiFi.softAPmacAddress( cfg.accessPoint.mac.data() );
+        WiFi.mode( WIFI_MODE_NULL );
 
         if( not configureAccessPoint() )
         {

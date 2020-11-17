@@ -4,7 +4,7 @@
 #include <FS.h>
 #include <SPIFFS.h>
 #include <FastCRC.h>
-#include <WiFi.h>
+
 #include <cstdio>
 #include <cstdlib>
 #include <esp_log.h>
@@ -38,17 +38,9 @@ static const Configuration defaultCfg
     }
 };
 
-static std::array<uint8_t, 6> stationMAC{};
-static std::array<uint8_t, 6> accessPointMAC{};
-
 auto Configuration::init() -> void
 {
     log_d( "begin" );
-
-    WiFi.mode( WIFI_MODE_APSTA );
-    WiFi.macAddress( stationMAC.data() );
-    WiFi.softAPmacAddress( accessPointMAC.data() );
-    WiFi.mode( WIFI_MODE_NULL );
 
     SPIFFS.begin( true );
 
@@ -61,7 +53,7 @@ auto Configuration::serialize( ArduinoJson::JsonVariant& json ) const -> void
         auto accessPoint{json["access_point"]};
 
         accessPoint["enabled"] = this->accessPoint.enabled;
-        for ( auto n : accessPointMAC )
+        for ( auto n : this->accessPoint.mac )
         {
             accessPoint["mac"].add( n );
         }
@@ -86,7 +78,7 @@ auto Configuration::serialize( ArduinoJson::JsonVariant& json ) const -> void
         auto station{json["station"]};
 
         station["enabled"] = this->station.enabled;
-        for ( auto n : stationMAC )
+        for ( auto n : this->station.mac )
         {
             station["mac"].add( n );
         }
@@ -112,15 +104,13 @@ auto Configuration::deserialize( const ArduinoJson::JsonVariant& json ) -> void
 {
     {
         const auto accessPoint{json["access_point"]};
+        // IGNORE this->accessPoint.mac
         {
             const auto enabled{accessPoint["enabled"]};
             if ( enabled.is<bool>() )
             {
                 this->accessPoint.enabled = enabled.as<bool>();
             }
-        }
-        {
-            this->accessPoint.mac = accessPointMAC;
         }
         {
             const auto ip{accessPoint["ip"]};
@@ -183,15 +173,13 @@ auto Configuration::deserialize( const ArduinoJson::JsonVariant& json ) -> void
     }
     {
         const auto station{json["station"]};
+        // IGNORE this->station.mac
         {
             const auto enabled{station["enabled"]};
             if ( enabled.is<bool>() )
             {
                 this->station.enabled = enabled.as<bool>();
             }
-        }
-        {
-            this->station.mac = stationMAC;
         }
         {
             const auto ip{station["ip"]};
@@ -260,7 +248,6 @@ auto Configuration::load( Configuration* cfg ) -> void
     else
     {
         auto file{SPIFFS.open( "/configuration.json", FILE_READ )};
-        file.setTimeout( 3000 );
         if ( not file )
         {
             log_e( "file error" );
