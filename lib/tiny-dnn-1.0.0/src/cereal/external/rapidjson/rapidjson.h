@@ -285,8 +285,13 @@ private:
 		chunk->next = chunkHead_;
 		chunkHead_ =  chunk;
 	}
-
-	static const int kDefaultChunkCapacity = 16 * 1024; //!< Default chunk capacity.
+    
+    //!< Default chunk capacity.
+#ifdef ESP32
+	static const int kDefaultChunkCapacity = 16 * 1024; 
+#else
+	static const int kDefaultChunkCapacity = 64 * 1024;
+#endif
 
 	//! Chunk header for perpending to each chunk.
 	/*! Chunks are stored as a singly linked list.

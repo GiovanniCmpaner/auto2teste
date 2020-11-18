@@ -79,17 +79,16 @@
 #define CNN_TASK_SIZE 8
 #endif
 
-namespace tiny_dnn
-{
+namespace tiny_dnn {
 
-    /**
-     * calculation data type
-     * you can change it to float, or user defined class (fixed point,etc)
-     **/
+/**
+ * calculation data type
+ * you can change it to float, or user defined class (fixed point,etc)
+ **/
 #ifdef CNN_USE_DOUBLE
-    typedef double float_t;
+typedef double float_t;
 #else
-    typedef float float_t;
+typedef float float_t;
 #endif
 
 }  // namespace tiny_dnn
