@@ -4,7 +4,7 @@ namespace Peripherals
 {
     namespace Motors
     {
-        enum Pins
+        enum
         {
             STBY = 34,
             PWM = 21,
@@ -17,5 +17,15 @@ namespace Peripherals
             DIN1 = 40,
             DIN2 = 39
         };
+    }
+    namespace Distances
+    {
+        enum
+        {
+            SDA = 15,
+            SCL = 16
+        };
+
+        static constexpr int XSHUT[6]{ 14, 13, 12, 11, 10, 9 };
     }
 }

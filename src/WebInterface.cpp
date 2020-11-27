@@ -1,7 +1,3 @@
-#include <chrono>
-#include <functional>
-#include <memory>
-
 #include <Arduino.h>
 #include <ArduinoJson.hpp>
 #include <AsyncJson.h>
@@ -20,24 +16,7 @@
 #include "Peripherals.hpp"
 #include "WebInterface.hpp"
 #include "Motors.hpp"
-
-extern const uint8_t control_html_start[] asm( "_binary_html_control_html_start" );
-extern const uint8_t control_html_end[] asm( "_binary_html_control_html_end" );
-
-extern const uint8_t control_js_start[] asm( "_binary_html_control_js_start" );
-extern const uint8_t control_js_end[] asm( "_binary_html_control_js_end" );
-
-extern const uint8_t configuration_html_start[] asm( "_binary_html_configuration_html_start" );
-extern const uint8_t configuration_html_end[] asm( "_binary_html_configuration_html_end" );
-
-extern const uint8_t configuration_js_start[] asm( "_binary_html_configuration_js_start" );
-extern const uint8_t configuration_js_end[] asm( "_binary_html_configuration_js_end" );
-
-extern const uint8_t style_css_start[] asm( "_binary_html_style_css_start" );
-extern const uint8_t style_css_end[] asm( "_binary_html_style_css_end" );
-
-extern const uint8_t jquery_min_js_start[] asm( "_binary_html_jquery_min_js_start" );
-extern const uint8_t jquery_min_js_end[] asm( "_binary_html_jquery_min_js_end" );
+#include "Files.hpp"
 
 namespace WebInterface
 {
@@ -378,26 +357,33 @@ namespace WebInterface
         return true;
     }
 
-    static auto taskAccessPoint( void* ) -> void
+    static auto checkAccessPoint() -> void
     {
-        auto modeTimer{ std::chrono::system_clock::now() };
-        while( WiFi.getMode() == WIFI_MODE_AP )
         {
-            const auto now{std::chrono::system_clock::now()};
+            static auto checkTimer{0UL};
+            if( millis() - checkTimer < 1000UL )
+            {
+                return;
+            }
+            checkTimer = millis();
+        }
+
+        if( WiFi.getMode() != WIFI_MODE_AP )
+        {
+            return;
+        }
+        
+        {
+            static auto modeTimer{ millis() };
             if( WiFi.softAPgetStationNum() > 0 )
             {
-                modeTimer = now;
+                modeTimer = millis();
             }
-            else
+            else if( millis() - modeTimer > cfg.accessPoint.duration * 1000UL )
             {
-                if( now - modeTimer > std::chrono::seconds( cfg.accessPoint.duration ) )
-                {
-                    configureStation();
-                }
+                configureStation();
             }
-            vTaskDelay( pdMS_TO_TICKS( 1000 ) );
         }
-        vTaskDelete( nullptr );
     }
 
     static auto configureAccessPoint() -> bool
@@ -444,8 +430,6 @@ namespace WebInterface
 
         configureServer();
 
-        xTaskCreate( taskAccessPoint, "taskAccessPoint", 2048, nullptr, 1, nullptr );
-
         return true;
     }
 
@@ -464,5 +448,10 @@ namespace WebInterface
         }
 
         log_d( "end" );
+    }
+
+    auto process() -> void
+    {
+        checkAccessPoint();
     }
 }

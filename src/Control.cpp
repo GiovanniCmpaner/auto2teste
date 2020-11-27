@@ -10,6 +10,7 @@
 
 #include "Control.hpp"
 #include "Motors.hpp"
+#include "Sensors.hpp"
 
 namespace Control
 {
@@ -56,6 +57,7 @@ namespace Control
 
     auto process() -> void
     {
-
+        Sensors::process();
+        Motors::process();
     }
 }

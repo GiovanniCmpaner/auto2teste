@@ -34,6 +34,11 @@ namespace Motors
         log_d( "end" );
     }
 
+    auto process() -> void
+    {
+
+    }
+
     auto forward() -> void
     {
         digitalWrite( Peripherals::Motors::STBY, HIGH );

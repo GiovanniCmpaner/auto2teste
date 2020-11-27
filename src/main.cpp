@@ -25,6 +25,8 @@ void setup()
 
 void loop()
 {
+    Control::process();
+    WebInterface::process();
     delay( 1 ); // Necessário para o ESP TCP Async
 }
 
