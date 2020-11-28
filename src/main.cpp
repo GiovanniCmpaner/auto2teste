@@ -1,6 +1,11 @@
 #include <Arduino.h>
 
 #include <esp_log.h>
+#include <soc/rtc_wdt.h>
+#include "soc/rtc.h"
+#include "soc/rtc_cntl_reg.h"
+#include "soc/apb_ctrl_reg.h"
+#include "esp_task_wdt.h"
 
 #include "Configuration.hpp"
 #include "Peripherals.hpp"
@@ -9,25 +14,30 @@
 
 void setup()
 {
-    Serial.begin( 115200 );
-    Serial.setDebugOutput( true );
+    Serial.begin(115200);
+    Serial.setDebugOutput(true);
 
-    log_d( "begin" );
+    log_d("begin");
+
+    rtc_wdt_protect_off();
+    rtc_wdt_disable();
+    disableCore0WDT();
+    disableLoopWDT();
 
     Configuration::init();
-    Configuration::load( &cfg );
+    Configuration::load(&cfg);
 
     Control::init();
-    WebInterface::init();
+    //WebInterface::init();
 
-    log_d( "end" );
+    log_d("end");
 }
 
 void loop()
 {
     Control::process();
-    WebInterface::process();
-    delay( 1 ); // Necessário para o ESP TCP Async
+    //WebInterface::process();
+    delay(1); // Necessário para o ESP TCP Async
 }
 
 //#include <Arduino.h>
