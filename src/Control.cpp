@@ -10,54 +10,54 @@
 
 #include "Control.hpp"
 #include "Motors.hpp"
-#include "Sensors.hpp"
+#include "Distance.hpp"
 
 namespace Control
 {
     static auto load() -> void
     {
-        log_d( "begin" );
+        log_d("begin");
 
-        if( SPIFFS.exists( "/neural_network_loading.json" ) )
+        if (SPIFFS.exists("/neural_network_loading.json"))
         {
-            log_e( "file error" );
+            log_e("file error");
 
-            SPIFFS.remove( "/neural_network_loading.json" );
+            SPIFFS.remove("/neural_network_loading.json");
         }
 
-        if( SPIFFS.exists( "/neural_network.json" ) )
+        if (SPIFFS.exists("/neural_network.json"))
         {
-            log_d( "file exists" );
+            log_d("file exists");
 
-            SPIFFS.rename( "/neural_network.json", "/neural_network_loading.json" );
+            SPIFFS.rename("/neural_network.json", "/neural_network_loading.json");
 
             using namespace tiny_dnn;
-            auto net{ network<sequential>{} };
-            net.load( "/spiffs/neural_network_loading.json", content_type::weights_and_model, file_format::json );
+            auto net{network<sequential>{}};
+            net.load("/spiffs/neural_network_loading.json", content_type::weights_and_model, file_format::json);
 
-            assert( net.in_data_size() == 13 );
-            assert( net.out_data_size() == 4 );
+            assert(net.in_data_size() == 13);
+            assert(net.out_data_size() == 4);
 
-            SPIFFS.rename( "/neural_network_loading.json", "/neural_network.json" );
+            SPIFFS.rename("/neural_network_loading.json", "/neural_network.json");
         }
 
-        log_d( "end" );
+        log_d("end");
     }
 
     auto init() -> void
     {
-        log_d( "begin" );
+        log_d("begin");
 
-        Sensors::init();
+        Distance::init();
         Motors::init();
         Control::load();
 
-        log_d( "end" );
+        log_d("end");
     }
 
     auto process() -> void
     {
-        Sensors::process();
+        Distance::process();
         Motors::process();
     }
-}
+} // namespace Control

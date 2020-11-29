@@ -18,17 +18,12 @@ void setup()
     Serial.setDebugOutput(true);
 
     log_d("begin");
-
-    rtc_wdt_protect_off();
-    rtc_wdt_disable();
-    disableCore0WDT();
-    disableLoopWDT();
-
+    
     Configuration::init();
     Configuration::load(&cfg);
 
     Control::init();
-    //WebInterface::init();
+    WebInterface::init();
 
     log_d("end");
 }
@@ -36,7 +31,7 @@ void setup()
 void loop()
 {
     Control::process();
-    //WebInterface::process();
+    WebInterface::process();
     delay(1); // Necessário para o ESP TCP Async
 }
 
