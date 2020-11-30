@@ -9,6 +9,8 @@
 
 #include "Configuration.hpp"
 #include "Peripherals.hpp"
+#include "Sensors.hpp"
+#include "Motors.hpp"
 #include "Control.hpp"
 #include "WebInterface.hpp"
 
@@ -18,18 +20,26 @@ void setup()
     Serial.setDebugOutput(true);
 
     log_d("begin");
-    
+
+    Peripherals::init();
+
     Configuration::init();
     Configuration::load(&cfg);
 
+    Sensors::init();
+    Motors::init();
     Control::init();
     WebInterface::init();
+
+    //Control::calibrateDistances();
 
     log_d("end");
 }
 
 void loop()
 {
+    Sensors::process();
+    Motors::process();
     Control::process();
     WebInterface::process();
     delay(1); // Necessário para o ESP TCP Async
