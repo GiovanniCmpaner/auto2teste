@@ -2,13 +2,25 @@
 
 #include <utility>
 #include <array>
-#include <map>
+#include <vector>
 
 #include <Arduino.h>
 #include <ArduinoJson.hpp>
 
 namespace Sensors
 {
+    enum class Color
+    {
+        BLACK = 0,
+        RED,
+        GREEN,
+        BLUE,
+        YELLOW,
+        MAGENTA,
+        CYAN,
+        WHITE
+    };
+
     static constexpr auto angleUnit{"deg"};
     static constexpr auto distanceUnit{"m"};
     static constexpr auto rotationUnit{"rad/s"};
@@ -17,11 +29,11 @@ namespace Sensors
 
     auto init() -> void;
     auto process() -> void;
-    auto resetReference() -> void;
+    auto resetOffset() -> void;
     auto print() -> void;
     auto serialize(ArduinoJson::JsonVariant &json) -> void;
 
-    auto distances() -> std::map<int, float>;
+    auto distances() -> std::array<std::pair<int, float>, 6>;
     auto color() -> std::array<uint16_t, 3>;
     auto rotation() -> std::array<float, 3>;
     auto acceleration() -> std::array<float, 3>;

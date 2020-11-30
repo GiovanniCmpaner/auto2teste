@@ -6,9 +6,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" type="image/x-icon" href="data:,">
   <link rel="stylesheet" type="text/css" href="style.css">
-  <script src="jquery.min.js"></script>
+  <script src="jquery.min.js.gz"></script>
+  <script src="chart.min.js.gz"></script>
   <script src="sensors.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
   <title>Auto2 - Sensors</title>
 </head>
 
@@ -176,7 +176,19 @@
         <td>
           <fieldset>
             <legend>Distances Chart</legend>
-            <canvas id="chart" width="500px" height="500px"></canvas>
+            <canvas id="distances_chart" width="500px" height="500px"></canvas>
+          </fieldset>
+        </td>
+        <td>
+          <fieldset>
+            <legend>Rotation Chart</legend>
+            <canvas id="rotation_chart" width="250px" height="250px"></canvas>
+          </fieldset>
+        </td>
+        <td>
+          <fieldset>
+            <legend>Acceleration Chart</legend>
+            <canvas id="acceleration_chart" width="250px" height="250px"></canvas>
           </fieldset>
         </td>
       </tr>

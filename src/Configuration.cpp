@@ -2,8 +2,8 @@
 
 #include <ArduinoJson.hpp>
 #include <FS.h>
-#include <SPIFFS.h>
 #include <FastCRC.h>
+#include <SPIFFS.h>
 
 #include <cstdio>
 #include <cstdlib>
@@ -13,61 +13,55 @@
 #include "Configuration.hpp"
 #include "Peripherals.hpp"
 
-static const Configuration defaultCfg
-{
-    {
-        true,
-        {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED},
-        {192, 168, 1, 210},
-        {255, 255, 255, 0},
-        {192, 168, 1, 1},
-        80,
-        "WORKGROUP",
-        "49WNN7F3CD@22"
-    },
-    {
-        true,
-        {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED},
-        {192, 168, 1, 210},
-        {255, 255, 255, 0},
-        {192, 168, 1, 1},
-        80,
-        "Auto2",
-        "4ut@Con7r0L",
-        30
-    }
-};
+static const Configuration defaultCfg{
+    {true,
+     {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED},
+     {192, 168, 1, 210},
+     {255, 255, 255, 0},
+     {192, 168, 1, 1},
+     80,
+     "WORKGROUP",
+     "49WNN7F3CD@22"},
+    {true,
+     {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED},
+     {192, 168, 1, 210},
+     {255, 255, 255, 0},
+     {192, 168, 1, 1},
+     80,
+     "Auto2",
+     "4ut@Con7r0L",
+     30}};
 
 auto Configuration::init() -> void
 {
-    log_d( "begin" );
+    log_d("begin");
 
-    SPIFFS.begin( true );
+    SPIFFS.begin(true);
 
-    log_d( "end" );
+    log_d("end");
 }
 
-auto Configuration::serialize( ArduinoJson::JsonVariant& json ) const -> void
+auto Configuration::serialize(ArduinoJson::JsonVariant &json) const -> void
 {
     {
         auto accessPoint{json["access_point"]};
 
         accessPoint["enabled"] = this->accessPoint.enabled;
-        for ( auto n : this->accessPoint.mac )
+        for (auto n : this->accessPoint.mac)
         {
-            accessPoint["mac"].add( n );
+            accessPoint["mac"].add(n);
         }
-        for ( auto n : this->accessPoint.ip )
+        for (auto n : this->accessPoint.ip)
         {
-            accessPoint["ip"].add( n );
+            accessPoint["ip"].add(n);
         }
-        for ( auto n : this->accessPoint.netmask )
+        for (auto n : this->accessPoint.netmask)
         {
-            accessPoint["netmask"].add( n );
+            accessPoint["netmask"].add(n);
         }
-        for ( auto n : this->accessPoint.gateway )
+        for (auto n : this->accessPoint.gateway)
         {
-            accessPoint["gateway"].add( n );
+            accessPoint["gateway"].add(n);
         }
         accessPoint["port"] = this->accessPoint.port;
         accessPoint["user"] = this->accessPoint.user;
@@ -78,21 +72,21 @@ auto Configuration::serialize( ArduinoJson::JsonVariant& json ) const -> void
         auto station{json["station"]};
 
         station["enabled"] = this->station.enabled;
-        for ( auto n : this->station.mac )
+        for (auto n : this->station.mac)
         {
-            station["mac"].add( n );
+            station["mac"].add(n);
         }
-        for ( auto n : this->station.ip )
+        for (auto n : this->station.ip)
         {
-            station["ip"].add( n );
+            station["ip"].add(n);
         }
-        for ( auto n : this->station.netmask )
+        for (auto n : this->station.netmask)
         {
-            station["netmask"].add( n );
+            station["netmask"].add(n);
         }
-        for ( auto n : this->station.gateway )
+        for (auto n : this->station.gateway)
         {
-            station["gateway"].add( n );
+            station["gateway"].add(n);
         }
         station["port"] = this->station.port;
         station["user"] = this->station.user;
@@ -100,23 +94,23 @@ auto Configuration::serialize( ArduinoJson::JsonVariant& json ) const -> void
     }
 }
 
-auto Configuration::deserialize( const ArduinoJson::JsonVariant& json ) -> void
+auto Configuration::deserialize(const ArduinoJson::JsonVariant &json) -> void
 {
     {
         const auto accessPoint{json["access_point"]};
         // IGNORE this->accessPoint.mac
         {
             const auto enabled{accessPoint["enabled"]};
-            if ( enabled.is<bool>() )
+            if (enabled.is<bool>())
             {
                 this->accessPoint.enabled = enabled.as<bool>();
             }
         }
         {
             const auto ip{accessPoint["ip"]};
-            if ( ip.is<ArduinoJson::JsonArray>() and ip.size() == this->accessPoint.ip.size() )
+            if (ip.is<ArduinoJson::JsonArray>() and ip.size() == this->accessPoint.ip.size())
             {
-                for ( auto i{0}; i < this->accessPoint.ip.size(); ++i )
+                for (auto i{0}; i < this->accessPoint.ip.size(); ++i)
                 {
                     this->accessPoint.ip[i] = ip[i].as<uint8_t>();
                 }
@@ -124,9 +118,9 @@ auto Configuration::deserialize( const ArduinoJson::JsonVariant& json ) -> void
         }
         {
             const auto netmask{accessPoint["netmask"]};
-            if ( netmask.is<ArduinoJson::JsonArray>() and netmask.size() == this->accessPoint.netmask.size() )
+            if (netmask.is<ArduinoJson::JsonArray>() and netmask.size() == this->accessPoint.netmask.size())
             {
-                for ( auto i{0}; i < this->accessPoint.netmask.size(); ++i )
+                for (auto i{0}; i < this->accessPoint.netmask.size(); ++i)
                 {
                     this->accessPoint.netmask[i] = netmask[i].as<uint8_t>();
                 }
@@ -134,9 +128,9 @@ auto Configuration::deserialize( const ArduinoJson::JsonVariant& json ) -> void
         }
         {
             const auto gateway{accessPoint["gateway"]};
-            if ( gateway.is<ArduinoJson::JsonArray>() and gateway.size() == this->accessPoint.gateway.size() )
+            if (gateway.is<ArduinoJson::JsonArray>() and gateway.size() == this->accessPoint.gateway.size())
             {
-                for ( auto i{0}; i < this->accessPoint.gateway.size(); ++i )
+                for (auto i{0}; i < this->accessPoint.gateway.size(); ++i)
                 {
                     this->accessPoint.gateway[i] = gateway[i].as<uint8_t>();
                 }
@@ -144,28 +138,28 @@ auto Configuration::deserialize( const ArduinoJson::JsonVariant& json ) -> void
         }
         {
             const auto port{accessPoint["port"]};
-            if ( port.is<uint16_t>() )
+            if (port.is<uint16_t>())
             {
                 this->accessPoint.port = port.as<uint16_t>();
             }
         }
         {
             const auto user{accessPoint["user"]};
-            if ( user.is<std::string>() )
+            if (user.is<std::string>())
             {
                 this->accessPoint.user = user.as<std::string>();
             }
         }
         {
             const auto password{accessPoint["password"]};
-            if ( password.is<std::string>() )
+            if (password.is<std::string>())
             {
                 this->accessPoint.password = password.as<std::string>();
             }
         }
         {
             const auto duration{accessPoint["duration"]};
-            if ( duration.is<uint16_t>() )
+            if (duration.is<uint16_t>())
             {
                 this->accessPoint.duration = duration.as<uint16_t>();
             }
@@ -176,16 +170,16 @@ auto Configuration::deserialize( const ArduinoJson::JsonVariant& json ) -> void
         // IGNORE this->station.mac
         {
             const auto enabled{station["enabled"]};
-            if ( enabled.is<bool>() )
+            if (enabled.is<bool>())
             {
                 this->station.enabled = enabled.as<bool>();
             }
         }
         {
             const auto ip{station["ip"]};
-            if ( ip.is<ArduinoJson::JsonArray>() and ip.size() == this->station.ip.size() )
+            if (ip.is<ArduinoJson::JsonArray>() and ip.size() == this->station.ip.size())
             {
-                for ( auto i{0}; i < this->station.ip.size(); ++i )
+                for (auto i{0}; i < this->station.ip.size(); ++i)
                 {
                     this->station.ip[i] = ip[i].as<uint8_t>();
                 }
@@ -193,9 +187,9 @@ auto Configuration::deserialize( const ArduinoJson::JsonVariant& json ) -> void
         }
         {
             const auto netmask{station["netmask"]};
-            if ( netmask.is<ArduinoJson::JsonArray>() and netmask.size() == this->station.netmask.size() )
+            if (netmask.is<ArduinoJson::JsonArray>() and netmask.size() == this->station.netmask.size())
             {
-                for ( auto i{0}; i < this->station.netmask.size(); ++i )
+                for (auto i{0}; i < this->station.netmask.size(); ++i)
                 {
                     this->station.netmask[i] = netmask[i].as<uint8_t>();
                 }
@@ -203,9 +197,9 @@ auto Configuration::deserialize( const ArduinoJson::JsonVariant& json ) -> void
         }
         {
             const auto gateway{station["gateway"]};
-            if ( gateway.is<ArduinoJson::JsonArray>() and gateway.size() == this->station.gateway.size() )
+            if (gateway.is<ArduinoJson::JsonArray>() and gateway.size() == this->station.gateway.size())
             {
-                for ( auto i{0}; i < this->station.gateway.size(); ++i )
+                for (auto i{0}; i < this->station.gateway.size(); ++i)
                 {
                     this->station.gateway[i] = gateway[i].as<uint8_t>();
                 }
@@ -213,21 +207,21 @@ auto Configuration::deserialize( const ArduinoJson::JsonVariant& json ) -> void
         }
         {
             const auto port{station["port"]};
-            if ( port.is<uint16_t>() )
+            if (port.is<uint16_t>())
             {
                 this->station.port = port.as<uint16_t>();
             }
         }
         {
             const auto user{station["user"]};
-            if ( user.is<std::string>() )
+            if (user.is<std::string>())
             {
                 this->station.user = user.as<std::string>();
             }
         }
         {
             const auto password{station["password"]};
-            if ( password.is<std::string>() )
+            if (password.is<std::string>())
             {
                 this->station.password = password.as<std::string>();
             }
@@ -235,67 +229,73 @@ auto Configuration::deserialize( const ArduinoJson::JsonVariant& json ) -> void
     }
 }
 
-auto Configuration::load( Configuration* cfg ) -> void
+auto Configuration::load(Configuration *cfg) -> void
 {
-    log_d( "begin" );
+    log_d("begin");
 
     *cfg = defaultCfg;
 
-    if ( not SPIFFS.exists( "/configuration.json" ) )
+    if (not SPIFFS.exists("/configuration.json"))
     {
-        log_d( "file not found" );
+        log_d("file not found");
     }
     else
     {
-        auto file{SPIFFS.open( "/configuration.json", FILE_READ )};
-        if ( not file )
+        auto file{SPIFFS.open("/configuration.json", FILE_READ)};
+        if (not file)
         {
-            log_e( "file error" );
+            log_e("file error");
         }
         else
         {
             auto doc{ArduinoJson::DynamicJsonDocument{3072}};
-            auto err{ArduinoJson::deserializeJson( doc, file )};
+            auto err{ArduinoJson::deserializeJson(doc, file)};
             file.close();
 
-            if ( err != ArduinoJson::DeserializationError::Ok )
+            if (err != ArduinoJson::DeserializationError::Ok)
             {
-                log_d( "json error = %s", err.c_str() );
+                log_d("json error = %s", err.c_str());
             }
             else
             {
                 auto json{doc.as<ArduinoJson::JsonVariant>()};
-                cfg->deserialize( json );
+                cfg->deserialize(json);
             }
         }
     }
 
-    Configuration::save( *cfg );
-
-    log_d( "end" );
-}
-
-auto Configuration::save( const Configuration& cfg ) -> void
-{
-    log_d( "begin" );
-
-    auto file{SPIFFS.open( "/configuration.json", FILE_WRITE )};
-    file.setTimeout( 3000 );
-    if ( not file )
+    if (not cfg->accessPoint.enabled and not cfg->station.enabled)
     {
-        log_e( "file error" );
-        std::abort();
+        cfg->accessPoint.enabled = true;
+        cfg->station.enabled = true;
     }
 
-    auto doc{ArduinoJson::DynamicJsonDocument{3072}};
-    auto json{doc.as<ArduinoJson::JsonVariant>()};
+    Configuration::save(*cfg);
 
-    cfg.serialize( json );
+    log_d("end");
+}
 
-    ArduinoJson::serializeJsonPretty( doc, file );
-    file.close();
+auto Configuration::save(const Configuration &cfg) -> void
+{
+    log_d("begin");
 
-    log_d( "end" );
+    auto file{SPIFFS.open("/configuration.json", FILE_WRITE)};
+    if (not file)
+    {
+        log_e("file error");
+    }
+    else
+    {
+        auto doc{ArduinoJson::DynamicJsonDocument{3072}};
+        auto json{doc.as<ArduinoJson::JsonVariant>()};
+
+        cfg.serialize(json);
+
+        ArduinoJson::serializeJsonPretty(doc, file);
+        file.close();
+    }
+
+    log_d("end");
 }
 
 Configuration cfg{};

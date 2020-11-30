@@ -1,22 +1,20 @@
-#include <utility>
 #include <array>
-#include <map>
+#include <cstdint>
+#include <cstdlib>
+#include <utility>
+#include <vector>
 
 #include <Arduino.h>
 #include <Wire.h>
-#include <cstdlib>
-#include <cstdint>
-
 #include <esp_log.h>
-#include <soc/dport_reg.h>
 
-#include <Adafruit_VL53L0X.h>
-#include <Adafruit_MPU6050.h>
-#include <Adafruit_APDS9960.h>
-#include <Adafruit_SSD1306.h>
-
-#include "Sensors.hpp"
 #include "Peripherals.hpp"
+#include "Sensors.hpp"
+
+#include <Adafruit_APDS9960.h>
+#include <Adafruit_MPU6050.h>
+#include <Adafruit_SSD1306.h>
+#include <Adafruit_VL53L0X.h>
 
 namespace Sensors
 {
@@ -24,22 +22,14 @@ namespace Sensors
     static auto gyroAccelSensor{Adafruit_MPU6050{}};
     static auto distanceSensors{std::array<Adafruit_VL53L0X, 6>{}};
 
-    static auto distanceValues{
-        std::map<int, float>{
-            {-90, NAN},
-            {-33, NAN},
-            {0, NAN},
-            {+33, NAN},
-            {+90, NAN},
-            {180, NAN}}};
-
+    static auto distanceValues{std::array<std::pair<int, float>, 6>{}};
     static auto colorValues{std::array<uint16_t, 3>{}};
     static auto rotationValues{std::array<float, 3>{}};
     static auto accelerationValues{std::array<float, 3>{}};
     static auto temperatureValue{float{}};
 
-    static auto rotationReferences{std::array<float, 3>{}};
-    static auto accelerationReferences{std::array<float, 3>{}};
+    static auto rotationOffset{std::array<float, 3>{}};
+    static auto accelerationOffset{std::array<float, 3>{}};
 
     static auto initColor() -> void
     {
@@ -109,24 +99,26 @@ namespace Sensors
         if (Sensors::gyroAccelSensor.getEvent(&a, &g, &t))
         {
             Sensors::accelerationValues = {
-                a.acceleration.x - Sensors::accelerationReferences[0],
-                a.acceleration.y - Sensors::accelerationReferences[1],
-                a.acceleration.z - Sensors::accelerationReferences[2]};
+                a.acceleration.x - Sensors::accelerationOffset[0],
+                a.acceleration.y - Sensors::accelerationOffset[1],
+                a.acceleration.z - Sensors::accelerationOffset[2]};
             Sensors::rotationValues = {
-                g.gyro.x - Sensors::rotationReferences[0],
-                g.gyro.y - Sensors::rotationReferences[1],
-                g.gyro.z - Sensors::rotationReferences[2]};
+                g.gyro.x - Sensors::rotationOffset[0],
+                g.gyro.y - Sensors::rotationOffset[1],
+                g.gyro.z - Sensors::rotationOffset[2]};
             Sensors::temperatureValue = t.temperature;
         }
     }
 
     static auto readDistances() -> void
     {
-        auto it{Sensors::distanceValues.begin()};
-        for (auto n{0}; n < Sensors::distanceSensors.size(); ++n, ++it)
+        for (auto n{0}; n < Sensors::distanceSensors.size(); ++n)
         {
             auto &distanceSensor{Sensors::distanceSensors[n]};
-            auto &distanceValue{*it};
+            auto &distance{Sensors::distanceValues[n]};
+            auto &angle{Peripherals::Distances::ANGLES[n]};
+
+            distance.first = angle;
 
             if (distanceSensor.Status == VL53L0X_ERROR_NONE)
             {
@@ -135,17 +127,17 @@ namespace Sensors
                     const auto reading{distanceSensor.readRangeResult()};
                     if (reading < 8191)
                     {
-                        distanceValue.second = reading / 1000.0f;
+                        distance.second = reading / 1000.0f;
                     }
                     else
                     {
-                        distanceValue.second = +INFINITY;
+                        distance.second = +INFINITY;
                     }
                 }
             }
             else
             {
-                distanceValue.second = NAN;
+                distance.second = NAN;
             }
         }
     }
@@ -158,7 +150,7 @@ namespace Sensors
         Sensors::initGyroAccel();
         Sensors::initDistances();
 
-        Sensors::resetReference();
+        Sensors::resetOffset();
 
         log_d("end");
     }
@@ -166,7 +158,7 @@ namespace Sensors
     auto process() -> void
     {
         static auto readTimer{0UL};
-        if (millis() - readTimer > 10UL)
+        if (millis() - readTimer >= 10UL)
         {
             readTimer = millis();
 
@@ -174,25 +166,17 @@ namespace Sensors
             Sensors::readGyroAccel();
             Sensors::readColor();
         }
-
-        //static auto printTimer{0UL};
-        //if (millis() - printTimer > 5000UL)
-        //{
-        //    printTimer = millis();
-        //
-        //    Sensors::print();
-        //}
     }
 
-    auto resetReference() -> void
+    auto resetOffset() -> void
     {
-        Sensors::accelerationReferences = {};
-        Sensors::rotationReferences = {};
+        Sensors::accelerationOffset = {};
+        Sensors::rotationOffset = {};
 
         Sensors::readGyroAccel();
 
-        Sensors::accelerationReferences = Sensors::accelerationValues;
-        Sensors::rotationReferences = Sensors::rotationValues;
+        Sensors::accelerationOffset = Sensors::accelerationValues;
+        Sensors::rotationOffset = Sensors::rotationValues;
 
         Sensors::accelerationValues = {};
         Sensors::rotationValues = {};
@@ -210,7 +194,7 @@ namespace Sensors
         }
     }
 
-    auto distances() -> std::map<int, float>
+    auto distances() -> std::array<std::pair<int, float>, 6>
     {
         return Sensors::distanceValues;
     }
@@ -237,32 +221,38 @@ namespace Sensors
 
     auto serialize(ArduinoJson::JsonVariant &json) -> void
     {
-        auto distances{json["distances"]};
-        for (auto [angle, distanceValue] : Sensors::distanceValues)
         {
-            distances[String{angle}] = distanceValue;
+            auto distances{json["distances"]};
+            for (auto [angle, distanceValue] : Sensors::distanceValues)
+            {
+                distances[String{angle}] = distanceValue;
+            }
         }
-
-        auto color{json["color"]};
-        for (auto colorValue : Sensors::colorValues)
         {
-            color.add(colorValue);
+            auto color{json["color"]};
+            for (auto colorValue : Sensors::colorValues)
+            {
+                color.add(colorValue);
+            }
         }
-
-        auto rotation{json["rotation"]};
-        for (auto rotationValue : Sensors::rotationValues)
         {
-            rotation.add(rotationValue);
+            auto rotation{json["rotation"]};
+            for (auto rotationValue : Sensors::rotationValues)
+            {
+                rotation.add(rotationValue);
+            }
         }
-
-        auto acceleration{json["acceleration"]};
-        for (auto accelerationValue : Sensors::accelerationValues)
         {
-            acceleration.add(accelerationValue);
+            auto acceleration{json["acceleration"]};
+            for (auto accelerationValue : Sensors::accelerationValues)
+            {
+                acceleration.add(accelerationValue);
+            }
         }
-
-        auto temperature{json["temperature"]};
-        temperature = Sensors::temperatureValue;
+        {
+            auto temperature{json["temperature"]};
+            temperature = Sensors::temperatureValue;
+        }
     }
 
 } // namespace Sensors

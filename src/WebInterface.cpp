@@ -2,30 +2,49 @@
 #include <ArduinoJson.hpp>
 #include <AsyncJson.h>
 #include <ESPAsyncWebServer.h>
-#include <WiFi.h>
-#include <Update.h>
 #include <SPIFFS.h>
+#include <Update.h>
+#include <WiFi.h>
 
+#include <esp32s2/rom/rtc.h>
 #include <esp_log.h>
 #include <esp_task_wdt.h>
-#include <soc/rtc_wdt.h>
-#include <esp32s2/rom/rtc.h>
 #include <esp_wifi.h>
+#include <soc/rtc_wdt.h>
 
 #include "Configuration.hpp"
-#include "WebInterface.hpp"
+#include "Files.hpp"
 #include "Motors.hpp"
 #include "Sensors.hpp"
-#include "Files.hpp"
+#include "WebInterface.hpp"
 
 namespace WebInterface
 {
     static auto webServer{std::unique_ptr<AsyncWebServer>{}};
     static auto controlWs{AsyncWebSocket{"/control.ws"}};
     static auto sensorsWs{AsyncWebSocket{"/sensors.ws"}};
+    static auto controlTimer{0UL};
 
     namespace Get
     {
+        static auto handleJqueryJsGz(AsyncWebServerRequest *request) -> void
+        {
+            log_d("GET /jquery.min.js.gz");
+
+            auto response{request->beginResponse_P(200, "application/javascript", jquery_min_js_gz_start, static_cast<size_t>(jquery_min_js_gz_end - jquery_min_js_gz_start))};
+            response->addHeader("Content-Encoding", "gzip");
+            request->send(response);
+        }
+
+        static auto handleChartMinJsGz(AsyncWebServerRequest *request) -> void
+        {
+            log_d("GET /chart.min.js.gz");
+
+            auto response{request->beginResponse_P(200, "application/javascript", chart_min_js_gz_start, static_cast<size_t>(chart_min_js_gz_end - chart_min_js_gz_start))};
+            response->addHeader("Content-Encoding", "gzip");
+            request->send(response);
+        }
+
         static auto handleConfigurationHtml(AsyncWebServerRequest *request) -> void
         {
             log_d("GET /configuration.html");
@@ -73,13 +92,6 @@ namespace WebInterface
             log_d("GET /style.css");
 
             request->send_P(200, "text/css", style_css_start, static_cast<size_t>(style_css_end - style_css_start));
-        }
-
-        static auto handleJqueryJs(AsyncWebServerRequest *request) -> void
-        {
-            log_d("GET /jquery.min.js");
-
-            request->send_P(200, "application/javascript", jquery_min_js_start, static_cast<size_t>(jquery_min_js_end - jquery_min_js_start));
         }
 
         static auto handleConfigurationJson(AsyncWebServerRequest *request) -> void
@@ -230,49 +242,58 @@ namespace WebInterface
         {
             if (type == WS_EVT_CONNECT)
             {
-                log_d("ws[%s][%u] connect", server->url(), client->id());
+                log_d("WS %s (%u) connect", server->url(), client->id());
                 client->ping();
             }
             else if (type == WS_EVT_DISCONNECT)
             {
-                log_d("ws[%s][%u] disconnect: %u", server->url(), client->id());
+                log_d("WS %s (%u) disconnect", server->url(), client->id());
             }
             else if (type == WS_EVT_ERROR)
             {
-                log_e("ws[%s][%u] error(%u): %s", server->url(), client->id(), *((uint16_t *)arg), (char *)data);
+                log_e("WS %s (%u) error (%u): %s", server->url(), client->id(), *reinterpret_cast<const uint16_t *>(arg), reinterpret_cast<const char *>(data));
             }
             else if (type == WS_EVT_PONG)
             {
-                log_d("ws[%s][%u] pong[%u]: %s", server->url(), client->id(), len, (len) ? (char *)data : "");
+                log_d("WS %s (%u) pong (%u): %s", server->url(), client->id(), len, (len ? reinterpret_cast<const char *>(data) : ""));
             }
             else if (type == WS_EVT_DATA)
             {
                 auto info{reinterpret_cast<const AwsFrameInfo *>(arg)};
-                if (info->opcode == WS_TEXT && info->final && info->index == 0 && info->len == 1)
+                if (info->opcode == WS_TEXT and info->final and info->index == 0)
                 {
-                    const auto command{*data};
+                    const auto text{reinterpret_cast<const char *>(data)};
+                    if (info->len == 1)
+                    {
+                        if (text[0] == 'U')
+                        {
+                            Motors::move(Motors::Move::MOVE_FORWARD);
+                        }
+                        else if (text[0] == 'D')
+                        {
+                            Motors::move(Motors::Move::MOVE_BACKWARD);
+                        }
+                        else if (text[0] == 'L')
+                        {
+                            Motors::move(Motors::Move::ROTATE_LEFT);
+                        }
+                        else if (text[0] == 'R')
+                        {
+                            Motors::move(Motors::Move::ROTATE_RIGHT);
+                        }
+                        else if (text[0] == 'X')
+                        {
+                            Motors::move(Motors::Move::STOP);
+                        }
 
-                    log_d("ws[%s][%u] command = %c", server->url(), client->id(), command);
-
-                    if (command == 'U')
-                    {
-                        Motors::forward();
+                        controlTimer = millis();
                     }
-                    else if (command == 'D')
+                    else if (info->len == 4)
                     {
-                        Motors::backward();
-                    }
-                    else if (command == 'L')
-                    {
-                        Motors::left();
-                    }
-                    else if (command == 'R')
-                    {
-                        Motors::right();
-                    }
-                    else if (command == 'X')
-                    {
-                        Motors::stop();
+                        if (strncmp(text, "ping", 4) == 0)
+                        {
+                            client->text("pong");
+                        }
                     }
                 }
             }
@@ -282,24 +303,35 @@ namespace WebInterface
         {
             if (type == WS_EVT_CONNECT)
             {
-                log_d("ws[%s][%u] connect", server->url(), client->id());
+                log_d("WS %s (%u) connect", server->url(), client->id());
                 client->ping();
             }
             else if (type == WS_EVT_DISCONNECT)
             {
-                log_d("ws[%s][%u] disconnect: %u", server->url(), client->id());
+                log_d("WS %s (%u) disconnect", server->url(), client->id());
             }
             else if (type == WS_EVT_ERROR)
             {
-                log_e("ws[%s][%u] error(%u): %s", server->url(), client->id(), *((uint16_t *)arg), (char *)data);
+                log_e("WS %s (%u) error (%u): %s", server->url(), client->id(), *reinterpret_cast<const uint16_t *>(arg), reinterpret_cast<const char *>(data));
             }
             else if (type == WS_EVT_PONG)
             {
-                log_d("ws[%s][%u] pong[%u]: %s", server->url(), client->id(), len, (len) ? (char *)data : "");
+                log_d("WS %s (%u) pong (%u): %s", server->url(), client->id(), len, (len ? reinterpret_cast<const char *>(data) : ""));
             }
             else if (type == WS_EVT_DATA)
             {
-                // NOTHING
+                auto info{reinterpret_cast<const AwsFrameInfo *>(arg)};
+                if (info->opcode == WS_TEXT and info->final and info->index == 0)
+                {
+                    const auto text{reinterpret_cast<const char *>(data)};
+                    if (info->len == 4)
+                    {
+                        if (strncmp(text, "ping", 4) == 0)
+                        {
+                            client->text("pong");
+                        }
+                    }
+                }
             }
         }
 
@@ -320,6 +352,8 @@ namespace WebInterface
 
         if (webServer)
         {
+            webServer->on("/jquery.min.js.gz", HTTP_GET, Get::handleJqueryJsGz);
+            webServer->on("/chart.min.js.gz", HTTP_GET, Get::handleChartMinJsGz);
             webServer->on("/configuration.html", HTTP_GET, Get::handleConfigurationHtml);
             webServer->on("/configuration.js", HTTP_GET, Get::handleConfigurationJs);
             webServer->on("/control.html", HTTP_GET, Get::handleControlHtml);
@@ -327,7 +361,6 @@ namespace WebInterface
             webServer->on("/sensors.html", HTTP_GET, Get::handleSensorsHtml);
             webServer->on("/sensors.js", HTTP_GET, Get::handleSensorsJs);
             webServer->on("/style.css", HTTP_GET, Get::handleStyleCss);
-            webServer->on("/jquery.min.js", HTTP_GET, Get::handleJqueryJs);
             webServer->on("/configuration.json", HTTP_GET, Get::handleConfigurationJson);
 
             webServer->addHandler(new AsyncCallbackJsonWebHandler("/configuration.json", Post::handleConfigurationJson, 2048));
@@ -428,7 +461,7 @@ namespace WebInterface
             {
                 modeTimer = millis();
             }
-            else if (millis() - modeTimer > cfg.accessPoint.duration * 1000UL)
+            else if (millis() - modeTimer >= cfg.accessPoint.duration * 1000UL)
             {
                 WebInterface::configureStation();
             }
@@ -485,7 +518,7 @@ namespace WebInterface
     static auto cleanupWebSockets() -> void
     {
         static auto cleanupTimer{0UL};
-        if (millis() - cleanupTimer > 1000UL)
+        if (millis() - cleanupTimer >= 1000UL)
         {
             cleanupTimer = millis();
 
@@ -497,7 +530,7 @@ namespace WebInterface
     static auto sendSensors() -> void
     {
         static auto sendTimer{0UL};
-        if (millis() - sendTimer > 100UL)
+        if (millis() - sendTimer >= 100UL)
         {
             sendTimer = millis();
 
@@ -512,6 +545,15 @@ namespace WebInterface
                 ArduinoJson::serializeJson(doc, str);
                 WebInterface::sensorsWs.textAll(str);
             }
+        }
+    }
+
+    static auto checkControlTimeout() -> void
+    {
+        if (controlTimer != 0 and millis() - controlTimer >= 50UL)
+        {
+            Motors::move(Motors::Move::STOP);
+            controlTimer = 0;
         }
     }
 
@@ -537,5 +579,6 @@ namespace WebInterface
         WebInterface::checkAccessPoint();
         WebInterface::cleanupWebSockets();
         WebInterface::sendSensors();
+        WebInterface::checkControlTimeout();
     }
 } // namespace WebInterface

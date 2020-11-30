@@ -1,19 +1,27 @@
 $(document).ready(() => {
-    connectWebSocket().then((ws) => assignButtons(ws));
+    connectWebSocket().then(() => assignButtons());
 });
 
-function assignButtons(ws){
-    $("#up").off("click");
-    $("#down").off("click");
-    $("#left").off("click");
-    $("#right").off("click");
-    $("#cross").off("click");
-    
-    $("#up").click(() =>  ws.send("U"));
-    $("#down").click(() => ws.send("D"));
-    $("#left").click(() => ws.send("L"));
-    $("#right").click(() => ws.send("R"));
-    $("#cross").click(() => ws.send("X"));
+
+var webSocket;
+var pingTimer;
+var mouseTimer;
+
+function sendWhileHolding(id, downVal, upVal){
+    $(id).on("mousedown", () => {
+        webSocket.send(downVal);
+        mouseTimer = setInterval(() => webSocket.send(downVal), 30);
+    }).on("mouseup mouseleave", () => {
+        clearTimeout(mouseTimer);
+        webSocket.send(upVal);
+    });
+}
+
+function assignButtons(){
+    sendWhileHolding("#up", "U", "X");
+    sendWhileHolding("#down", "D", "X");
+    sendWhileHolding("#left", "L", "X");
+    sendWhileHolding("#right", "R", "X");
 }
 
 function connectWebSocket() {
@@ -21,23 +29,45 @@ function connectWebSocket() {
   
   infoMessage("Socket connecting");
   
-  var ws = new WebSocket(`ws://${window.location.host}/control.ws`);
-  ws.onopen = () => {
-    deferred.resolve(ws);
+  webSocket = new WebSocket(`ws://${window.location.host}/control.ws`);
+  
+  webSocket.onopen = (evt) => {
+    deferred.resolve(webSocket);
+    ping();
     successMessage("Socket opened").then(() => clearMessage());
   };
 
-  ws.onclose = (e) => {
-    warningMessage("Socket closed");
-    setTimeout(() => connectWebSocket(), 5000);
+  webSocket.onclose = (evt) => {
+    if(evt.wasClean){
+        warningMessage("Socket closed");
+    }
+    else {
+        errorMessage("Socket error");
+    }
+    setTimeout(() => connectWebSocket(), 10000);
   };
 
-  ws.onerror = (err) => {
-    errorMessage("Socket error");
-    ws.close();
+  webSocket.onerror = (evt) => {
+    // NOTHING
+  };
+  
+  webSocket.onmessage = (evt) => {
+    if(evt.data == "pong"){
+        ping();
+    }
   };
   
   return deferred.promise();
+}
+
+function ping(){
+    clearTimeout(pingTimer);
+    if (webSocket != 0 && webSocket.readyState == 1){
+        setTimeout(() => {
+            webSocket.send("ping");
+            pingTimer = setTimeout(() => webSocket.close(), 250);
+        }, 2000);
+    }
 }
 
 function clearMessage() {
