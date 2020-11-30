@@ -20,7 +20,7 @@
 
 namespace WebInterface
 {
-    static auto server{std::unique_ptr<AsyncWebServer>{}};
+    static auto webServer{std::unique_ptr<AsyncWebServer>{}};
     static auto controlWs{AsyncWebSocket{"/control.ws"}};
     static auto sensorsWs{AsyncWebSocket{"/sensors.ws"}};
 
@@ -54,6 +54,20 @@ namespace WebInterface
             request->send_P(200, "application/javascript", control_js_start, static_cast<size_t>(control_js_end - control_js_start));
         }
 
+        static auto handleSensorsHtml(AsyncWebServerRequest *request) -> void
+        {
+            log_d("GET /sensors.html");
+
+            request->send_P(200, "text/html", sensors_html_start, static_cast<size_t>(sensors_html_end - sensors_html_start));
+        }
+
+        static auto handleSensorsJs(AsyncWebServerRequest *request) -> void
+        {
+            log_d("GET /sensors.js");
+
+            request->send_P(200, "application/javascript", sensors_js_start, static_cast<size_t>(sensors_js_end - sensors_js_start));
+        }
+
         static auto handleStyleCss(AsyncWebServerRequest *request) -> void
         {
             log_d("GET /style.css");
@@ -80,6 +94,7 @@ namespace WebInterface
             response->setLength();
             request->send(response);
         }
+
     } // namespace Get
 
     namespace File
@@ -292,41 +307,43 @@ namespace WebInterface
 
     static auto configureServer() -> void
     {
-        server.release();
+        webServer.release();
 
         if (WiFi.getMode() == WIFI_MODE_STA)
         {
-            server.reset(new AsyncWebServer{cfg.station.port});
+            webServer.reset(new AsyncWebServer{cfg.station.port});
         }
         else if (WiFi.getMode() == WIFI_MODE_AP)
         {
-            server.reset(new AsyncWebServer{cfg.accessPoint.port});
+            webServer.reset(new AsyncWebServer{cfg.accessPoint.port});
         }
 
-        if (server)
+        if (webServer)
         {
-            server->on("/configuration.html", HTTP_GET, Get::handleConfigurationHtml);
-            server->on("/configuration.js", HTTP_GET, Get::handleConfigurationJs);
-            server->on("/control.html", HTTP_GET, Get::handleControlHtml);
-            server->on("/control.js", HTTP_GET, Get::handleControlJs);
-            server->on("/style.css", HTTP_GET, Get::handleStyleCss);
-            server->on("/jquery.min.js", HTTP_GET, Get::handleJqueryJs);
-            server->on("/configuration.json", HTTP_GET, Get::handleConfigurationJson);
+            webServer->on("/configuration.html", HTTP_GET, Get::handleConfigurationHtml);
+            webServer->on("/configuration.js", HTTP_GET, Get::handleConfigurationJs);
+            webServer->on("/control.html", HTTP_GET, Get::handleControlHtml);
+            webServer->on("/control.js", HTTP_GET, Get::handleControlJs);
+            webServer->on("/sensors.html", HTTP_GET, Get::handleSensorsHtml);
+            webServer->on("/sensors.js", HTTP_GET, Get::handleSensorsJs);
+            webServer->on("/style.css", HTTP_GET, Get::handleStyleCss);
+            webServer->on("/jquery.min.js", HTTP_GET, Get::handleJqueryJs);
+            webServer->on("/configuration.json", HTTP_GET, Get::handleConfigurationJson);
 
-            server->addHandler(new AsyncCallbackJsonWebHandler("/configuration.json", Post::handleConfigurationJson, 2048));
-            server->onFileUpload(Post::handleFile);
+            webServer->addHandler(new AsyncCallbackJsonWebHandler("/configuration.json", Post::handleConfigurationJson, 2048));
+            webServer->onFileUpload(Post::handleFile);
 
             controlWs.onEvent(WebSocket::handleControlWs);
-            server->addHandler(&controlWs);
+            webServer->addHandler(&controlWs);
 
             sensorsWs.onEvent(WebSocket::handleSensorsWs);
-            server->addHandler(&sensorsWs);
+            webServer->addHandler(&sensorsWs);
 
             DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
             DefaultHeaders::Instance().addHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
             DefaultHeaders::Instance().addHeader("Access-Control-Allow-Headers", "Content-Type");
             DefaultHeaders::Instance().addHeader("Access-Control-Max-Age", "86400");
-            server->onNotFound([](AsyncWebServerRequest *request) {
+            webServer->onNotFound([](AsyncWebServerRequest *request) {
                 log_d("not found = %s", request->url().c_str());
                 if (request->method() == HTTP_OPTIONS)
                 {
@@ -337,7 +354,7 @@ namespace WebInterface
                     request->send(404, "not found");
                 }
             });
-            server->begin();
+            webServer->begin();
         }
     }
 
@@ -384,7 +401,7 @@ namespace WebInterface
             return false;
         }
 
-        configureServer();
+        WebInterface::configureServer();
 
         return true;
     }
@@ -413,7 +430,7 @@ namespace WebInterface
             }
             else if (millis() - modeTimer > cfg.accessPoint.duration * 1000UL)
             {
-                configureStation();
+                WebInterface::configureStation();
             }
         }
     }
@@ -460,7 +477,7 @@ namespace WebInterface
             return false;
         }
 
-        configureServer();
+        WebInterface::configureServer();
 
         return true;
     }
@@ -507,9 +524,9 @@ namespace WebInterface
         WiFi.softAPmacAddress(cfg.accessPoint.mac.data());
         WiFi.mode(WIFI_MODE_NULL);
 
-        if (not configureAccessPoint())
+        if (not WebInterface::configureAccessPoint())
         {
-            configureStation();
+            WebInterface::configureStation();
         }
 
         log_d("end");

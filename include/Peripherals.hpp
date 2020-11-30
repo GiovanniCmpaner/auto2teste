@@ -34,8 +34,8 @@ namespace Peripherals
             SCL = 16
         };
         static constexpr auto &I2C{Wire};
-        static constexpr auto XSHUT{std::array<int, 6>{14, 13, 12, 11, 10, 9}};
-        static constexpr auto ANGLES{std::array<int, 6>{+33, +90, 0, -33, -90, 180}};
+        static constexpr auto XSHUT{std::array<int, 6>{10, 11, 12, 14, 13, 9}};
+        static constexpr auto ANGLES{std::array<int, 6>{-90, -33, 0, +33, +90, 180}};
     } // namespace Distances
     namespace Color
     {

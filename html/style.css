@@ -54,11 +54,11 @@ body {
   padding: 0.2em;
 }
 
-.normal tbody th:nth-child(odd), .normal tbody td:nth-child(odd) {
+.normal tbody th:first-child, .normal tbody td:first-child {
   width: 5em;
 }
 
-.normal tbody th:nth-child(even), .normal tbody td:nth-child(even) {
+.normal tbody th:last-child, .normal tbody td:last-child {
   width: 9em;
 }
 
@@ -72,10 +72,10 @@ body {
     width: 100%;
     min-width: 6em;
   }
-  .responsive tbody th:nth-child(odd), .responsive tbody td:nth-child(odd) {
+  .responsive tbody th:first-child, .responsive tbody td:first-child {
     display: none;
   }
-  .responsive tbody th:nth-child(even), .responsive tbody td:nth-child(even) {
+  .responsive tbody th:last-child, .responsive tbody td:last-child {
     width: auto;
   }
 }

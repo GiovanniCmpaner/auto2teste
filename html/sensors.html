@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="data:,">
+  <link rel="stylesheet" type="text/css" href="style.css">
+  <script src="jquery.min.js"></script>
+  <script src="sensors.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@2.9.4/dist/Chart.min.js"></script>
+  <title>Auto2 - Sensors</title>
+</head>
+
+<body>
+  <nav id="message"></nav>
+  <nav id="menu">
+    <a href="/configuration.html">Configuration</a>
+    <a href="/control.html">Control</a>
+    <a href="/sensors.html">Sensors</a>
+  </nav>
+  <h2> Sensors </h2>
+  <div id="sensors">
+    <table>
+      <tr>
+        <td>
+          <table>
+            <tr>
+              <td rowspan="6">
+                <label for="distances">Distances</label>
+              </td>
+              <td>
+                <label for="distances_0">0</label>
+              </td>
+              <td>
+                <input type="number" id="distances_0" readonly> m
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <label for="distances_1">+33</label>
+              </td>
+              <td>
+                <input type="number" id="distances_1" readonly> m
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <label for="distances_2">-33</label>
+              </td>
+              <td>
+                <input type="number" id="distances_2" readonly> m
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <label for="distances_3">+90</label>
+              </td>
+              <td>
+                <input type="number" id="distances_3" readonly> m
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <label for="distances_4">-90</label>
+              </td>
+              <td>
+                <input type="number" id="distances_4" readonly> m
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <label for="distances_5">180</label>
+              </td>
+              <td>
+                <input type="number" id="distances_5" readonly> m
+              </td>
+            </tr>
+            <tr style="height: 16px;"/>
+            <tr>
+              <td rowspan="3">
+                <label for="color">Color</label>
+              </td>
+              <td>
+                <label for="color_r">r</label>
+              </td>
+              <td>
+                <input type="number" id="color_r" readonly>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <label for="color_g">g</label>
+              </td>
+              <td>
+                <input type="number" id="color_g" readonly>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <label for="color_b">b</label>
+              </td>
+              <td>
+                <input type="number" id="color_b" readonly>
+              </td>
+            </tr>
+            <tr style="height: 16px;"/>
+            <tr>
+              <td rowspan="3">
+                <label for="rotation">Rotation</label>
+              </td>
+              <td>
+                <label for="rotation_x">x</label>
+              </td>
+              <td>
+                <input type="number" id="rotation_x" readonly> rad/s
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <label for="rotation_y">y</label>
+              </td>
+              <td>
+                <input type="number" id="rotation_y" readonly> rad/s
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <label for="rotation_y">z</label>
+              </td>
+              <td>
+                <input type="number" id="rotation_z" readonly> rad/s
+              </td>
+            </tr>
+            <tr style="height: 16px;"/>
+            <tr>
+              <td rowspan="3">
+                <label for="acceleration">Acceleration</label>
+              </td>
+              <td>
+                <label for="acceleration_x">x</label>
+              </td>
+              <td>
+                <input type="number" id="acceleration_x" readonly> m/s²
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <label for="acceleration_y">y</label>
+              </td>
+              <td>
+                <input type="number" id="acceleration_y" readonly> m/s²
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <label for="acceleration_y">z</label>
+              </td>
+              <td>
+                <input type="number" id="acceleration_z" readonly> m/s²
+              </td>
+            </tr>
+            <tr style="height: 16px;"/>
+            <tr>
+              <td>
+                <label for="temperature">Temperature</label>
+              </td>
+              <td>
+              </td>
+              <td>
+                <input type="number" id="temperature" readonly> °C
+              </td>
+            </tr>
+          </table>
+        </td>
+        <td>
+          <fieldset>
+            <legend>Distances Chart</legend>
+            <canvas id="chart" width="500px" height="500px"></canvas>
+          </fieldset>
+        </td>
+      </tr>
+    </table>
+  </div>
+</body>
+
+</html>

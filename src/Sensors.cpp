@@ -26,11 +26,11 @@ namespace Sensors
 
     static auto distanceValues{
         std::map<int, float>{
+            {-90, NAN},
+            {-33, NAN},
+            {0, NAN},
             {+33, NAN},
             {+90, NAN},
-            {0, NAN},
-            {-33, NAN},
-            {-90, NAN},
             {180, NAN}}};
 
     static auto colorValues{std::array<uint16_t, 3>{}};
@@ -175,13 +175,13 @@ namespace Sensors
             Sensors::readColor();
         }
 
-        static auto printTimer{0UL};
-        if (millis() - printTimer > 5000UL)
-        {
-            printTimer = millis();
-
-            Sensors::print();
-        }
+        //static auto printTimer{0UL};
+        //if (millis() - printTimer > 5000UL)
+        //{
+        //    printTimer = millis();
+        //
+        //    Sensors::print();
+        //}
     }
 
     auto resetReference() -> void

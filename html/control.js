@@ -21,7 +21,7 @@ function connectWebSocket() {
   
   infoMessage("Socket connecting");
   
-  var ws = new WebSocket('ws://192.168.1.210/control.ws');
+  var ws = new WebSocket(`ws://${window.location.host}/control.ws`);
   ws.onopen = () => {
     deferred.resolve(ws);
     successMessage("Socket opened").then(() => clearMessage());
