@@ -28,3 +28,9 @@ extern const uint8_t sensors_html_end[] asm("_binary_html_sensors_html_end");
 
 extern const uint8_t sensors_js_start[] asm("_binary_html_sensors_js_start");
 extern const uint8_t sensors_js_end[] asm("_binary_html_sensors_js_end");
+
+extern const uint8_t measure_html_start[] asm("_binary_html_measure_html_start");
+extern const uint8_t measure_html_end[] asm("_binary_html_measure_html_end");
+
+extern const uint8_t measure_js_start[] asm("_binary_html_measure_js_start");
+extern const uint8_t measure_js_end[] asm("_binary_html_measure_js_end");

@@ -3,17 +3,16 @@ $(document).ready(() => {
 });
 
 
-var webSocket;
-var pingTimer;
+var wsControl;
 var mouseTimer;
 
 function sendWhileHolding(id, downVal, upVal){
     $(id).on("mousedown", () => {
-        webSocket.send(downVal);
-        mouseTimer = setInterval(() => webSocket.send(downVal), 30);
+        wsControl.send(downVal);
+        mouseTimer = setInterval(() => wsControl.send(downVal), 30);
     }).on("mouseup mouseleave", () => {
         clearTimeout(mouseTimer);
-        webSocket.send(upVal);
+        wsControl.send(upVal);
     });
 }
 
@@ -29,14 +28,14 @@ function connectWebSocket() {
   
   infoMessage("Socket connecting");
   
-  webSocket = new WebSocket(`ws://${window.location.host}/control.ws`);
+  wsControl = new WebSocket(`ws://${window.location.host}/control.ws`);
   
-  webSocket.onopen = (evt) => {
-    deferred.resolve(webSocket);
+  wsControl.onopen = (evt) => {
+    deferred.resolve(wsControl);
     successMessage("Socket opened").then(() => clearMessage());
   };
 
-  webSocket.onclose = (evt) => {
+  wsControl.onclose = (evt) => {
     if(evt.wasClean){
         warningMessage("Socket closed");
     }
@@ -46,11 +45,11 @@ function connectWebSocket() {
     setTimeout(() => connectWebSocket(), 10000);
   };
 
-  webSocket.onerror = (evt) => {
+  wsControl.onerror = (evt) => {
     // NOTHING
   };
   
-  webSocket.onmessage = (evt) => {
+  wsControl.onmessage = (evt) => {
     // NOTHING
   };
   

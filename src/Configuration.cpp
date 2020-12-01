@@ -38,6 +38,8 @@ auto Configuration::init() -> void
 
     SPIFFS.begin(true);
 
+    Configuration::load(&cfg);
+
     log_d("end");
 }
 

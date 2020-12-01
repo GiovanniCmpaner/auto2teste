@@ -5,8 +5,7 @@ $(document).ready(() => {
     connectWebSocket();
 });
 
-var webSocket;
-var pingTimer;
+var wsSensors;
 var distancesChart;
 var rotationChart;
 var accelerationChart;
@@ -16,13 +15,13 @@ function connectWebSocket() {
   
   infoMessage("Socket connecting");
   
-  webSocket = new WebSocket(`ws://${window.location.host}/sensors.ws`);
-  webSocket.onopen = (evt) => {
-    deferred.resolve(webSocket);
+  wsSensors = new WebSocket(`ws://${window.location.host}/sensors.ws`);
+  wsSensors.onopen = (evt) => {
+    deferred.resolve(wsSensors);
     successMessage("Socket opened").then(() => clearMessage());
   };
 
-  webSocket.onclose = (evt) => {
+  wsSensors.onclose = (evt) => {
     if(evt.wasClean){
         warningMessage("Socket closed");
     }
@@ -32,11 +31,11 @@ function connectWebSocket() {
     setTimeout(() => connectWebSocket(), 10000);
   };
 
-  webSocket.onerror = (evt) => {
+  wsSensors.onerror = (evt) => {
     // NOTHING
   };
   
-  webSocket.onmessage = (evt) => {
+  wsSensors.onmessage = (evt) => {
     var sensors = JSON.parse(evt.data);  
     updateSensors(sensors);
     updateDistancesChart(sensors.distances);

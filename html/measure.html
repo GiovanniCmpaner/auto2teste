@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="data:,">
+  <link rel="stylesheet" type="text/css" href="style.css">
+  <script src="jquery.min.js.gz"></script>
+  <script src="chart.min.js.gz"></script>
+  <script src="measure.js"></script>
+  <title>Auto2 - Sensors</title>
+</head>
+
+<body>
+  <nav id="message"></nav>
+  <nav id="menu">
+    <a href="/configuration.html">Configuration</a>
+    <a href="/control.html">Control</a>
+    <a href="/sensors.html">Sensors</a>
+    <a href="/measure.html">Measure</a>
+  </nav>
+  <h2> Measure </h2>
+  <div id="measure">
+    <table>
+      <tr>
+        <td>
+          <button id="start">Start</button>
+        </td>
+      </tr>
+      <tr>
+        <td>
+          <canvas id="measure_chart" width="400px" height="400px"></canvas>
+        </td>
+      </tr>
+      <tr>
+        <table id="data" class="responsive">
+          <thead>
+            <tr>
+              <th> N </th>
+              <th> Seconds </th>
+              <th> Distance </th>
+            </tr>
+          </thead>
+          <tbody>
+            <template id="data_template">
+              <tr>
+                <th> <label for="data_n"> N </label> </th>
+                <th> <span id="data_n"></span> </th>
+                <td> <label for="data_seconds"> Seconds </label> </td>
+                <td> <span id="data_seconds"></span> </td>
+                <td> <label for="data_distance"> Distance </label> </td>
+                <td> <span id="data_distance"></span> </td>
+              </tr>
+            </template>
+          </tbody>
+        </table>
+      </tr>
+    </table>
+  </div>
+</body>
+
+</html>

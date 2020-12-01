@@ -1,16 +1,16 @@
 #pragma once
 
+enum class Move
+{
+    STOP = 0,
+    MOVE_FORWARD,
+    MOVE_BACKWARD,
+    ROTATE_LEFT,
+    ROTATE_RIGHT
+};
+
 namespace Motors
 {
-    enum class Move
-    {
-        STOP = 0,
-        MOVE_FORWARD,
-        MOVE_BACKWARD,
-        ROTATE_LEFT,
-        ROTATE_RIGHT
-    };
-
     auto init() -> void;
     auto process() -> void;
 

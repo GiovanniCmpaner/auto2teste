@@ -87,6 +87,20 @@ namespace WebInterface
             request->send_P(200, "application/javascript", sensors_js_start, static_cast<size_t>(sensors_js_end - sensors_js_start));
         }
 
+        static auto handleMeasureHtml(AsyncWebServerRequest *request) -> void
+        {
+            log_d("GET /measure.html");
+
+            request->send_P(200, "text/html", measure_html_start, static_cast<size_t>(measure_html_end - measure_html_start));
+        }
+
+        static auto handleMeasureJs(AsyncWebServerRequest *request) -> void
+        {
+            log_d("GET /measure.js");
+
+            request->send_P(200, "application/javascript", measure_js_start, static_cast<size_t>(measure_js_end - measure_js_start));
+        }
+
         static auto handleStyleCss(AsyncWebServerRequest *request) -> void
         {
             log_d("GET /style.css");
@@ -267,23 +281,23 @@ namespace WebInterface
                     {
                         if (text[0] == 'U')
                         {
-                            Motors::move(Motors::Move::MOVE_FORWARD);
+                            Motors::move(Move::MOVE_FORWARD);
                         }
                         else if (text[0] == 'D')
                         {
-                            Motors::move(Motors::Move::MOVE_BACKWARD);
+                            Motors::move(Move::MOVE_BACKWARD);
                         }
                         else if (text[0] == 'L')
                         {
-                            Motors::move(Motors::Move::ROTATE_LEFT);
+                            Motors::move(Move::ROTATE_LEFT);
                         }
                         else if (text[0] == 'R')
                         {
-                            Motors::move(Motors::Move::ROTATE_RIGHT);
+                            Motors::move(Move::ROTATE_RIGHT);
                         }
                         else if (text[0] == 'X')
                         {
-                            Motors::move(Motors::Move::STOP);
+                            Motors::move(Move::STOP);
                         }
 
                         controlTimer = millis();
@@ -342,6 +356,8 @@ namespace WebInterface
             webServer->on("/control.js", HTTP_GET, Get::handleControlJs);
             webServer->on("/sensors.html", HTTP_GET, Get::handleSensorsHtml);
             webServer->on("/sensors.js", HTTP_GET, Get::handleSensorsJs);
+            webServer->on("/measure.html", HTTP_GET, Get::handleMeasureHtml);
+            webServer->on("/measure.js", HTTP_GET, Get::handleMeasureJs);
             webServer->on("/style.css", HTTP_GET, Get::handleStyleCss);
             webServer->on("/configuration.json", HTTP_GET, Get::handleConfigurationJson);
 
@@ -532,9 +548,9 @@ namespace WebInterface
 
     static auto checkControlTimeout() -> void
     {
-        if (controlTimer != 0 and millis() - controlTimer >= 50UL)
+        if (controlTimer != 0 and millis() - controlTimer >= 100UL)
         {
-            Motors::move(Motors::Move::STOP);
+            Motors::move(Move::STOP);
             controlTimer = 0;
         }
     }

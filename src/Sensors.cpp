@@ -12,20 +12,20 @@
 #include "Sensors.hpp"
 
 #include <Adafruit_APDS9960.h>
-#include <Adafruit_MPU6050.h>
-#include <Adafruit_SSD1306.h>
+#include <Adafruit_ICM20948.h>
 #include <Adafruit_VL53L0X.h>
 
 namespace Sensors
 {
     static auto colorSensor{Adafruit_APDS9960{}};
-    static auto gyroAccelSensor{Adafruit_MPU6050{}};
+    static auto gyroAccelSensor{Adafruit_ICM20948{}};
     static auto distanceSensors{std::array<Adafruit_VL53L0X, 6>{}};
 
     static auto distanceValues{std::array<std::pair<int, float>, 6>{}};
     static auto colorValues{std::array<uint16_t, 3>{}};
     static auto rotationValues{std::array<float, 3>{}};
     static auto accelerationValues{std::array<float, 3>{}};
+    static auto magneticValues{std::array<float, 3>{}};
     static auto temperatureValue{float{}};
 
     static auto rotationOffset{std::array<float, 3>{}};
@@ -46,18 +46,18 @@ namespace Sensors
         }
     }
 
-    static auto initGyroAccel() -> void
+    static auto initGyroAccelMag() -> void
     {
-        if (not gyroAccelSensor.begin(MPU6050_I2CADDR_DEFAULT, &Peripherals::GyroAccel::I2C, 0))
+        if (not gyroAccelSensor.begin_I2C(Peripherals::GyroAccelMag::ADDRESS, &Peripherals::GyroAccelMag::I2C, 0))
         {
-            log_e("failed to initialize gyroscope and accelerometer");
+            log_e("failed to initialize gyroscope, accelerometer and magnetometer");
         }
         else
         {
-            gyroAccelSensor.setAccelerometerRange(MPU6050_RANGE_2_G);
-            gyroAccelSensor.setGyroRange(MPU6050_RANGE_500_DEG);
-            gyroAccelSensor.setFilterBandwidth(MPU6050_BAND_260_HZ);
-            log_d("successfully initialized gyroscope and accelerometer");
+            gyroAccelSensor.setAccelRange(ICM20948_ACCEL_RANGE_2_G);
+            gyroAccelSensor.setGyroRange(ICM20948_GYRO_RANGE_500_DPS);
+            gyroAccelSensor.setMagDataRate(AK09916_MAG_DATARATE_50_HZ);
+            log_d("successfully initialized gyroscope, accelerometer and magnetometer");
         }
     }
 
@@ -93,20 +93,24 @@ namespace Sensors
         }
     }
 
-    static auto readGyroAccel() -> void
+    static auto readGyroAccelMag() -> void
     {
-        sensors_event_t a, g, t;
-        if (Sensors::gyroAccelSensor.getEvent(&a, &g, &t))
+        sensors_event_t accel, gyro, mag, temp;
+        if (Sensors::gyroAccelSensor.getEvent(&accel, &gyro, &temp, &mag))
         {
             Sensors::accelerationValues = {
-                a.acceleration.x - Sensors::accelerationOffset[0],
-                a.acceleration.y - Sensors::accelerationOffset[1],
-                a.acceleration.z - Sensors::accelerationOffset[2]};
+                accel.acceleration.x - Sensors::accelerationOffset[0],
+                accel.acceleration.y - Sensors::accelerationOffset[1],
+                accel.acceleration.z - Sensors::accelerationOffset[2]};
             Sensors::rotationValues = {
-                g.gyro.x - Sensors::rotationOffset[0],
-                g.gyro.y - Sensors::rotationOffset[1],
-                g.gyro.z - Sensors::rotationOffset[2]};
-            Sensors::temperatureValue = t.temperature;
+                gyro.gyro.x - Sensors::rotationOffset[0],
+                gyro.gyro.y - Sensors::rotationOffset[1],
+                gyro.gyro.z - Sensors::rotationOffset[2]};
+            Sensors::magneticValues = {
+                mag.magnetic.x,
+                mag.magnetic.y,
+                mag.magnetic.z};
+            Sensors::temperatureValue = temp.temperature;
         }
     }
 
@@ -147,10 +151,14 @@ namespace Sensors
         log_d("begin");
 
         Sensors::initColor();
-        Sensors::initGyroAccel();
+        Sensors::initGyroAccelMag();
         Sensors::initDistances();
 
         Sensors::resetOffset();
+
+        Sensors::readDistances();
+        Sensors::readGyroAccelMag();
+        Sensors::readColor();
 
         log_d("end");
     }
@@ -163,7 +171,7 @@ namespace Sensors
             readTimer = millis();
 
             Sensors::readDistances();
-            Sensors::readGyroAccel();
+            Sensors::readGyroAccelMag();
             Sensors::readColor();
         }
     }
@@ -173,7 +181,7 @@ namespace Sensors
         Sensors::accelerationOffset = {};
         Sensors::rotationOffset = {};
 
-        Sensors::readGyroAccel();
+        Sensors::readGyroAccelMag();
 
         Sensors::accelerationOffset = Sensors::accelerationValues;
         Sensors::rotationOffset = Sensors::rotationValues;
@@ -214,6 +222,11 @@ namespace Sensors
         return Sensors::accelerationValues;
     }
 
+    auto magnetic() -> std::array<float, 3>
+    {
+        return Sensors::magneticValues;
+    }
+
     auto temperature() -> float
     {
         return Sensors::temperatureValue;
@@ -247,6 +260,13 @@ namespace Sensors
             for (auto accelerationValue : Sensors::accelerationValues)
             {
                 acceleration.add(accelerationValue);
+            }
+        }
+        {
+            auto magnetic{json["magnetic"]};
+            for (auto magneticValue : Sensors::magneticValues)
+            {
+                magnetic.add(magneticValue);
             }
         }
         {

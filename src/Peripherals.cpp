@@ -11,37 +11,38 @@ namespace Peripherals
     {
         log_d("begin");
 
-        pinMode(Peripherals::Motors::STBY, OUTPUT);
-        pinMode(Peripherals::Motors::PWM, OUTPUT);
-        pinMode(Peripherals::Motors::AIN1, OUTPUT);
-        pinMode(Peripherals::Motors::AIN2, OUTPUT);
-        pinMode(Peripherals::Motors::BIN1, OUTPUT);
-        pinMode(Peripherals::Motors::BIN2, OUTPUT);
-        pinMode(Peripherals::Motors::CIN1, OUTPUT);
-        pinMode(Peripherals::Motors::CIN2, OUTPUT);
-        pinMode(Peripherals::Motors::DIN1, OUTPUT);
-        pinMode(Peripherals::Motors::DIN2, OUTPUT);
+        pinMode(Motors::STBY, OUTPUT);
+        pinMode(Motors::PWM, OUTPUT);
+        pinMode(Motors::AIN1, OUTPUT);
+        pinMode(Motors::AIN2, OUTPUT);
+        pinMode(Motors::BIN1, OUTPUT);
+        pinMode(Motors::BIN2, OUTPUT);
+        pinMode(Motors::CIN1, OUTPUT);
+        pinMode(Motors::CIN2, OUTPUT);
+        pinMode(Motors::DIN1, OUTPUT);
+        pinMode(Motors::DIN2, OUTPUT);
 
-        digitalWrite(Peripherals::Motors::STBY, LOW);
-        digitalWrite(Peripherals::Motors::PWM, LOW);
-        digitalWrite(Peripherals::Motors::AIN1, LOW);
-        digitalWrite(Peripherals::Motors::AIN2, LOW);
-        digitalWrite(Peripherals::Motors::BIN1, LOW);
-        digitalWrite(Peripherals::Motors::BIN2, LOW);
-        digitalWrite(Peripherals::Motors::CIN1, LOW);
-        digitalWrite(Peripherals::Motors::CIN2, LOW);
-        digitalWrite(Peripherals::Motors::DIN1, LOW);
-        digitalWrite(Peripherals::Motors::DIN2, LOW);
+        digitalWrite(Motors::STBY, LOW);
+        digitalWrite(Motors::PWM, LOW);
+        digitalWrite(Motors::AIN1, LOW);
+        digitalWrite(Motors::AIN2, LOW);
+        digitalWrite(Motors::BIN1, LOW);
+        digitalWrite(Motors::BIN2, LOW);
+        digitalWrite(Motors::CIN1, LOW);
+        digitalWrite(Motors::CIN2, LOW);
+        digitalWrite(Motors::DIN1, LOW);
+        digitalWrite(Motors::DIN2, LOW);
 
-        for (auto xshut : Peripherals::Distances::XSHUT)
+        for (auto xshut : Distances::XSHUT)
         {
             pinMode(xshut, OUTPUT);
             digitalWrite(xshut, LOW);
         }
 
-        Peripherals::Distances::I2C.begin(Peripherals::Distances::SDA, Peripherals::Distances::SCL);
-        Peripherals::Color::I2C.begin(Peripherals::Color::SDA, Peripherals::Color::SCL);
-        Peripherals::GyroAccel::I2C.begin(Peripherals::GyroAccel::SDA, Peripherals::GyroAccel::SCL);
+        Distances::I2C.begin(Distances::SDA, Distances::SCL);
+        Color::I2C.begin(Color::SDA, Color::SCL);
+        GyroAccelMag::I2C.begin(GyroAccelMag::SDA, GyroAccelMag::SCL);
+        Display::I2C.begin(Display::SDA, Display::SCL);
 
         delay(100);
 

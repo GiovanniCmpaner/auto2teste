@@ -1,18 +1,59 @@
 #include <Arduino.h>
-
 #include <esp_log.h>
-#include <soc/rtc_wdt.h>
-#include "soc/rtc.h"
-#include "soc/rtc_cntl_reg.h"
-#include "soc/apb_ctrl_reg.h"
-#include "esp_task_wdt.h"
 
 #include "Configuration.hpp"
+#include "Control.hpp"
+#include "Display.hpp"
+#include "Motors.hpp"
 #include "Peripherals.hpp"
 #include "Sensors.hpp"
-#include "Motors.hpp"
-#include "Control.hpp"
 #include "WebInterface.hpp"
+
+void scan()
+{
+    Wire1.begin();
+
+    while (1)
+    {
+        byte error, address;
+        int nDevices;
+        Serial.println("Scanning...");
+        nDevices = 0;
+        for (address = 1; address < 127; address++)
+        {
+            Wire1.beginTransmission(address);
+            error = Wire1.endTransmission();
+            if (error == 0)
+            {
+                Serial.print("I2C device found at address 0x");
+                if (address < 16)
+                {
+                    Serial.print("0");
+                }
+                Serial.println(address, HEX);
+                nDevices++;
+            }
+            else if (error == 4)
+            {
+                Serial.print("Unknow error at address 0x");
+                if (address < 16)
+                {
+                    Serial.print("0");
+                }
+                Serial.println(address, HEX);
+            }
+        }
+        if (nDevices == 0)
+        {
+            Serial.println("No I2C devices found\n");
+        }
+        else
+        {
+            Serial.println("done\n");
+        }
+        delay(5000);
+    }
+}
 
 void setup()
 {
@@ -23,15 +64,14 @@ void setup()
 
     Peripherals::init();
 
-    Configuration::init();
-    Configuration::load(&cfg);
+    //scan();
 
+    Configuration::init();
     Sensors::init();
     Motors::init();
     Control::init();
+    Display::init();
     WebInterface::init();
-
-    //Control::calibrateDistances();
 
     log_d("end");
 }
@@ -41,35 +81,7 @@ void loop()
     Sensors::process();
     Motors::process();
     Control::process();
+    Display::process();
     WebInterface::process();
     delay(1); // Necessário para o ESP TCP Async
 }
-
-//#include <Arduino.h>
-//#include <ESPAsyncWebServer.h>
-//#include <WiFi.h>
-//
-//void setup()
-//{
-//    Serial.begin( 115200 );
-//    Serial.setDebugOutput( true );
-//
-//    const uint8_t ip[] { 192, 168, 1, 210 };
-//    const uint8_t gateway[] { 192, 168, 1, 1 };
-//    const uint8_t netmask[] { 255, 255, 255, 0 };
-//    const char username[] { "WORKGROUP" };
-//    const char password[] { "49WNN7F3CD@22" };
-//
-//    WiFi.mode( WIFI_MODE_STA );
-//    WiFi.config( ip, gateway, netmask );
-//    WiFi.begin( username, password );
-//
-//    const auto server{ new AsyncWebServer{80} };
-//    server->on( "/index.html", HTTP_GET, []( AsyncWebServerRequest * request )
-//    {
-//        request->send( 200, "text/plain", "you are at index.html" );
-//    } );
-//    server->begin();
-//}
-//
-//void loop() {}

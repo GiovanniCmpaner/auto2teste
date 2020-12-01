@@ -24,35 +24,59 @@ namespace Peripherals
             DIN1 = 40,
             DIN2 = 39
         };
-
     }
+
     namespace Distances
     {
         enum
         {
             SDA = 15,
-            SCL = 16
+            SCL = 16,
+
+            ADDRESS = 0x29
         };
         static constexpr auto &I2C{Wire};
         static constexpr auto XSHUT{std::array<int, 6>{10, 11, 12, 14, 13, 9}};
         static constexpr auto ANGLES{std::array<int, 6>{-90, -33, 0, +33, +90, 180}};
     } // namespace Distances
+
     namespace Color
     {
         enum
         {
             SDA = 5,
-            SCL = 6
+            SCL = 6,
+
+            ADDRESS = 0x39
         };
         static constexpr auto &I2C{Wire1};
     } // namespace Color
-    namespace GyroAccel
+
+    namespace GyroAccelMag
     {
         enum
         {
             SDA = 5,
-            SCL = 6
+            SCL = 6,
+
+            ADDRESS = 0x68
         };
         static constexpr auto &I2C{Wire1};
-    } // namespace GyroAccel
+    } // namespace GyroAccelMag
+
+    namespace Display
+    {
+        enum
+        {
+            SDA = 5,
+            SCL = 6,
+
+            WIDTH = 128,
+            HEIGHT = 64,
+
+            ADDRESS = 0x3C
+        };
+        static constexpr auto &I2C{Wire1};
+    } // namespace Display
+
 } // namespace Peripherals
