@@ -14,6 +14,8 @@
 
 namespace Control
 {
+    static auto modeValue{Mode::MANUAL};
+
     static auto load() -> void
     {
         //        log_d("begin");
@@ -55,5 +57,10 @@ namespace Control
 
     auto process() -> void
     {
+    }
+
+    auto mode(Mode modeValue) -> void
+    {
+        Control::modeValue = modeValue;
     }
 } // namespace Control

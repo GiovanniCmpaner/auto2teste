@@ -136,6 +136,9 @@ function createDistancesChart(){
             },
             scales: {
                 xAxes: [{
+                    gridLines: {
+                        drawOnChartArea: false
+                    },
                     ticks: {
                         display: false
                     }
@@ -209,6 +212,9 @@ function createRotationChart(){
             },
             scales: {
                 xAxes: [{
+                    gridLines: {
+                        drawOnChartArea: false
+                    },
                     ticks: {
                         display: false
                     }
@@ -279,6 +285,9 @@ function createAccelerationChart(){
             },
             scales: {
                 xAxes: [{
+                    gridLines: {
+                        drawOnChartArea: false
+                    },
                     ticks: {
                         display: false
                     }

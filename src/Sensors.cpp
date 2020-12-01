@@ -125,7 +125,7 @@ namespace Sensors
                 if (distanceSensor.isRangeComplete())
                 {
                     const auto reading{distanceSensor.readRangeResult()};
-                    if (reading < 8191)
+                    if (reading < 4000)
                     {
                         distance.second = reading / 1000.0f;
                     }
