@@ -19,6 +19,7 @@
     <a href="/sensors.html">Sensors</a>
   </nav>
   <h2> Configuration </h2>
+  
   <form id="neural_network">
     <fieldset>
       <legend> Neural Network </legend>
@@ -35,6 +36,7 @@
       <input type="submit" value="Upload">
     </fieldset>
   </form>
+  
   <form id="firmware">
     <fieldset>
       <legend> Firmware </legend>
@@ -51,13 +53,172 @@
       <input type="submit" value="Upload">
     </fieldset>
   </form>
+  
+  <form id="calibration">
+    <fieldset>
+      <legend> Calibration </legend>
+      <table>
+        <tr>
+          <td>
+            <label for="calibration_calibrate">Calibrate</label>
+          </td>
+          <td>
+            <input type="checkbox" id="calibration_calibrate">
+          </td>
+        </tr>
+        
+        <tr>
+          <td rowspan="3">
+            <label for="calibration_gyroscope_bias">Gyroscope Bias</label>
+          </td>
+          <td>
+            <span>x</span>
+          </td>
+          <td>
+            <input type="number" id="calibration_gyroscope_bias_x" step="any" required>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <span>y</span>
+          </td>
+          <td>
+            <input type="number" id="calibration_gyroscope_bias_y" step="any" required>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <span>z</span>
+          </td>
+          <td>
+            <input type="number" id="calibration_gyroscope_bias_z" step="any" required>
+          </td>
+        </tr>
+        <tr style="height: 16px;"/>
+        <tr>
+          <td rowspan="3">
+            <label for="calibration_accelerometer_bias">Accelerometer Bias</label>
+          </td>
+          <td>
+            <span>x</span>
+          </td>
+          <td>
+            <input type="number" id="calibration_accelerometer_bias_x" step="any" required>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <span>y</span>
+          </td>
+          <td>
+            <input type="number" id="calibration_accelerometer_bias_y" step="any" required>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <span>z</span>
+          </td>
+          <td>
+            <input type="number" id="calibration_accelerometer_bias_z" step="any" required>
+          </td>
+        </tr>
+        <tr style="height: 16px;"/>
+        <tr>
+          <td rowspan="3">
+            <label for="calibration_accelerometer_factor">Accelerometer Factor</label>
+          </td>
+          <td>
+            <span>x</span>
+          </td>
+          <td>
+            <input type="number" id="calibration_accelerometer_factor_x" step="any" required>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <span>y</span>
+          </td>
+          <td>
+            <input type="number" id="calibration_accelerometer_factor_y" step="any" required>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <span>z</span>
+          </td>
+          <td>
+            <input type="number" id="calibration_accelerometer_factor_z" step="any" required>
+          </td>
+        </tr>
+        <tr style="height: 16px;"/>
+        <tr>
+          <td rowspan="3">
+            <label for="calibration_magnetometer_bias">Magnetometer Bias</label>
+          </td>
+          <td>
+            <span>x</span>
+          </td>
+          <td>
+            <input type="number" id="calibration_magnetometer_bias_x" step="any" required>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <span>y</span>
+          </td>
+          <td>
+            <input type="number" id="calibration_magnetometer_bias_y" step="any" required>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <span>z</span>
+          </td>
+          <td>
+            <input type="number" id="calibration_magnetometer_bias_z" step="any" required>
+          </td>
+        </tr>
+        <tr style="height: 16px;"/>
+        <tr>
+          <td rowspan="3">
+            <label for="calibration_magnetometer_factor">Magnetometer Factor</label>
+          </td>
+          <td>
+            <span>x</span>
+          </td>
+          <td>
+            <input type="number" id="calibration_magnetometer_factor_x" step="any" required>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <span>y</span>
+          </td>
+          <td>
+            <input type="number" id="calibration_magnetometer_factor_y" step="any" required>
+          </td>
+        </tr>
+        <tr>
+          <td>
+            <span>z</span>
+          </td>
+          <td>
+            <input type="number" id="calibration_magnetometer_factor_z" step="any" required>
+          </td>
+        </tr>
+        
+      </table>
+      <input type="submit" value="Save">
+    </fieldset>
+  </form>
+  
   <form id="access_point">
     <fieldset>
       <legend> Access Point </legend>
-      <table class="normal">
+      <table>
         <tr>
           <td>
-            <label for="access_point_enabled"> Enabled </label>
+            <label for="access_point_enabled">Enabled</label>
           </td>
           <td>
             <input type="checkbox" id="access_point_enabled">
@@ -131,10 +292,11 @@
       <input type="submit" value="Save">
     </fieldset>
   </form>
+  
   <form id="station">
     <fieldset>
       <legend>Station</legend>
-      <table class="normal">
+      <table>
         <tr>
           <td>
             <label for="station_enabled">Enabled</label>
@@ -203,6 +365,7 @@
       <input type="submit" value="Save">
     </fieldset>
   </form>
+  
 </body>
 
 </html>

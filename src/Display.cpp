@@ -18,6 +18,8 @@ namespace Display
     {
         log_d("begin");
 
+        log_d("initializing display");
+
         if (not display.begin(SSD1306_SWITCHCAPVCC, Peripherals::Display::ADDRESS))
         {
             log_e("failed to initialize display");
@@ -36,8 +38,6 @@ namespace Display
 
             display.setTextSize(1);
             display.clearDisplay();
-
-            log_d("successfully initialized display");
         }
 
         log_d("end");

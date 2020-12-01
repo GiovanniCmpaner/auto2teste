@@ -7,6 +7,31 @@
 
 struct Configuration
 {
+    struct Calibration
+    {
+        struct Gyroscope
+        {
+            std::array<float, 3> bias;
+        };
+
+        struct Accelerometer
+        {
+            std::array<float, 3> bias;
+            std::array<float, 3> factor;
+        };
+
+        struct Magnetometer
+        {
+            std::array<float, 3> bias;
+            std::array<float, 3> factor;
+        };
+
+        bool calibrate;
+        Gyroscope gyroscope;
+        Accelerometer accelerometer;
+        Magnetometer magnetometer;
+    };
+
     struct Station
     {
         bool enabled;
@@ -32,15 +57,16 @@ struct Configuration
         uint16_t duration;
     };
 
+    Calibration calibration;
     Station station;
     AccessPoint accessPoint;
 
     static auto init() -> void;
-    static auto load( Configuration* cfg ) -> void;
-    static auto save( const Configuration& cfg ) -> void;
+    static auto load(Configuration *cfg) -> void;
+    static auto save(const Configuration &cfg) -> void;
 
-    auto serialize( ArduinoJson::JsonVariant& json ) const -> void;
-    auto deserialize( const ArduinoJson::JsonVariant& json ) -> void;
+    auto serialize(ArduinoJson::JsonVariant &json) const -> void;
+    auto deserialize(const ArduinoJson::JsonVariant &json) -> void;
 };
 
 extern Configuration cfg;

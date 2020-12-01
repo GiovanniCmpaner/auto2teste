@@ -22,6 +22,13 @@ function handleFiles() {
 }
 
 function handleConfiguration() {
+    $("#calibration").submit((event) => {
+        event.preventDefault();
+        if ($("#calibration")[0].checkValidity()) {
+            setCalibration().then(() => clearMessage());
+        }
+    });
+    
     $("#access_point").submit((event) => {
         event.preventDefault();
         if ($("#access_point")[0].checkValidity()) {
@@ -35,6 +42,46 @@ function handleConfiguration() {
             setStation().then(() => clearMessage());
         }
     });
+}
+
+function setCalibration() {
+    var cfg = {
+        calibration: {
+            calibrate: $("#calibration_calibrate").prop("checked"),
+            gyroscope: {
+                bias: [ 
+                    $("#calibration_gyroscope_bias_x").prop("value"),
+                    $("#calibration_gyroscope_bias_y").prop("value"),
+                    $("#calibration_gyroscope_bias_z").prop("value")
+                ]
+            },
+            accelerometer: {
+                bias: [ 
+                    $("#calibration_accelerometer_bias_x").prop("value"),
+                    $("#calibration_accelerometer_bias_y").prop("value"),
+                    $("#calibration_accelerometer_bias_z").prop("value")
+                ],
+                factor: [ 
+                    $("#calibration_accelerometer_factor_x").prop("value"),
+                    $("#calibration_accelerometer_factor_y").prop("value"),
+                    $("#calibration_accelerometer_factor_z").prop("value")
+                ]
+            },
+            magnetometer: {
+                bias: [ 
+                    $("#calibration_magnetometer_bias_x").prop("value"),
+                    $("#calibration_magnetometer_bias_y").prop("value"),
+                    $("#calibration_magnetometer_bias_z").prop("value")
+                ],
+                factor: [ 
+                    $("#calibration_magnetometer_factor_x").prop("value"),
+                    $("#calibration_magnetometer_factor_y").prop("value"),
+                    $("#calibration_magnetometer_factor_z").prop("value")
+                ]
+            }
+        }
+    };
+    return setConfiguration(cfg);
 }
 
 function setAccessPoint() {
@@ -113,6 +160,24 @@ function getConfiguration() {
         }
     })
     .done((cfg) => {
+        
+        $("#calibration_calibrate").prop("checked", cfg.calibration.calibrate);
+        $("#calibration_gyroscope_bias_x").prop("value", cfg.calibration.gyroscope.bias[0]);
+        $("#calibration_gyroscope_bias_y").prop("value", cfg.calibration.gyroscope.bias[1]);
+        $("#calibration_gyroscope_bias_z").prop("value", cfg.calibration.gyroscope.bias[2]);
+        $("#calibration_accelerometer_bias_x").prop("value", cfg.calibration.accelerometer.bias[0]);
+        $("#calibration_accelerometer_bias_y").prop("value", cfg.calibration.accelerometer.bias[1]);
+        $("#calibration_accelerometer_bias_z").prop("value", cfg.calibration.accelerometer.bias[2]);
+        $("#calibration_accelerometer_factor_x").prop("value", cfg.calibration.accelerometer.factor[0]);
+        $("#calibration_accelerometer_factor_y").prop("value", cfg.calibration.accelerometer.factor[1]);
+        $("#calibration_accelerometer_factor_z").prop("value", cfg.calibration.accelerometer.factor[2]);
+        $("#calibration_magnetometer_bias_x").prop("value", cfg.calibration.magnetometer.bias[0]);
+        $("#calibration_magnetometer_bias_y").prop("value", cfg.calibration.magnetometer.bias[1]);
+        $("#calibration_magnetometer_bias_z").prop("value", cfg.calibration.magnetometer.bias[2]);
+        $("#calibration_magnetometer_factor_x").prop("value", cfg.calibration.magnetometer.factor[0]);
+        $("#calibration_magnetometer_factor_y").prop("value", cfg.calibration.magnetometer.factor[1]);
+        $("#calibration_magnetometer_factor_z").prop("value", cfg.calibration.magnetometer.factor[2]);
+        
         $("#access_point_enabled").prop("checked", cfg.access_point.enabled);
         $("#access_point_mac").prop("value", cfg.access_point.mac.map((n) => n.toString(16).toUpperCase().padStart(2, "0")).join("-"));
         $("#access_point_ip").prop("value", cfg.access_point.ip.map((n) => n.toString(10)).join("."));

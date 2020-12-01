@@ -103,7 +103,7 @@
                   <label for="color">Color</label>
                 </td>
                 <td>
-                  <label for="color_r">r</label>
+                  <span> </span>
                 </td>
                 <td>
                   <input type="number" id="color_r" readonly>
@@ -210,10 +210,48 @@
               </tr>
               <tr style="height: 16px;"/>
               <tr>
+                <td rowspan="3">
+                  <label for="magnetic">Magnetic</label>
+                </td>
+                <td>
+                  <label for="magnetic_x">x</label>
+                </td>
+                <td>
+                  <input type="number" id="magnetic_x" readonly>
+                </td>
+                <td>
+                  <span>μT</span>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label for="magnetic_y">y</label>
+                </td>
+                <td>
+                  <input type="number" id="magnetic_y" readonly>
+                </td>
+                <td>
+                  <span>μT</span>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <label for="magnetic_y">z</label>
+                </td>
+                <td>
+                  <input type="number" id="magnetic_z" readonly>
+                </td>
+                <td>
+                  <span>μT</span>
+                </td>
+              </tr>
+              <tr style="height: 16px;"/>
+              <tr>
                 <td>
                   <label for="temperature">Temperature</label>
                 </td>
                 <td>
+                  <span> </span>
                 </td>
                 <td>
                   <input type="number" id="temperature" readonly>
@@ -249,7 +287,10 @@
                 </fieldset>
               </td>
               <td>
-                
+                <fieldset>
+                  <legend>Magnetic Chart (μT)</legend>
+                  <canvas id="magnetic_chart" width="400px" height="400px"></canvas>
+                </fieldset>
               </td>
             </tr>
           </table>

@@ -20,6 +20,8 @@ enum class Color
     WHITE
 };
 
+auto text(Color color) -> const char *;
+
 namespace Sensors
 {
     static constexpr auto angleUnit{"deg"};

@@ -15,6 +15,10 @@
 
 static const Configuration defaultCfg{
     {true,
+     {{0.0f, 0.0f, 0.0f}},
+     {{0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f}},
+     {{0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f}}},
+    {true,
      {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED},
      {192, 168, 1, 210},
      {255, 255, 255, 0},
@@ -45,6 +49,40 @@ auto Configuration::init() -> void
 
 auto Configuration::serialize(ArduinoJson::JsonVariant &json) const -> void
 {
+    {
+        auto calibration{json["calibration"]};
+
+        calibration["calibrate"] = this->calibration.calibrate;
+        {
+            auto gyroscope{calibration["gyroscope"]};
+            for (auto n : this->calibration.gyroscope.bias)
+            {
+                gyroscope["bias"].add(n);
+            }
+        }
+        {
+            auto accelerometer{calibration["accelerometer"]};
+            for (auto n : this->calibration.accelerometer.bias)
+            {
+                accelerometer["bias"].add(n);
+            }
+            for (auto n : this->calibration.accelerometer.factor)
+            {
+                accelerometer["factor"].add(n);
+            }
+        }
+        {
+            auto magnetometer{calibration["magnetometer"]};
+            for (auto n : this->calibration.magnetometer.bias)
+            {
+                magnetometer["bias"].add(n);
+            }
+            for (auto n : this->calibration.magnetometer.factor)
+            {
+                magnetometer["factor"].add(n);
+            }
+        }
+    }
     {
         auto accessPoint{json["access_point"]};
 
@@ -98,6 +136,75 @@ auto Configuration::serialize(ArduinoJson::JsonVariant &json) const -> void
 
 auto Configuration::deserialize(const ArduinoJson::JsonVariant &json) -> void
 {
+    {
+        const auto calibration{json["calibration"]};
+        {
+            const auto calibrate{calibration["calibrate"]};
+            if (calibrate.is<bool>())
+            {
+                this->calibration.calibrate = calibrate.as<bool>();
+            }
+        }
+        {
+            const auto gyroscope{calibration["gyroscope"]};
+            {
+                const auto bias{gyroscope["bias"]};
+                if (bias.is<ArduinoJson::JsonArray>() and bias.size() == this->calibration.gyroscope.bias.size())
+                {
+                    for (auto i{0}; i < this->calibration.gyroscope.bias.size(); ++i)
+                    {
+                        this->calibration.gyroscope.bias[i] = bias[i].as<float>();
+                    }
+                }
+            }
+        }
+        {
+            const auto accelerometer{calibration["accelerometer"]};
+            {
+                const auto bias{accelerometer["bias"]};
+                if (bias.is<ArduinoJson::JsonArray>() and bias.size() == this->calibration.accelerometer.bias.size())
+                {
+                    for (auto i{0}; i < this->calibration.accelerometer.bias.size(); ++i)
+                    {
+                        this->calibration.accelerometer.bias[i] = bias[i].as<float>();
+                    }
+                }
+            }
+            {
+                const auto factor{accelerometer["factor"]};
+                if (factor.is<ArduinoJson::JsonArray>() and factor.size() == this->calibration.accelerometer.factor.size())
+                {
+                    for (auto i{0}; i < this->calibration.accelerometer.factor.size(); ++i)
+                    {
+                        this->calibration.accelerometer.factor[i] = factor[i].as<float>();
+                    }
+                }
+            }
+        }
+        {
+            const auto magnetometer{calibration["magnetometer"]};
+            {
+                const auto bias{magnetometer["bias"]};
+                if (bias.is<ArduinoJson::JsonArray>() and bias.size() == this->calibration.magnetometer.bias.size())
+                {
+                    for (auto i{0}; i < this->calibration.magnetometer.bias.size(); ++i)
+                    {
+                        this->calibration.magnetometer.bias[i] = bias[i].as<float>();
+                    }
+                }
+            }
+            {
+                const auto factor{magnetometer["factor"]};
+                if (factor.is<ArduinoJson::JsonArray>() and factor.size() == this->calibration.magnetometer.factor.size())
+                {
+                    for (auto i{0}; i < this->calibration.magnetometer.factor.size(); ++i)
+                    {
+                        this->calibration.magnetometer.factor[i] = factor[i].as<float>();
+                    }
+                }
+            }
+        }
+    }
     {
         const auto accessPoint{json["access_point"]};
         // IGNORE this->accessPoint.mac

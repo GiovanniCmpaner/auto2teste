@@ -534,7 +534,7 @@ namespace WebInterface
 
             if (sensorsWs.count() > 0)
             {
-                auto doc{ArduinoJson::DynamicJsonDocument{512}};
+                auto doc{ArduinoJson::DynamicJsonDocument{1024}};
                 auto json{doc.as<ArduinoJson::JsonVariant>()};
 
                 Sensors::serialize(json);
