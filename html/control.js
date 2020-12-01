@@ -33,7 +33,6 @@ function connectWebSocket() {
   
   webSocket.onopen = (evt) => {
     deferred.resolve(webSocket);
-    ping();
     successMessage("Socket opened").then(() => clearMessage());
   };
 
@@ -52,22 +51,10 @@ function connectWebSocket() {
   };
   
   webSocket.onmessage = (evt) => {
-    if(evt.data == "pong"){
-        ping();
-    }
+    // NOTHING
   };
   
   return deferred.promise();
-}
-
-function ping(){
-    clearTimeout(pingTimer);
-    if (webSocket != 0 && webSocket.readyState == 1){
-        setTimeout(() => {
-            webSocket.send("ping");
-            pingTimer = setTimeout(() => webSocket.close(), 250);
-        }, 2000);
-    }
 }
 
 function clearMessage() {

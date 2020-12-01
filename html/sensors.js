@@ -19,7 +19,6 @@ function connectWebSocket() {
   webSocket = new WebSocket(`ws://${window.location.host}/sensors.ws`);
   webSocket.onopen = (evt) => {
     deferred.resolve(webSocket);
-    ping();
     successMessage("Socket opened").then(() => clearMessage());
   };
 
@@ -38,30 +37,14 @@ function connectWebSocket() {
   };
   
   webSocket.onmessage = (evt) => {
-    if(evt.data == "pong")
-    {
-        ping();
-    }
-    else {
-        var sensors = JSON.parse(evt.data);  
-        updateSensors(sensors);
-        updateDistancesChart(sensors.distances);
-        updateRotationChart(sensors.rotation);
-        updateAccelerationChart(sensors.acceleration);
-    }
+    var sensors = JSON.parse(evt.data);  
+    updateSensors(sensors);
+    updateDistancesChart(sensors.distances);
+    updateRotationChart(sensors.rotation);
+    updateAccelerationChart(sensors.acceleration);
   };
   
   return deferred.promise();
-}
-
-function ping(){
-    clearTimeout(pingTimer);
-    if (webSocket != 0 && webSocket.readyState == 1){
-        setTimeout(() => {
-            webSocket.send("ping");
-            pingTimer = setTimeout(() => webSocket.close(), 250);
-        }, 2000);
-    }
 }
 
 function smoothValue(id, val){

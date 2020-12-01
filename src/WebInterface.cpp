@@ -255,7 +255,7 @@ namespace WebInterface
             }
             else if (type == WS_EVT_PONG)
             {
-                log_d("WS %s (%u) pong (%u): %s", server->url(), client->id(), len, (len ? reinterpret_cast<const char *>(data) : ""));
+                log_d("WS %s (%u) pong", server->url(), client->id());
             }
             else if (type == WS_EVT_DATA)
             {
@@ -288,13 +288,6 @@ namespace WebInterface
 
                         controlTimer = millis();
                     }
-                    else if (info->len == 4)
-                    {
-                        if (strncmp(text, "ping", 4) == 0)
-                        {
-                            client->text("pong");
-                        }
-                    }
                 }
             }
         }
@@ -316,22 +309,11 @@ namespace WebInterface
             }
             else if (type == WS_EVT_PONG)
             {
-                log_d("WS %s (%u) pong (%u): %s", server->url(), client->id(), len, (len ? reinterpret_cast<const char *>(data) : ""));
+                log_d("WS %s (%u) pong", server->url(), client->id());
             }
             else if (type == WS_EVT_DATA)
             {
-                auto info{reinterpret_cast<const AwsFrameInfo *>(arg)};
-                if (info->opcode == WS_TEXT and info->final and info->index == 0)
-                {
-                    const auto text{reinterpret_cast<const char *>(data)};
-                    if (info->len == 4)
-                    {
-                        if (strncmp(text, "ping", 4) == 0)
-                        {
-                            client->text("pong");
-                        }
-                    }
-                }
+                // NOTHING
             }
         }
 
