@@ -30,6 +30,7 @@ namespace Sensors
     static constexpr auto accelerationUnit{"m/s^2"};
     static constexpr auto magneticUnit{"uT"};
     static constexpr auto temperatureUnit{"degC"};
+    static constexpr auto batteryUnit{"%"};
 
     auto init() -> void;
     auto process() -> void;
@@ -43,4 +44,5 @@ namespace Sensors
     auto acceleration() -> std::array<float, 3>;
     auto magnetic() -> std::array<float, 3>;
     auto temperature() -> float;
+    auto battery() -> float;
 } // namespace Sensors

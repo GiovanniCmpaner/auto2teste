@@ -141,6 +141,12 @@ function createDistancesChart(){
                 mode: null
             },
             scales: {
+                yAxes: [{
+                    ticks: {
+                        suggestedMin: 0,
+                        suggestedMax: 1
+                    }
+                }],
                 xAxes: [{
                     gridLines: {
                         drawOnChartArea: false
@@ -217,6 +223,12 @@ function createRotationChart(){
                 mode: null
             },
             scales: {
+                yAxes: [{
+                    ticks: {
+                        suggestedMin: -5,
+                        suggestedMax: 5
+                    }
+                }],
                 xAxes: [{
                     gridLines: {
                         drawOnChartArea: false
@@ -290,6 +302,12 @@ function createAccelerationChart(){
                 mode: null
             },
             scales: {
+                yAxes: [{
+                    ticks: {
+                        suggestedMin: -5,
+                        suggestedMax: 5
+                    }
+                }],
                 xAxes: [{
                     gridLines: {
                         drawOnChartArea: false
@@ -363,6 +381,12 @@ function createMagneticChart(){
                 mode: null
             },
             scales: {
+                yAxes: [{
+                    ticks: {
+                        suggestedMin: -40,
+                        suggestedMax: 40
+                    }
+                }],
                 xAxes: [{
                     gridLines: {
                         drawOnChartArea: false

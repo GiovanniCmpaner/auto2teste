@@ -55,6 +55,7 @@ namespace Sensors
     static auto accelerationValues{std::array<float, 3>{}};
     static auto magneticValues{std::array<float, 3>{}};
     static auto temperatureValue{float{}};
+    static auto batteryValue{float{}};
 
     static auto rotationOffset{std::array<float, 3>{}};
     static auto accelerationOffset{std::array<float, 3>{}};
@@ -197,6 +198,10 @@ namespace Sensors
         }
     }
 
+    static auto initBattery() -> void
+    {
+    }
+
     static auto readColor() -> void
     {
         if (Sensors::colorSensor.colorDataReady())
@@ -301,6 +306,10 @@ namespace Sensors
         }
     }
 
+    static auto readBattery() -> void
+    {
+    }
+
     auto init() -> void
     {
         log_d("begin");
@@ -308,12 +317,14 @@ namespace Sensors
         Sensors::initColor();
         Sensors::initGyroAccelMag();
         Sensors::initDistances();
+        Sensors::initBattery();
 
         Sensors::resetOffset();
 
         Sensors::readDistances();
         Sensors::readGyroAccelMag();
         Sensors::readColor();
+        Sensors::readBattery();
 
         log_d("end");
     }
@@ -328,6 +339,7 @@ namespace Sensors
             Sensors::readDistances();
             Sensors::readGyroAccelMag();
             Sensors::readColor();
+            Sensors::readBattery();
         }
     }
 
@@ -353,6 +365,7 @@ namespace Sensors
         log_d("acceleration = %.2f, %.2f, %.2f (%s)", Sensors::accelerationValues[0], Sensors::accelerationValues[1], Sensors::accelerationValues[2], Sensors::accelerationUnit);
         log_d("rotation = %.2f, %.2f, %.2f (%s)", Sensors::rotationValues[0], Sensors::rotationValues[1], Sensors::rotationValues[2], Sensors::rotationUnit);
         log_d("temperature = %.2f (%s)", Sensors::temperatureValue, Sensors::temperatureUnit);
+        log_d("battery = %.2f (%s)", Sensors::batteryValue, Sensors::batteryUnit);
         log_d("color = %u, %u, %u", Sensors::colorValues[0], Sensors::colorValues[1], Sensors::colorValues[2]);
         for (auto [angle, distanceValue] : Sensors::distanceValues)
         {
@@ -388,6 +401,10 @@ namespace Sensors
     auto temperature() -> float
     {
         return Sensors::temperatureValue;
+    }
+
+    auto battery() -> float
+    {
     }
 
     auto serialize(ArduinoJson::JsonVariant &json) -> void
@@ -430,6 +447,10 @@ namespace Sensors
         {
             auto temperature{json["temp"]};
             temperature = Sensors::temperatureValue;
+        }
+        {
+            auto battery{json["bat"]};
+            battery = Sensors::batteryValue;
         }
     }
 

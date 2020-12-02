@@ -5,14 +5,13 @@
 
 #include "Display.hpp"
 #include "Peripherals.hpp"
+#include "Sensors.hpp"
 
 #include <Adafruit_SSD1306.h>
 
 namespace Display
 {
     static auto display{Adafruit_SSD1306{Peripherals::Display::WIDTH, Peripherals::Display::HEIGHT, &Peripherals::Display::I2C}};
-    static auto updateTimer{0UL};
-    static auto needUpdate{false};
 
     auto init() -> void
     {
@@ -26,51 +25,49 @@ namespace Display
         }
         else
         {
-            display.setRotation(1);
+            display.setRotation(0);
             display.setTextColor(SSD1306_WHITE);
             display.cp437(true);
-
-            display.clearDisplay();
-            display.setTextSize(2);
-            display.setCursor(0, 0);
-            display.print("Auto2");
-            display.display();
-
             display.setTextSize(1);
             display.clearDisplay();
+            display.print("Auto2");
+            display.display();
         }
 
         log_d("end");
     }
 
-    auto process() -> void
+    static auto updateStatus() -> void
     {
-        if (millis() - updateTimer >= 200UL)
+        static auto updateTimer{0UL};
+        if (millis() - updateTimer >= 2000UL)
         {
             updateTimer = millis();
 
-            if (needUpdate)
-            {
-                display.display();
-                display.clearDisplay();
-                needUpdate = false;
-            }
+            display.fillRect(0, 0, Peripherals::Display::WIDTH, 16, SSD1306_BLACK);
+            display.setCursor(0, 0);
+            display.printf("BAT %.0f%", Sensors::battery());
+            display.display();
         }
     }
 
-    auto printf(int16_t x, int16_t y, const char *format, ...) -> void
+    auto process() -> void
     {
-        char *buffer;
+        Display::updateStatus();
+    }
+
+    auto printf(const char *format, ...) -> void
+    {
+        char buffer[256];
 
         va_list args;
         va_start(args, format);
-        vasprintf(&buffer, format, args);
+        vsnprintf(buffer, sizeof(buffer), format, args);
         va_end(args);
 
-        display.setCursor(x, y);
+        display.fillRect(0, 16, Peripherals::Display::WIDTH, Peripherals::Display::HEIGHT - 16, SSD1306_BLACK);
+        display.setCursor(0, 16);
         display.print(buffer);
-        needUpdate = true;
-
-        free(buffer);
+        display.display();
     }
 } // namespace Display
