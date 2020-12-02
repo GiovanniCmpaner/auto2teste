@@ -82,9 +82,9 @@ namespace Motors
     {
         log_d("begin");
 
-        ledcSetup(0, 1000, 10);
+        ledcSetup(0, 10000, 8);
         ledcAttachPin(Peripherals::Motors::PWM, 0);
-        ledcWrite(0, 1024);
+        ledcWrite(0, 255);
 
         digitalWrite(Peripherals::Motors::STBY, HIGH);
 

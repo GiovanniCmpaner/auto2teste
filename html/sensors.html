@@ -260,6 +260,21 @@
                   <span>°C</span>
                 </td>
               </tr>
+              <tr style="height: 16px;"/>
+              <tr>
+                <td>
+                  <label for="battery">Battery</label>
+                </td>
+                <td>
+                  <span> </span>
+                </td>
+                <td>
+                  <input type="number" id="battery" readonly>
+                </td>
+                <td>
+                  <span>%</span>
+                </td>
+              </tr>
             </table>
           </fieldset>
         </td>
@@ -269,13 +284,19 @@
               <td>
                 <fieldset>
                   <legend>Distances Chart (m)</legend>
-                  <canvas id="distances_chart" width="400px" height="400px"></canvas>
+                  <canvas id="distances_chart" width="300px" height="300px"></canvas>
                 </fieldset>
               </td>
               <td>
                 <fieldset>
                   <legend>Rotation Chart (rad/s)</legend>
-                  <canvas id="rotation_chart" width="400px" height="400px"></canvas>
+                  <canvas id="rotation_chart" width="300px" height="300px"></canvas>
+                </fieldset>
+              </td>
+              <td>
+                <fieldset>
+                  <legend>Battery Chart (%)</legend>
+                  <canvas id="battery_chart" width="300px" height="300px"></canvas>
                 </fieldset>
               </td>
             </tr>
@@ -283,13 +304,19 @@
               <td>
                 <fieldset>
                   <legend>Acceleration Chart (m/s²)</legend>
-                  <canvas id="acceleration_chart" width="400px" height="400px"></canvas>
+                  <canvas id="acceleration_chart" width="300px" height="300px"></canvas>
                 </fieldset>
               </td>
               <td>
                 <fieldset>
                   <legend>Magnetic Chart (μT)</legend>
-                  <canvas id="magnetic_chart" width="400px" height="400px"></canvas>
+                  <canvas id="magnetic_chart" width="300px" height="300px"></canvas>
+                </fieldset>
+              </td>
+              <td>
+                <fieldset>
+                  <legend>Color Chart</legend>
+                  <canvas id="color_chart" width="300px" height="300px"></canvas>
                 </fieldset>
               </td>
             </tr>

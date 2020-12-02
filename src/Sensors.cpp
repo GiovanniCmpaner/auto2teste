@@ -144,16 +144,18 @@ namespace Sensors
     {
         log_d("initializing color");
 
-        if (not colorSensor.begin(30, APDS9960_AGAIN_64X, APDS9960_ADDRESS, &Peripherals::Color::I2C))
+        if (not colorSensor.begin(50, APDS9960_AGAIN_16X, APDS9960_ADDRESS, &Peripherals::Color::I2C))
         {
             log_e("failed to initialize color");
         }
         else
         {
-            colorSensor.enableColor(true);
-            colorSensor.enableGesture(false);
-            colorSensor.enableProximity(false);
+            colorSensor.enableColor();
         }
+
+        ledcSetup(1, 10000, 8);
+        ledcAttachPin(Peripherals::LED::CTRL, 1);
+        ledcWrite(1, 0);
     }
 
     static auto initGyroAccelMag() -> void
@@ -179,7 +181,7 @@ namespace Sensors
     {
         for (auto n{0}; n < Sensors::distanceSensors.size(); ++n)
         {
-            auto &object{Sensors::distanceSensors[n]};
+            auto &distanceSensor{Sensors::distanceSensors[n]};
             auto &xshut{Peripherals::Distances::XSHUT[n]};
 
             log_d("initializing distance[%d]", n);
@@ -187,19 +189,22 @@ namespace Sensors
             digitalWrite(xshut, HIGH);
             delay(10);
 
-            if (not object.begin(0x30 + n, false, &Peripherals::Distances::I2C, Adafruit_VL53L0X::VL53L0X_SENSE_HIGH_ACCURACY))
+            if (not distanceSensor.begin(0x30 + n, false, &Peripherals::Distances::I2C, Adafruit_VL53L0X::VL53L0X_SENSE_HIGH_ACCURACY))
             {
                 log_e("failed to initialize distance[%d]", n);
             }
             else
             {
-                object.startRangeContinuous(30);
+                distanceSensor.startRangeContinuous(30);
             }
         }
     }
 
     static auto initBattery() -> void
     {
+        analogReadResolution(12);
+        analogSetAttenuation(adc_attenuation_t::ADC_11db);
+        analogSetClockDiv(1);
     }
 
     static auto readColor() -> void
@@ -209,6 +214,16 @@ namespace Sensors
             uint16_t r, g, b, c;
             Sensors::colorSensor.getColorData(&r, &g, &b, &c);
             Sensors::colorValues = {r, g, b};
+
+            const auto currentDuty{ledcRead(1)};
+            if (c < 500 and currentDuty < 255)
+            {
+                ledcWrite(1, currentDuty + 15);
+            }
+            else if (c > 600 and currentDuty > 0)
+            {
+                ledcWrite(1, currentDuty - 15);
+            }
             //            if (c < 300)
             //            {
             //                Sensors::colorValue = Color::BLACK;
@@ -308,6 +323,9 @@ namespace Sensors
 
     static auto readBattery() -> void
     {
+        const auto reading{analogRead(Peripherals::Battery::VIN)};
+        //Sensors::batteryValue = map(reading, 4000, 6400, 0, 100);
+        Sensors::batteryValue = reading;
     }
 
     auto init() -> void
@@ -405,6 +423,7 @@ namespace Sensors
 
     auto battery() -> float
     {
+        return Sensors::batteryValue;
     }
 
     auto serialize(ArduinoJson::JsonVariant &json) -> void

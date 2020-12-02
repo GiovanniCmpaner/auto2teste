@@ -9,10 +9,11 @@ var mouseTimer;
 function sendWhileHolding(id, downVal, upVal){
     $(id).on("mousedown", () => {
         wsControl.send(downVal);
+        clearTimeout(mouseTimer);
         mouseTimer = setInterval(() => wsControl.send(downVal), 30);
     }).on("mouseup mouseleave", () => {
-        clearTimeout(mouseTimer);
-        wsControl.send(upVal);
+        //clearTimeout(mouseTimer);
+        //wsControl.send(upVal);
     });
 }
 
@@ -21,6 +22,7 @@ function assignButtons(){
     sendWhileHolding("#down", "D", "X");
     sendWhileHolding("#left", "L", "X");
     sendWhileHolding("#right", "R", "X");
+    sendWhileHolding("#cross", "X");
 }
 
 function connectWebSocket() {

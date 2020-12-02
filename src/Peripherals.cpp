@@ -39,6 +39,9 @@ namespace Peripherals
             digitalWrite(xshut, LOW);
         }
 
+        //pinMode(LED::CTRL, OUTPUT);
+        //digitalWrite(LED::CTRL, LOW);
+
         Distances::I2C.begin(Distances::SDA, Distances::SCL);
         Color::I2C.begin(Color::SDA, Color::SCL);
         GyroAccelMag::I2C.begin(GyroAccelMag::SDA, GyroAccelMag::SCL);

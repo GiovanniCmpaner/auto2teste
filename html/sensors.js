@@ -1,9 +1,11 @@
 $(document).ready(() => {
     createDistancesChart();
+    createColorChart();
     createRotationChart();
     createAccelerationChart();
     createMagneticChart();
-    connectWebSocket();
+    createBatteryChart();
+    connectWsSensors();
 });
 
 var wsSensors;
@@ -12,7 +14,7 @@ var rotationChart;
 var accelerationChart;
 var magneticChart;
 
-function connectWebSocket() {
+function connectWsSensors() {
   var deferred = new $.Deferred();
   
   infoMessage("Socket connecting");
@@ -30,7 +32,7 @@ function connectWebSocket() {
     else {
         errorMessage("Socket error");
     }
-    setTimeout(() => connectWebSocket(), 10000);
+    setTimeout(() => connectWsSensors(), 10000);
   };
 
   wsSensors.onerror = (evt) => {
@@ -39,11 +41,8 @@ function connectWebSocket() {
   
   wsSensors.onmessage = (evt) => {
     var sensors = JSON.parse(evt.data);  
-    updateSensors(sensors);
-    updateDistancesChart(sensors.dist);
-    updateRotationChart(sensors.rot);
-    updateAccelerationChart(sensors.accel);
-    updateMagneticChart(sensors.mag);
+    updateValues(sensors);
+    updateCharts(sensors);
   };
   
   return deferred.promise();
@@ -51,7 +50,7 @@ function connectWebSocket() {
 
 function smoothValue(id, val){
     var obj = $(id);
-    var factor = 0.1;
+    var factor = 0.05;
     if(val == null)
     {
          obj.prop("value", "");
@@ -66,7 +65,16 @@ function smoothValue(id, val){
     }
 }
 
-function updateSensors(sensors){
+function updateCharts(sensors){
+    updateDistancesChart(sensors.dist);
+    updateColorChart(sensors.color);
+    updateRotationChart(sensors.rot);
+    updateAccelerationChart(sensors.accel);
+    updateMagneticChart(sensors.mag);
+    updateBatteryChart(sensors.bat);
+}
+
+function updateValues(sensors){
     
     smoothValue("#distances_0", sensors.dist["0"]);
     smoothValue("#distances_1", sensors.dist["33"]);
@@ -92,6 +100,8 @@ function updateSensors(sensors){
     smoothValue("#magnetic_z", sensors.mag[2]);
     
     smoothValue("#temperature", sensors.temp);
+    
+    smoothValue("#battery", sensors.bat);
 }
 
 function createDistancesChart(){
@@ -122,24 +132,24 @@ function createDistancesChart(){
                 },
                 { 
                     label: '-90',
-                    pointBackgroundColor: 'purple',
-                    borderColor: 'purple'
+                    pointBackgroundColor: 'magenta',
+                    borderColor: 'magenta'
                 },
                 { 
                     label: '180',
-                    pointBackgroundColor: 'orange',
-                    borderColor: 'orange'
+                    pointBackgroundColor: 'cyan',
+                    borderColor: 'cyan'
                 }
             ]
         },
         options: {
-            spanGaps: true,
             tooltips: {
                 enabled: false
             },
             hover: {
                 mode: null
             },
+            spanGaps: true,
             scales: {
                 yAxes: [{
                     ticks: {
@@ -189,6 +199,86 @@ function updateDistancesChart(distances){
     });
 
     distancesChart.update();
+}
+
+function createColorChart(){
+    var ctx = document.getElementById('color_chart').getContext('2d');
+    colorChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            datasets: [
+                {
+                    label: 'r',
+                    backgroundColor: '#FF0000',
+                    borderColor: '#FF0000'
+                },
+                {
+                    label: 'g',
+                    backgroundColor: '#00FF00',
+                    borderColor: '#00FF00'
+                },
+                {
+                    label: 'b',
+                    backgroundColor: '#0000FF',
+                    borderColor: '#0000FF'
+                }
+            ]
+        },
+        options: {
+            tooltips: {
+                enabled: false
+            },
+            hover: {
+                mode: null
+            },
+            spanGaps: true,
+            scales: {
+                yAxes: [{
+                    stacked: true,
+                    ticks: {
+                        suggestedMin: 0,
+                        suggestedMax: 600
+                    }
+                }],
+                xAxes: [{
+                    gridLines: {
+                        drawOnChartArea: false
+                    },
+                    ticks: {
+                        display: false
+                    }
+                }]
+            },
+            elements: {
+                line: {
+                    fill: true
+                },
+                point:{
+                    radius: 0
+                }
+            }
+        }
+    });
+}
+
+function updateColorChart(color){
+    
+    colorChart.data.labels.push(Date.now());
+    if(colorChart.data.labels.length > 100){
+        colorChart.data.labels.shift();
+    }
+   
+    colorChart.data.datasets[0].data.push(color[0]);
+    colorChart.data.datasets[1].data.push(color[1]);
+    colorChart.data.datasets[2].data.push(color[2]);
+   
+    colorChart.data.datasets.forEach((dataset) => {
+        if(dataset.data.length > 100){
+            dataset.data.shift();
+        }
+    });
+
+    colorChart.update();
 }
 
 function createRotationChart(){
@@ -294,13 +384,13 @@ function createAccelerationChart(){
             ]
         },
         options: {
-            spanGaps: true,
             tooltips: {
                 enabled: false
             },
             hover: {
                 mode: null
             },
+            spanGaps: true,
             scales: {
                 yAxes: [{
                     ticks: {
@@ -373,13 +463,13 @@ function createMagneticChart(){
             ]
         },
         options: {
-            spanGaps: true,
             tooltips: {
                 enabled: false
             },
             hover: {
                 mode: null
             },
+            spanGaps: true,
             scales: {
                 yAxes: [{
                     ticks: {
@@ -426,6 +516,73 @@ function updateMagneticChart(magnetic){
     });
 
     magneticChart.update();
+}
+
+function createBatteryChart(){
+    var ctx = document.getElementById('battery_chart').getContext('2d');
+    batteryChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            datasets: [
+                {
+                    pointBackgroundColor: 'red',
+                    borderColor: 'red'
+                }
+            ]
+        },
+        options: {
+            legend: {
+                display: false
+            },
+            tooltips: {
+                enabled: false
+            },
+            hover: {
+                mode: null
+            },
+            spanGaps: true,
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        suggestedMin: 0,
+                        suggestedMax: 100
+                    }
+                }],
+                xAxes: [{
+                    ticks: {
+                        autoSkip: true,
+                        maxTicksLimit: 10
+                    }
+                }]
+            },
+            elements: {
+                line: {
+                    fill: false
+                },
+                point:{
+                    radius: 0
+                }
+            }
+        }
+    });
+}
+
+function updateBatteryChart(battery){
+    
+    batteryChart.data.labels.push(new Date().toLocaleString());
+    if(batteryChart.data.labels.length > 2000){
+        batteryChart.data.labels.shift();
+    }
+   
+    batteryChart.data.datasets[0].data.push(battery);
+    
+    batteryChart.data.datasets.forEach((dataset) => {
+        if(dataset.data.length > 2000){
+            dataset.data.shift();
+        }
+    });
+
+    batteryChart.update();
 }
 
 //$("#color_text").prop("value", sensors.color);

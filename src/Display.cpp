@@ -44,10 +44,10 @@ namespace Display
         {
             updateTimer = millis();
 
-            display.fillRect(0, 0, Peripherals::Display::WIDTH, 16, SSD1306_BLACK);
-            display.setCursor(0, 0);
-            display.printf("BAT %.0f%", Sensors::battery());
-            display.display();
+            //display.fillRect(0, 0, Peripherals::Display::WIDTH, 16, SSD1306_BLACK);
+            //display.setCursor(0, 0);
+            //display.printf("BAT %.0f %%", Sensors::battery());
+            //display.display();
         }
     }
 
