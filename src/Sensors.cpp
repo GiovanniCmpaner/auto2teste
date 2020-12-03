@@ -396,7 +396,7 @@ namespace Sensors
         return Sensors::distanceValues;
     }
 
-    auto color() -> std::array<uint16_t, 3>
+    auto colors() -> std::array<uint16_t, 3>
     {
         return Sensors::colorValues;
     }

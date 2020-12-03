@@ -66,22 +66,26 @@ void setup()
 
     //scan();
 
+    Display::init();
+    Display::printf("initializing");
+
     Configuration::init();
     Sensors::init();
     Motors::init();
     Control::init();
-    Display::init();
     WebInterface::init();
+
+    Display::printf("ready");
 
     log_d("end");
 }
 
 void loop()
 {
+    Display::process();
     Sensors::process();
     Motors::process();
     Control::process();
-    Display::process();
     WebInterface::process();
     delay(1); // Necessário para o ESP TCP Async
 }
