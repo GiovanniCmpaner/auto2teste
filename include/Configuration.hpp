@@ -26,7 +26,6 @@ struct Configuration
             std::array<float, 3> factor;
         };
 
-        bool calibrate;
         Gyroscope gyroscope;
         Accelerometer accelerometer;
         Magnetometer magnetometer;

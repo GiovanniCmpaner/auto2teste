@@ -123,7 +123,7 @@ namespace WebInterface
 
     } // namespace Get
 
-    namespace File
+    namespace Upload
     {
         static auto handleFirmwareBin(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final) -> void
         {
@@ -210,7 +210,7 @@ namespace WebInterface
                 }
             }
         }
-    } // namespace File
+    } // namespace Upload
 
     namespace Post
     {
@@ -233,20 +233,23 @@ namespace WebInterface
             esp_restart();
         }
 
-        static auto handleFile(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final) -> void
+        static auto handleCalibrationJson(AsyncWebServerRequest *request, JsonVariant &requestJson) -> void
         {
-            if (request->url() == "/firmware.bin")
-            {
-                File::handleFirmwareBin(request, filename, index, data, len, final);
-            }
-            else if (request->url() == "/neural_network.json")
-            {
-                File::handleNetJson(request, filename, index, data, len, final);
-            }
-            else
-            {
-                request->send(404);
-            }
+            log_d("POST /calibration.json");
+
+            auto response{new AsyncJsonResponse{}};
+            auto &responseJson{response->getRoot()};
+
+            auto newCfg{cfg};
+            newCfg.deserialize(requestJson);
+            Configuration::save(newCfg);
+
+            responseJson.set("Configuration saved, restarting in 3 seconds");
+            response->setLength();
+            request->send(response);
+
+            delay(3000);
+            esp_restart();
         }
     } // namespace Post
 
@@ -361,8 +364,12 @@ namespace WebInterface
             webServer->on("/style.css", HTTP_GET, Get::handleStyleCss);
             webServer->on("/configuration.json", HTTP_GET, Get::handleConfigurationJson);
 
+            webServer->on("/firmware.bin", HTTP_POST, nullptr, Upload::handleFirmwareBin);
+            webServer->on("/neural_network.json", HTTP_POST, nullptr, Upload::handleNetJson);
+
             webServer->addHandler(new AsyncCallbackJsonWebHandler("/configuration.json", Post::handleConfigurationJson, 2048));
-            webServer->onFileUpload(Post::handleFile);
+            webServer->addHandler(new AsyncCallbackJsonWebHandler("/calibration.json", Post::handleCalibrationJson, 2048));
+            //webServer->onFileUpload(Post::handleFile);
 
             controlWs.onEvent(WebSocket::handleControlWs);
             webServer->addHandler(&controlWs);

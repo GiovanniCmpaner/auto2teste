@@ -14,8 +14,7 @@
 #include "Peripherals.hpp"
 
 static const Configuration defaultCfg{
-    {true,
-     {{0.0f, 0.0f, 0.0f}},
+    {{{0.0f, 0.0f, 0.0f}},
      {{0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f}},
      {{0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f}}},
     {true,
@@ -51,8 +50,6 @@ auto Configuration::serialize(ArduinoJson::JsonVariant &json) const -> void
 {
     {
         auto calibration{json["calibration"]};
-
-        calibration["calibrate"] = this->calibration.calibrate;
         {
             auto gyroscope{calibration["gyroscope"]};
             for (auto n : this->calibration.gyroscope.bias)
@@ -138,13 +135,6 @@ auto Configuration::deserialize(const ArduinoJson::JsonVariant &json) -> void
 {
     {
         const auto calibration{json["calibration"]};
-        {
-            const auto calibrate{calibration["calibrate"]};
-            if (calibrate.is<bool>())
-            {
-                this->calibration.calibrate = calibrate.as<bool>();
-            }
-        }
         {
             const auto gyroscope{calibration["gyroscope"]};
             {
