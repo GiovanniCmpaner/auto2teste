@@ -8,14 +8,14 @@ $(document).ready(() => {
     connectWsSensors();
 });
 
-var wsSensors;
-var distancesChart;
-var rotationChart;
-var accelerationChart;
-var magneticChart;
+let wsSensors;
+let distancesChart;
+let rotationChart;
+let accelerationChart;
+let magneticChart;
 
 function connectWsSensors() {
-  var deferred = new $.Deferred();
+  let deferred = new $.Deferred();
   
   infoMessage("Socket connecting");
   
@@ -40,7 +40,7 @@ function connectWsSensors() {
   };
   
   wsSensors.onmessage = (evt) => {
-    var sensors = JSON.parse(evt.data);  
+    let sensors = JSON.parse(evt.data);  
     updateValues(sensors);
     updateCharts(sensors);
   };
@@ -49,8 +49,8 @@ function connectWsSensors() {
 }
 
 function smoothValue(id, val){
-    var obj = $(id);
-    var factor = 0.05;
+    let obj = $(id);
+    let factor = 0.05;
     if(val == null)
     {
          obj.prop("value", "");
@@ -105,7 +105,7 @@ function updateValues(sensors){
 }
 
 function createDistancesChart(){
-    var ctx = document.getElementById('distances_chart').getContext('2d');
+    let ctx = document.getElementById('distances_chart').getContext('2d');
     distancesChart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -202,7 +202,7 @@ function updateDistancesChart(distances){
 }
 
 function createColorChart(){
-    var ctx = document.getElementById('color_chart').getContext('2d');
+    let ctx = document.getElementById('color_chart').getContext('2d');
     colorChart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -282,7 +282,7 @@ function updateColorChart(color){
 }
 
 function createRotationChart(){
-    var ctx = document.getElementById('rotation_chart').getContext('2d');
+    let ctx = document.getElementById('rotation_chart').getContext('2d');
     rotationChart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -361,7 +361,7 @@ function updateRotationChart(rotation){
 }
 
 function createAccelerationChart(){
-    var ctx = document.getElementById('acceleration_chart').getContext('2d');
+    let ctx = document.getElementById('acceleration_chart').getContext('2d');
     accelerationChart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -440,7 +440,7 @@ function updateAccelerationChart(acceleration){
 }
 
 function createMagneticChart(){
-    var ctx = document.getElementById('magnetic_chart').getContext('2d');
+    let ctx = document.getElementById('magnetic_chart').getContext('2d');
     magneticChart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -519,7 +519,7 @@ function updateMagneticChart(magnetic){
 }
 
 function createBatteryChart(){
-    var ctx = document.getElementById('battery_chart').getContext('2d');
+    let ctx = document.getElementById('battery_chart').getContext('2d');
     batteryChart = new Chart(ctx, {
         type: 'line',
         data: {
@@ -589,7 +589,7 @@ function updateBatteryChart(battery){
 //$("#color_value").prop("value", colorFromText(sensors.color));
 //
 //function colorFromText(){
-//    var ctx = document.createElement("canvas").getContext("2d");
+//    let ctx = document.createElement("canvas").getContext("2d");
 //	ctx.fillStyle = str;
 //	return ctx.fillStyle;
 //}

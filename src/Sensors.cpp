@@ -61,58 +61,6 @@ namespace Sensors
     static auto accelerationOffset{std::array<float, 3>{}};
     static auto magneticOffset{std::array<float, 3>{}};
 
-    static auto _calibrate() -> void
-    {
-        log_d("calibrating gyroscope");
-        delay(5000);
-        if (gyroAccelMagSensor.calibrateGyro() < 0)
-        {
-            log_e("failed to calibrate gyroscope");
-        }
-
-        for (auto n{0}; n < 6; ++n)
-        {
-            log_d("calibrating accelerometer[%d]", n);
-            delay(5000);
-            if (gyroAccelMagSensor.calibrateAccel() < 0)
-            {
-                log_e("failed to calibrate accelerometer[%d]", n);
-            }
-        }
-
-        log_d("calibrating magnetometer");
-        delay(5000);
-        if (gyroAccelMagSensor.calibrateMag() < 0)
-        {
-            log_e("failed to calibrate magnetometer");
-        }
-
-        cfg.calibration.gyroscope.bias = {
-            gyroAccelMagSensor.getGyroBiasY_rads(),
-            gyroAccelMagSensor.getGyroBiasX_rads(),
-            gyroAccelMagSensor.getGyroBiasZ_rads()};
-
-        cfg.calibration.accelerometer.bias = {
-            gyroAccelMagSensor.getAccelBiasY_mss(),
-            gyroAccelMagSensor.getAccelBiasX_mss(),
-            gyroAccelMagSensor.getAccelBiasZ_mss()};
-        cfg.calibration.accelerometer.factor = {
-            gyroAccelMagSensor.getAccelScaleFactorY(),
-            gyroAccelMagSensor.getAccelScaleFactorX(),
-            gyroAccelMagSensor.getAccelScaleFactorZ()};
-
-        cfg.calibration.magnetometer.bias = {
-            gyroAccelMagSensor.getMagBiasY_uT(),
-            gyroAccelMagSensor.getMagBiasX_uT(),
-            gyroAccelMagSensor.getMagBiasZ_uT()};
-        cfg.calibration.magnetometer.factor = {
-            gyroAccelMagSensor.getMagScaleFactorY(),
-            gyroAccelMagSensor.getMagScaleFactorX(),
-            gyroAccelMagSensor.getMagScaleFactorZ()};
-
-        Configuration::save(cfg);
-    }
-
     static auto initColor() -> void
     {
         log_d("initializing color");
@@ -361,7 +309,7 @@ namespace Sensors
         Sensors::magneticValues = {};
     }
 
-    auto print() -> void
+    auto debug() -> void
     {
         log_d("acceleration = %.2f, %.2f, %.2f (%s)", Sensors::accelerationValues[0], Sensors::accelerationValues[1], Sensors::accelerationValues[2], Sensors::accelerationUnit);
         log_d("rotation = %.2f, %.2f, %.2f (%s)", Sensors::rotationValues[0], Sensors::rotationValues[1], Sensors::rotationValues[2], Sensors::rotationUnit);
@@ -454,6 +402,80 @@ namespace Sensors
             auto battery{json["bat"]};
             battery = Sensors::batteryValue;
         }
+    }
+
+    auto calibrateGyroscope() -> bool
+    {
+        log_d("calibrating gyroscope");
+
+        const auto result{gyroAccelMagSensor.calibrateGyro()};
+        if (result < 0)
+        {
+            log_e("failed to calibrate gyroscope = %d", result);
+            return false;
+        }
+
+        cfg.calibration.gyroscope.bias = {
+            gyroAccelMagSensor.getGyroBiasY_rads(),
+            gyroAccelMagSensor.getGyroBiasX_rads(),
+            gyroAccelMagSensor.getGyroBiasZ_rads()};
+
+        Configuration::save(cfg);
+
+        log_d("gyroscope calibration done");
+        return true;
+    }
+
+    auto calibrateAccelerometer() -> bool
+    {
+        log_d("calibrating accelerometer");
+
+        const auto result{gyroAccelMagSensor.calibrateAccel()};
+        if (result < 0)
+        {
+            log_e("failed to calibrate accelerometer = %d", result);
+            return false;
+        }
+
+        cfg.calibration.accelerometer.bias = {
+            gyroAccelMagSensor.getAccelBiasY_mss(),
+            gyroAccelMagSensor.getAccelBiasX_mss(),
+            gyroAccelMagSensor.getAccelBiasZ_mss()};
+        cfg.calibration.accelerometer.factor = {
+            gyroAccelMagSensor.getAccelScaleFactorY(),
+            gyroAccelMagSensor.getAccelScaleFactorX(),
+            gyroAccelMagSensor.getAccelScaleFactorZ()};
+
+        Configuration::save(cfg);
+
+        log_d("accelerometer calibration done");
+        return true;
+    }
+
+    auto calibrateMagnetometer() -> bool
+    {
+        log_d("calibrating magnetometer");
+
+        const auto result{gyroAccelMagSensor.calibrateMag()};
+        if (result < 0)
+        {
+            log_e("failed to calibrate magnetometer = %d", result);
+            return false;
+        }
+
+        cfg.calibration.magnetometer.bias = {
+            gyroAccelMagSensor.getMagBiasY_uT(),
+            gyroAccelMagSensor.getMagBiasX_uT(),
+            gyroAccelMagSensor.getMagBiasZ_uT()};
+        cfg.calibration.magnetometer.factor = {
+            gyroAccelMagSensor.getMagScaleFactorY(),
+            gyroAccelMagSensor.getMagScaleFactorX(),
+            gyroAccelMagSensor.getMagScaleFactorZ()};
+
+        Configuration::save(cfg);
+
+        log_d("magnetometer calibration done");
+        return true;
     }
 
 } // namespace Sensors

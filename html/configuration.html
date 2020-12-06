@@ -1,371 +1,350 @@
 <!DOCTYPE html>
 <html>
-
-<head>
-  <meta http-equiv="content-type" content="text/html; charset=utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <link rel="icon" type="image/x-icon" href="data:,">
-  <link rel="stylesheet" type="text/css" href="style.css">
-  <script src="jquery.min.js.gz"></script>
-  <script src="configuration.js"></script>
-  <title>Auto2 - Configuration</title>
-</head>
-
-<body>
-  <nav id="message"></nav>
-  <nav id="menu">
-    <a href="/configuration.html">Configuration</a>
-    <a href="/control.html">Control</a>
-    <a href="/sensors.html">Sensors</a>
-  </nav>
-  <h2> Configuration </h2>
-  
-  <form id="neural_network">
-    <fieldset>
-      <legend> Neural Network </legend>
-      <table class="normal">
-        <tr>
-          <td>
-            <label for="neural_network_file"> File </label>
-          </td>
-          <td>
-            <input type="file" id="neural_network_file" accept=".json" required>
-          </td>
-        </tr>
-      </table>
-      <input type="submit" value="Upload">
-    </fieldset>
-  </form>
-  
-  <form id="firmware">
-    <fieldset>
-      <legend> Firmware </legend>
-      <table class="normal">
-        <tr>
-          <td>
-            <label for="firmware_file"> File </label>
-          </td>
-          <td>
-            <input type="file" id="firmware_file" accept=".bin" required>
-          </td>
-        </tr>
-      </table>
-      <input type="submit" value="Upload">
-    </fieldset>
-  </form>
-  
-  <form id="calibration">
-    <fieldset>
-      <legend> Calibration </legend>
-      <table>
-        <tr>
-          <td>
-            <label for="calibration_calibrate">Calibrate</label>
-          </td>
-          <td>
-            <input type="checkbox" id="calibration_calibrate">
-          </td>
-        </tr>
-        
-        <tr>
-          <td rowspan="3">
-            <label for="calibration_gyroscope_bias">Gyroscope Bias</label>
-          </td>
-          <td>
-            <span>x</span>
-          </td>
-          <td>
-            <input type="number" id="calibration_gyroscope_bias_x" step="any" required>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <span>y</span>
-          </td>
-          <td>
-            <input type="number" id="calibration_gyroscope_bias_y" step="any" required>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <span>z</span>
-          </td>
-          <td>
-            <input type="number" id="calibration_gyroscope_bias_z" step="any" required>
-          </td>
-        </tr>
-        <tr style="height: 16px;"/>
-        <tr>
-          <td rowspan="3">
-            <label for="calibration_accelerometer_bias">Accelerometer Bias</label>
-          </td>
-          <td>
-            <span>x</span>
-          </td>
-          <td>
-            <input type="number" id="calibration_accelerometer_bias_x" step="any" required>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <span>y</span>
-          </td>
-          <td>
-            <input type="number" id="calibration_accelerometer_bias_y" step="any" required>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <span>z</span>
-          </td>
-          <td>
-            <input type="number" id="calibration_accelerometer_bias_z" step="any" required>
-          </td>
-        </tr>
-        <tr style="height: 16px;"/>
-        <tr>
-          <td rowspan="3">
-            <label for="calibration_accelerometer_factor">Accelerometer Factor</label>
-          </td>
-          <td>
-            <span>x</span>
-          </td>
-          <td>
-            <input type="number" id="calibration_accelerometer_factor_x" step="any" required>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <span>y</span>
-          </td>
-          <td>
-            <input type="number" id="calibration_accelerometer_factor_y" step="any" required>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <span>z</span>
-          </td>
-          <td>
-            <input type="number" id="calibration_accelerometer_factor_z" step="any" required>
-          </td>
-        </tr>
-        <tr style="height: 16px;"/>
-        <tr>
-          <td rowspan="3">
-            <label for="calibration_magnetometer_bias">Magnetometer Bias</label>
-          </td>
-          <td>
-            <span>x</span>
-          </td>
-          <td>
-            <input type="number" id="calibration_magnetometer_bias_x" step="any" required>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <span>y</span>
-          </td>
-          <td>
-            <input type="number" id="calibration_magnetometer_bias_y" step="any" required>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <span>z</span>
-          </td>
-          <td>
-            <input type="number" id="calibration_magnetometer_bias_z" step="any" required>
-          </td>
-        </tr>
-        <tr style="height: 16px;"/>
-        <tr>
-          <td rowspan="3">
-            <label for="calibration_magnetometer_factor">Magnetometer Factor</label>
-          </td>
-          <td>
-            <span>x</span>
-          </td>
-          <td>
-            <input type="number" id="calibration_magnetometer_factor_x" step="any" required>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <span>y</span>
-          </td>
-          <td>
-            <input type="number" id="calibration_magnetometer_factor_y" step="any" required>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <span>z</span>
-          </td>
-          <td>
-            <input type="number" id="calibration_magnetometer_factor_z" step="any" required>
-          </td>
-        </tr>
-        
-      </table>
-      <input type="submit" value="Save">
-    </fieldset>
-  </form>
-  
-  <form id="access_point">
-    <fieldset>
-      <legend> Access Point </legend>
-      <table>
-        <tr>
-          <td>
-            <label for="access_point_enabled">Enabled</label>
-          </td>
-          <td>
-            <input type="checkbox" id="access_point_enabled">
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <label for="access_point_mac">MAC</label>
-          </td>
-          <td>
-            <input type="text" id="access_point_mac" readonly>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <label for="access_point_ip">IP</label>
-          </td>
-          <td>
-            <input type="text" id="access_point_ip" pattern="^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\.(?!$)|$)){4}$" required>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <label for="access_point_netmask">Netmask</label>
-          </td>
-          <td>
-            <input type="text" id="access_point_netmask" pattern="^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\.(?!$)|$)){4}$" required>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <label for="access_point_gateway">Gateway</label>
-          </td>
-          <td>
-            <input type="text" id="access_point_gateway" pattern="^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\.(?!$)|$)){4}$" required>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <label for="access_point_port">Port</label>
-          </td>
-          <td>
-            <input type="number" id="access_point_port" min="1" max="65534" required>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <label for="access_point_user">User</label>
-          </td>
-          <td>
-            <input type="text" id="access_point_user" minlength="4" maxlength="32" required>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <label for="access_point_password">Password</label>
-          </td>
-          <td>
-            <input type="text" id="access_point_password" minlength="8" maxlength="64" required>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <label for="access_point_duration">Duration</label>
-          </td>
-          <td>
-            <input type="number" id="access_point_duration" min="10" max="99999" required>
-          </td>
-        </tr>
-      </table>
-      <input type="submit" value="Save">
-    </fieldset>
-  </form>
-  
-  <form id="station">
-    <fieldset>
-      <legend>Station</legend>
-      <table>
-        <tr>
-          <td>
-            <label for="station_enabled">Enabled</label>
-          </td>
-          <td>
-            <input type="checkbox" id="station_enabled">
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <label for="station_mac">MAC</label>
-          </td>
-          <td>
-            <input type="text" id="station_mac" readonly>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <label for="station_ip">IP</label>
-          </td>
-          <td>
-            <input type="text" id="station_ip" pattern="^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\.(?!$)|$)){4}$" required>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <label for="station_netmask">Netmask</label>
-          </td>
-          <td>
-            <input type="text" id="station_netmask" pattern="^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\.(?!$)|$)){4}$" required>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <label for="station_gateway">Gateway</label>
-          </td>
-          <td>
-            <input type="text" id="station_gateway" pattern="^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\.(?!$)|$)){4}$" required>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <label for="station_port">Port</label>
-          </td>
-          <td>
-            <input type="number" id="station_port" min="1" max="65534" required>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <label for="station_user">User</label>
-          </td>
-          <td>
-            <input type="text" id="station_user" minlength="4" maxlength="32" required>
-          </td>
-        </tr>
-        <tr>
-          <td>
-            <label for="station_password">Password</label>
-          </td>
-          <td>
-            <input type="text" id="station_password" minlength="8" maxlength="64" required>
-          </td>
-        </tr>
-      </table>
-      <input type="submit" value="Save">
-    </fieldset>
-  </form>
-  
-</body>
-
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<link rel="icon" type="image/x-icon" href="data:,">
+		<link rel="stylesheet" type="text/css" href="style.css">
+		<script src="jquery.min.js.gz"></script>
+		<script src="configuration.js"></script>
+		<title>Auto2 - Configuration</title>
+	</head>
+	<body>
+		<nav id="message"></nav>
+		<nav id="menu">
+			<a href="/configuration.html">Configuration</a>
+			<a href="/control.html">Control</a>
+			<a href="/sensors.html">Sensors</a>
+		</nav>
+		<h2>Configuration</h2>
+		<form id="neural_network">
+			<fieldset>
+				<legend> Neural Network </legend>
+				<table>
+					<tr>
+						<td>
+							<label for="neural_network_file"> File </label>
+						</td>
+						<td>
+							<input type="file" id="neural_network_file" accept=".json" required>
+						</td>
+					</tr>
+				</table>
+				<input type="submit" id="neural_network_upload" value="Upload">
+			</fieldset>
+		</form>
+		<form id="firmware">
+			<fieldset>
+				<legend> Firmware </legend>
+				<table>
+					<tr>
+						<td>
+							<label for="firmware_file"> File </label>
+						</td>
+						<td>
+							<input type="file" id="firmware_file" accept=".bin" required>
+						</td>
+					</tr>
+				</table>
+				<input type="submit" id="firmware_upload" value="Upload">
+			</fieldset>
+		</form>
+		<form id="calibration">
+			<fieldset>
+				<legend> Calibration </legend>
+				<table>
+					<tr>
+						<td> 
+						</td>
+						<td>
+						</td>
+						<td>
+							<span>x</span>
+						</td>
+						<td>
+							<span>y</span>
+						</td>
+						<td>
+							<span>z</span>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<span>Gyroscope</span>
+						</td>
+						<td>
+							<span>Bias</span>
+						</td>
+						<td>
+							<input type="number" id="calibration_gyroscope_bias_x" step="any" required>
+						</td>
+						<td>
+							<input type="number" id="calibration_gyroscope_bias_y" step="any" required>
+						</td>
+						<td>
+							<input type="number" id="calibration_gyroscope_bias_z" step="any" required>
+						</td>
+					</tr>
+					<tr>
+						<td> 
+							<input type="button" id="calibrate_gyroscope" value="Calibrate">
+						</td>
+					</tr>
+					<tr style="height: 16px;"/>
+					<tr>
+						<td> 
+						</td>
+						<td>
+						</td>
+						<td>
+							<span>x</span>
+						</td>
+						<td>
+							<span>y</span>
+						</td>
+						<td>
+							<span>z</span>
+						</td>
+					</tr>
+					<tr>
+						<td> 
+							<span>Accelerometer</span>
+						</td>
+						<td>
+							<span>Bias</span>
+						</td>
+						<td>
+							<input type="number" id="calibration_accelerometer_bias_x" step="any" required>
+						</td>
+						<td>
+							<input type="number" id="calibration_accelerometer_bias_y" step="any" required>
+						</td>
+						<td>
+							<input type="number" id="calibration_accelerometer_bias_z" step="any" required>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<input type="button" id="calibrate_accelerometer" value="Calibrate">	
+						</td>
+						<td>
+							<span>Factor</span>
+						</td>
+						<td>
+							<input type="number" id="calibration_accelerometer_factor_x" step="any" required>
+						</td>
+						<td>
+							<input type="number" id="calibration_accelerometer_factor_y" step="any" required>
+						</td>
+						<td>
+							<input type="number" id="calibration_accelerometer_factor_z" step="any" required>
+						</td>
+					</tr>
+					<tr style="height: 16px;"/>
+					<tr>
+						<td> 
+						</td>
+						<td>
+						</td>
+						<td>
+							<span>x</span>
+						</td>
+						<td>
+							<span>y</span>
+						</td>
+						<td>
+							<span>z</span>
+						</td>
+					</tr>
+					<tr>
+						<td> 
+							<span>Magnetometer</span>
+						</td>
+						<td>
+							<span>Bias</span>
+						</td>
+						<td>
+							<input type="number" id="calibration_magnetometer_bias_x" step="any" required>
+						</td>
+						<td>
+							<input type="number" id="calibration_magnetometer_bias_y" step="any" required>
+						</td>
+						<td>
+							<input type="number" id="calibration_magnetometer_bias_z" step="any" required>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<input type="button" id="calibrate_magnetometer" value="Calibrate">	
+						</td>
+						<td>
+							<span>Factor</span>
+						</td>
+						<td>
+							<input type="number" id="calibration_magnetometer_factor_x" step="any" required>
+						</td>
+						<td>
+							<input type="number" id="calibration_magnetometer_factor_y" step="any" required>
+						</td>
+						<td>
+							<input type="number" id="calibration_magnetometer_factor_z" step="any" required>
+						</td>
+					</tr>
+				</table>
+				<input type="submit" id="calibration_save" value="Save">
+			</fieldset>
+		</form>
+		<form id="access_point">
+			<fieldset>
+				<legend>Access Point</legend>
+				<table>
+					<tr>
+						<td>
+							<label for="access_point_enabled">Enabled</label>
+						</td>
+						<td>
+							<input type="checkbox" id="access_point_enabled">
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<label for="access_point_mac">MAC</label>
+						</td>
+						<td>
+							<input type="text" id="access_point_mac" readonly>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<label for="access_point_ip">IP</label>
+						</td>
+						<td>
+							<input type="text" id="access_point_ip" pattern="^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\.(?!$)|$)){4}$" required>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<label for="access_point_netmask">Netmask</label>
+						</td>
+						<td>
+							<input type="text" id="access_point_netmask" pattern="^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\.(?!$)|$)){4}$" required>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<label for="access_point_gateway">Gateway</label>
+						</td>
+						<td>
+							<input type="text" id="access_point_gateway" pattern="^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\.(?!$)|$)){4}$" required>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<label for="access_point_port">Port</label>
+						</td>
+						<td>
+							<input type="number" id="access_point_port" min="1" max="65534" required>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<label for="access_point_user">User</label>
+						</td>
+						<td>
+							<input type="text" id="access_point_user" minlength="4" maxlength="32" required>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<label for="access_point_password">Password</label>
+						</td>
+						<td>
+							<input type="text" id="access_point_password" minlength="8" maxlength="64" required>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<label for="access_point_duration">Duration</label>
+						</td>
+						<td>
+							<input type="number" id="access_point_duration" min="10" max="99999" required>
+						</td>
+					</tr>
+				</table>
+				<input type="submit" id="access_point_save" value="Save">
+			</fieldset>
+		</form>
+		<form id="station">
+			<fieldset>
+				<legend>Station</legend>
+				<table>
+					<tr>
+						<td>
+							<label for="station_enabled">Enabled</label>
+						</td>
+						<td>
+							<input type="checkbox" id="station_enabled">
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<label for="station_mac">MAC</label>
+						</td>
+						<td>
+							<input type="text" id="station_mac" readonly>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<label for="station_ip">IP</label>
+						</td>
+						<td>
+							<input type="text" id="station_ip" pattern="^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\.(?!$)|$)){4}$" required>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<label for="station_netmask">Netmask</label>
+						</td>
+						<td>
+							<input type="text" id="station_netmask" pattern="^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\.(?!$)|$)){4}$" required>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<label for="station_gateway">Gateway</label>
+						</td>
+						<td>
+							<input type="text" id="station_gateway" pattern="^((25[0-5]|(2[0-4]|1[0-9]|[1-9]|)[0-9])(\.(?!$)|$)){4}$" required>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<label for="station_port">Port</label>
+						</td>
+						<td>
+							<input type="number" id="station_port" min="1" max="65534" required>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<label for="station_user">User</label>
+						</td>
+						<td>
+							<input type="text" id="station_user" minlength="4" maxlength="32" required>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<label for="station_password">Password</label>
+						</td>
+						<td>
+							<input type="text" id="station_password" minlength="8" maxlength="64" required>
+						</td>
+					</tr>
+				</table>
+				<input type="submit" id="station_save" value="Save">
+			</fieldset>
+		</form>
+	</body>
 </html>

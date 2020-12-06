@@ -34,7 +34,7 @@ namespace Control
         constexpr int kTensorArenaSize = 2 * 1024;
         uint8_t tensor_arena[kTensorArenaSize];
     } // namespace
-
+    /*
     static auto load() -> void
     {
         // Set up logging. Google style is to avoid globals or statics because of
@@ -142,19 +142,19 @@ namespace Control
         if (inference_count >= kInferencesPerCycle)
             inference_count = 0;
     }
-
+    */
     auto init() -> void
     {
         log_d("begin");
 
-        Control::load();
+        //Control::load();
 
         log_d("end");
     }
 
     auto process() -> void
     {
-        Control::inference();
+        //Control::inference();
     }
 
     auto mode(Mode modeValue) -> void

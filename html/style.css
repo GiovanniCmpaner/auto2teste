@@ -4,6 +4,14 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
+table {
+  border-collapse: collapse;
+}
+
+table th, table td{
+  padding: 0.2em;
+}
+
 #message {
   position: sticky;
   top: 0;
@@ -41,25 +49,6 @@ body {
 .error {
   color: #D8000C;
   background-color: #FFD2D2;
-}
-
-/***************************************************/
-
-.normal {
-  table-layout: fixed;
-  min-width: 16em;
-}
-
-.normal th, .normal td {
-  padding: 0.2em;
-}
-
-.normal tbody th:first-child, .normal tbody td:first-child {
-  width: 5em;
-}
-
-.normal tbody th:last-child, .normal tbody td:last-child {
-  width: 9em;
 }
 
 /***************************************************/

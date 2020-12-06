@@ -35,8 +35,12 @@ namespace Sensors
     auto init() -> void;
     auto process() -> void;
     auto resetOffset() -> void;
-    auto print() -> void;
+    auto debug() -> void;
     auto serialize(ArduinoJson::JsonVariant &json) -> void;
+
+    auto calibrateGyroscope() -> bool;
+    auto calibrateAccelerometer() -> bool;
+    auto calibrateMagnetometer() -> bool;
 
     auto distances() -> std::array<std::pair<int, float>, 6>;
     auto colors() -> std::array<uint16_t, 3>;
