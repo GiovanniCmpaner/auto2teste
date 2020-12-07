@@ -417,6 +417,10 @@ namespace WebInterface
                                 calibrationStartTimer = millis();
                                 calibrationWs.textAll("starting");
                             }
+                            else
+                            {
+                                client->text("ongoing");
+                            }
                         }
                         else if (info->len == 5 and strncmp(text, "accel", 5) == 0)
                         {
@@ -426,6 +430,10 @@ namespace WebInterface
                                 calibrationStartTimer = millis();
                                 calibrationWs.textAll("starting");
                             }
+                            else
+                            {
+                                client->text("ongoing");
+                            }
                         }
                         else if (info->len == 3 and strncmp(text, "mag", 3) == 0)
                         {
@@ -434,6 +442,10 @@ namespace WebInterface
                                 calibrateMag = true;
                                 calibrationStartTimer = millis();
                                 calibrationWs.textAll("starting");
+                            }
+                            else
+                            {
+                                client->text("ongoing");
                             }
                         }
                     }

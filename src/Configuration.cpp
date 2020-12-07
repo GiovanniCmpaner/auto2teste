@@ -14,7 +14,8 @@
 #include "Peripherals.hpp"
 
 static const Configuration defaultCfg{
-    {{{0.0f, 0.0f, 0.0f}},
+    {{-166.67f, 0.0417f},
+     {{0.0f, 0.0f, 0.0f}},
      {{0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f}},
      {{0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f}}},
     {true,
@@ -50,6 +51,12 @@ auto Configuration::serialize(ArduinoJson::JsonVariant &json) const -> void
 {
     {
         auto calibration{json["calibration"]};
+        {
+            auto battery{calibration["battery"]};
+
+            battery["bias"] = this->calibration.battery.bias;
+            battery["factor"] = this->calibration.battery.factor;
+        }
         {
             auto gyroscope{calibration["gyroscope"]};
             for (auto n : this->calibration.gyroscope.bias)
@@ -135,6 +142,23 @@ auto Configuration::deserialize(const ArduinoJson::JsonVariant &json) -> void
 {
     {
         const auto calibration{json["calibration"]};
+        {
+            const auto battery{calibration["battery"]};
+            {
+                const auto bias{battery["bias"]};
+                if (bias.is<float>())
+                {
+                    this->calibration.battery.bias = bias.as<float>();
+                }
+            }
+            {
+                const auto factor{battery["factor"]};
+                if (factor.is<float>())
+                {
+                    this->calibration.battery.factor = factor.as<float>();
+                }
+            }
+        }
         {
             const auto gyroscope{calibration["gyroscope"]};
             {
@@ -347,7 +371,7 @@ auto Configuration::load(Configuration *cfg) -> void
         }
         else
         {
-            auto doc{ArduinoJson::DynamicJsonDocument{3072}};
+            auto doc{ArduinoJson::DynamicJsonDocument{4096}};
             auto err{ArduinoJson::deserializeJson(doc, file)};
             file.close();
 
@@ -385,7 +409,7 @@ auto Configuration::save(const Configuration &cfg) -> void
     }
     else
     {
-        auto doc{ArduinoJson::DynamicJsonDocument{3072}};
+        auto doc{ArduinoJson::DynamicJsonDocument{4096}};
         auto json{doc.as<ArduinoJson::JsonVariant>()};
 
         cfg.serialize(json);

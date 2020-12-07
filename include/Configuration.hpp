@@ -9,6 +9,12 @@ struct Configuration
 {
     struct Calibration
     {
+        struct Battery
+        {
+            float bias;
+            float factor;
+        };
+
         struct Gyroscope
         {
             std::array<float, 3> bias;
@@ -26,6 +32,7 @@ struct Configuration
             std::array<float, 3> factor;
         };
 
+        Battery battery;
         Gyroscope gyroscope;
         Accelerometer accelerometer;
         Magnetometer magnetometer;

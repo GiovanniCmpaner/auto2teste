@@ -7,10 +7,10 @@ let wsControl;
 let mouseTimer;
 
 function sendWhileHolding(id, downVal, upVal){
-    $(id).on("mousedown", () => {
+    $(id).on("mousedown touchstart", () => {
         wsControl.send(downVal);
         mouseTimer = setInterval(() => wsControl.send(downVal), 30);
-    }).on("mouseup mouseleave", () => {
+    }).on("mouseup mouseleave touchend", () => {
         clearTimeout(mouseTimer);
         wsControl.send(upVal);
     });

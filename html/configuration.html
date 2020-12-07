@@ -54,6 +54,28 @@
 				<legend> Calibration </legend>
 				<table>
 					<tr>
+						<td>
+							<span>Battery</span>
+						</td>
+						<td>
+							<span>Factor</span>
+						</td>
+						<td>
+							<input type="number" id="calibration_battery_factor" step="any" required>
+						</td>
+					</tr>
+					<tr>
+						<td>
+						</td>
+						<td>
+							<span>Bias</span>
+						</td>
+						<td>
+							<input type="number" id="calibration_battery_bias" step="any" required>
+						</td>
+					</tr>
+					<tr style="height: 16px;"/>
+					<tr>
 						<td> 
 						</td>
 						<td>
@@ -111,23 +133,6 @@
 							<span>Accelerometer</span>
 						</td>
 						<td>
-							<span>Bias</span>
-						</td>
-						<td>
-							<input type="number" id="calibration_accelerometer_bias_x" step="any" required>
-						</td>
-						<td>
-							<input type="number" id="calibration_accelerometer_bias_y" step="any" required>
-						</td>
-						<td>
-							<input type="number" id="calibration_accelerometer_bias_z" step="any" required>
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<input type="button" id="calibrate_accelerometer" value="Calibrate">	
-						</td>
-						<td>
 							<span>Factor</span>
 						</td>
 						<td>
@@ -138,6 +143,23 @@
 						</td>
 						<td>
 							<input type="number" id="calibration_accelerometer_factor_z" step="any" required>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<input type="button" id="calibrate_accelerometer" value="Calibrate">	
+						</td>
+						<td>
+							<span>Bias</span>
+						</td>
+						<td>
+							<input type="number" id="calibration_accelerometer_bias_x" step="any" required>
+						</td>
+						<td>
+							<input type="number" id="calibration_accelerometer_bias_y" step="any" required>
+						</td>
+						<td>
+							<input type="number" id="calibration_accelerometer_bias_z" step="any" required>
 						</td>
 					</tr>
 					<tr style="height: 16px;"/>
@@ -161,23 +183,6 @@
 							<span>Magnetometer</span>
 						</td>
 						<td>
-							<span>Bias</span>
-						</td>
-						<td>
-							<input type="number" id="calibration_magnetometer_bias_x" step="any" required>
-						</td>
-						<td>
-							<input type="number" id="calibration_magnetometer_bias_y" step="any" required>
-						</td>
-						<td>
-							<input type="number" id="calibration_magnetometer_bias_z" step="any" required>
-						</td>
-					</tr>
-					<tr>
-						<td>
-							<input type="button" id="calibrate_magnetometer" value="Calibrate">	
-						</td>
-						<td>
 							<span>Factor</span>
 						</td>
 						<td>
@@ -188,6 +193,23 @@
 						</td>
 						<td>
 							<input type="number" id="calibration_magnetometer_factor_z" step="any" required>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<input type="button" id="calibrate_magnetometer" value="Calibrate">	
+						</td>
+						<td>
+							<span>Bias</span>
+						</td>
+						<td>
+							<input type="number" id="calibration_magnetometer_bias_x" step="any" required>
+						</td>
+						<td>
+							<input type="number" id="calibration_magnetometer_bias_y" step="any" required>
+						</td>
+						<td>
+							<input type="number" id="calibration_magnetometer_bias_z" step="any" required>
 						</td>
 					</tr>
 				</table>

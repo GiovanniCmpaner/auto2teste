@@ -79,38 +79,43 @@ function setCalibration()
 	let cfg = {
 		calibration:
 		{
+			battery:
+			{
+				bias: parseFloat($("#calibration_battery_bias").prop("value")),
+				factor: parseFloat($("#calibration_battery_factor").prop("value"))
+			},
 			gyroscope:
 			{
 				bias: [
-					$("#calibration_gyroscope_bias_x").prop("value"),
-					$("#calibration_gyroscope_bias_y").prop("value"),
-					$("#calibration_gyroscope_bias_z").prop("value")
+					parseFloat($("#calibration_gyroscope_bias_x").prop("value")),
+					parseFloat($("#calibration_gyroscope_bias_y").prop("value")),
+					parseFloat($("#calibration_gyroscope_bias_z").prop("value"))
 				]
 			},
 			accelerometer:
 			{
 				bias: [
-					$("#calibration_accelerometer_bias_x").prop("value"),
-					$("#calibration_accelerometer_bias_y").prop("value"),
-					$("#calibration_accelerometer_bias_z").prop("value")
+					parseFloat($("#calibration_accelerometer_bias_x").prop("value")),
+					parseFloat($("#calibration_accelerometer_bias_y").prop("value")),
+					parseFloat($("#calibration_accelerometer_bias_z").prop("value"))
 				],
 				factor: [
-					$("#calibration_accelerometer_factor_x").prop("value"),
-					$("#calibration_accelerometer_factor_y").prop("value"),
-					$("#calibration_accelerometer_factor_z").prop("value")
+					parseFloat($("#calibration_accelerometer_factor_x").prop("value")),
+					parseFloat($("#calibration_accelerometer_factor_y").prop("value")),
+					parseFloat($("#calibration_accelerometer_factor_z").prop("value"))
 				]
 			},
 			magnetometer:
 			{
 				bias: [
-					$("#calibration_magnetometer_bias_x").prop("value"),
-					$("#calibration_magnetometer_bias_y").prop("value"),
-					$("#calibration_magnetometer_bias_z").prop("value")
+					parseFloat($("#calibration_magnetometer_bias_x").prop("value")),
+					parseFloat($("#calibration_magnetometer_bias_y").prop("value")),
+					parseFloat($("#calibration_magnetometer_bias_z").prop("value"))
 				],
 				factor: [
-					$("#calibration_magnetometer_factor_x").prop("value"),
-					$("#calibration_magnetometer_factor_y").prop("value"),
-					$("#calibration_magnetometer_factor_z").prop("value")
+					parseFloat($("#calibration_magnetometer_factor_x").prop("value")),
+					parseFloat($("#calibration_magnetometer_factor_y").prop("value")),
+					parseFloat($("#calibration_magnetometer_factor_z").prop("value"))
 				]
 			}
 		}
@@ -174,7 +179,7 @@ function setConfiguration(cfg)
 		})
 		.done((msg) =>
 		{
-			successMessage(msg ?? "Done").then(() =>
+			successMessage(msg ?? "Configuration saved").then(() =>
 			{
 				setTimeout(() =>
 				{
@@ -214,6 +219,8 @@ function getConfiguration()
 		})
 		.done((cfg) =>
 		{
+			$("#calibration_battery_bias").prop("value", cfg.calibration.battery.bias);
+			$("#calibration_battery_factor").prop("value", cfg.calibration.battery.factor);
 
 			$("#calibration_gyroscope_bias_x").prop("value", cfg.calibration.gyroscope.bias[0]);
 			$("#calibration_gyroscope_bias_y").prop("value", cfg.calibration.gyroscope.bias[1]);
@@ -252,7 +259,7 @@ function getConfiguration()
 			$("#station_user").prop("value", cfg.station.user);
 			$("#station_password").prop("value", cfg.station.password);
 
-			successMessage("Done");
+			successMessage("Configuration loaded");
 			deferred.resolve();
 		})
 		.fail((xhr, status, error) =>
@@ -370,7 +377,7 @@ function doCalibrate(sensor)
 
 	disableInput();
 	
-	infoMessage("Calibration preparing");
+	infoMessage("Calibration starting");
 
 	let wsCalibration = new WebSocket(`ws://${window.location.host}/calibration.ws`);
 
@@ -393,6 +400,10 @@ function doCalibrate(sensor)
 		if (evt.data == "calibrating")
 		{
 			infoMessage("Calibrating");
+		}
+		else if (evt.data == "ongoing")
+		{
+			warningMessage("Calibration ongoing");
 		}
 		else if (evt.data == "done")
 		{

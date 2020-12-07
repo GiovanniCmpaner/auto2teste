@@ -45,220 +45,221 @@ auto text(Color color) -> const char *
 
 namespace Sensors
 {
-    static auto colorSensor{Adafruit_APDS9960{}};
-    static auto distanceSensors{std::array<Adafruit_VL53L0X, 6>{}};
-    static auto gyroAccelMagSensor{MPU9250{Peripherals::GyroAccelMag::I2C, Peripherals::GyroAccelMag::ADDRESS}};
-
-    static auto distanceValues{std::array<std::pair<int, float>, 6>{}};
-    static auto colorValues{std::array<uint16_t, 3>{}};
-    static auto rotationValues{std::array<float, 3>{}};
-    static auto accelerationValues{std::array<float, 3>{}};
-    static auto magneticValues{std::array<float, 3>{}};
-    static auto temperatureValue{float{}};
-    static auto batteryValue{float{}};
-
-    static auto rotationOffset{std::array<float, 3>{}};
-    static auto accelerationOffset{std::array<float, 3>{}};
-    static auto magneticOffset{std::array<float, 3>{}};
-
-    static auto initColor() -> void
+    namespace
     {
-        log_d("initializing color");
+        auto colorSensor{Adafruit_APDS9960{}};
+        auto distanceSensors{std::array<Adafruit_VL53L0X, 6>{}};
+        auto gyroAccelMagSensor{MPU9250{Peripherals::GyroAccelMag::I2C, Peripherals::GyroAccelMag::ADDRESS}};
 
-        if (not colorSensor.begin(50, APDS9960_AGAIN_16X, APDS9960_ADDRESS, &Peripherals::Color::I2C))
+        auto distanceValues{std::array<std::pair<int, float>, 6>{}};
+        auto colorValues{std::array<uint16_t, 3>{}};
+        auto rotationValues{std::array<float, 3>{}};
+        auto accelerationValues{std::array<float, 3>{}};
+        auto magneticValues{std::array<float, 3>{}};
+        auto temperatureValue{float{}};
+        auto batteryValue{float{}};
+
+        auto rotationOffset{std::array<float, 3>{}};
+        auto accelerationOffset{std::array<float, 3>{}};
+        auto magneticOffset{std::array<float, 3>{}};
+
+        auto initColor() -> void
         {
-            log_e("failed to initialize color");
-        }
-        else
-        {
-            colorSensor.enableColor();
-        }
+            log_d("initializing color");
 
-        ledcSetup(1, 10000, 8);
-        ledcAttachPin(Peripherals::LED::CTRL, 1);
-        ledcWrite(1, 0);
-    }
-
-    static auto initGyroAccelMag() -> void
-    {
-        log_d("initializing gyroscope, accelerometer and magnetometer");
-
-        if (gyroAccelMagSensor.begin() < 0)
-        {
-            log_e("failed to initialize gyroscope, accelerometer and magnetometer");
-        }
-        else
-        {
-            gyroAccelMagSensor.setAccelRange(MPU9250::ACCEL_RANGE_2G);
-            gyroAccelMagSensor.setGyroRange(MPU9250::GYRO_RANGE_500DPS);
-            gyroAccelMagSensor.setDlpfBandwidth(MPU9250::DLPF_BANDWIDTH_41HZ);
-            gyroAccelMagSensor.setSrd(19); // 50 Hz
-
-            gyroAccelMagSensor.setGyroBiasY_rads(cfg.calibration.gyroscope.bias[0]);
-            gyroAccelMagSensor.setGyroBiasX_rads(cfg.calibration.gyroscope.bias[1]);
-            gyroAccelMagSensor.setGyroBiasZ_rads(cfg.calibration.gyroscope.bias[2]);
-
-            gyroAccelMagSensor.setAccelCalY(cfg.calibration.accelerometer.bias[0], cfg.calibration.accelerometer.factor[0]);
-            gyroAccelMagSensor.setAccelCalX(cfg.calibration.accelerometer.bias[1], cfg.calibration.accelerometer.factor[1]);
-            gyroAccelMagSensor.setAccelCalZ(cfg.calibration.accelerometer.bias[2], cfg.calibration.accelerometer.factor[2]);
-
-            gyroAccelMagSensor.setMagCalY(cfg.calibration.magnetometer.bias[0], cfg.calibration.magnetometer.factor[0]);
-            gyroAccelMagSensor.setMagCalX(cfg.calibration.magnetometer.bias[1], cfg.calibration.magnetometer.factor[1]);
-            gyroAccelMagSensor.setMagCalZ(cfg.calibration.magnetometer.bias[2], cfg.calibration.magnetometer.factor[2]);
-        }
-    }
-
-    static auto initDistances() -> void
-    {
-        for (auto n{0}; n < Sensors::distanceSensors.size(); ++n)
-        {
-            auto &distanceSensor{Sensors::distanceSensors[n]};
-            auto &xshut{Peripherals::Distances::XSHUT[n]};
-
-            log_d("initializing distance[%d]", n);
-
-            digitalWrite(xshut, HIGH);
-            delay(10);
-
-            if (not distanceSensor.begin(0x30 + n, false, &Peripherals::Distances::I2C, Adafruit_VL53L0X::VL53L0X_SENSE_HIGH_ACCURACY))
+            if (not colorSensor.begin(50, APDS9960_AGAIN_16X, APDS9960_ADDRESS, &Peripherals::Color::I2C))
             {
-                log_e("failed to initialize distance[%d]", n);
+                log_e("failed to initialize color");
             }
             else
             {
-                distanceSensor.startRangeContinuous(30);
+                colorSensor.enableColor();
+            }
+
+            ledcSetup(1, 10000, 8);
+            ledcAttachPin(Peripherals::LED::CTRL, 1);
+            ledcWrite(1, 0);
+        }
+
+        auto initGyroAccelMag() -> void
+        {
+            log_d("initializing gyroscope, accelerometer and magnetometer");
+
+            if (gyroAccelMagSensor.begin() < 0)
+            {
+                log_e("failed to initialize gyroscope, accelerometer and magnetometer");
+            }
+            else
+            {
+                gyroAccelMagSensor.setAccelRange(MPU9250::ACCEL_RANGE_2G);
+                gyroAccelMagSensor.setGyroRange(MPU9250::GYRO_RANGE_500DPS);
+                gyroAccelMagSensor.setDlpfBandwidth(MPU9250::DLPF_BANDWIDTH_41HZ);
+                gyroAccelMagSensor.setSrd(19); // 50 Hz
+
+                gyroAccelMagSensor.setGyroBiasY_rads(cfg.calibration.gyroscope.bias[0]);
+                gyroAccelMagSensor.setGyroBiasX_rads(cfg.calibration.gyroscope.bias[1]);
+                gyroAccelMagSensor.setGyroBiasZ_rads(cfg.calibration.gyroscope.bias[2]);
+
+                gyroAccelMagSensor.setAccelCalY(cfg.calibration.accelerometer.bias[0], cfg.calibration.accelerometer.factor[0]);
+                gyroAccelMagSensor.setAccelCalX(cfg.calibration.accelerometer.bias[1], cfg.calibration.accelerometer.factor[1]);
+                gyroAccelMagSensor.setAccelCalZ(cfg.calibration.accelerometer.bias[2], cfg.calibration.accelerometer.factor[2]);
+
+                gyroAccelMagSensor.setMagCalY(cfg.calibration.magnetometer.bias[0], cfg.calibration.magnetometer.factor[0]);
+                gyroAccelMagSensor.setMagCalX(cfg.calibration.magnetometer.bias[1], cfg.calibration.magnetometer.factor[1]);
+                gyroAccelMagSensor.setMagCalZ(cfg.calibration.magnetometer.bias[2], cfg.calibration.magnetometer.factor[2]);
             }
         }
-    }
 
-    static auto initBattery() -> void
-    {
-        analogReadResolution(12);
-        analogSetAttenuation(adc_attenuation_t::ADC_11db);
-        analogSetClockDiv(1);
-    }
-
-    static auto readColor() -> void
-    {
-        if (Sensors::colorSensor.colorDataReady())
+        auto initDistances() -> void
         {
-            uint16_t r, g, b, c;
-            Sensors::colorSensor.getColorData(&r, &g, &b, &c);
-            Sensors::colorValues = {r, g, b};
-
-            const auto currentDuty{ledcRead(1)};
-            if (c < 500 and currentDuty < 255)
+            for (auto n{0}; n < Sensors::distanceSensors.size(); ++n)
             {
-                ledcWrite(1, currentDuty + 15);
-            }
-            else if (c > 600 and currentDuty > 0)
-            {
-                ledcWrite(1, currentDuty - 15);
-            }
-            //            if (c < 300)
-            //            {
-            //                Sensors::colorValue = Color::BLACK;
-            //            }
-            //            else if (c > 1500)
-            //            {
-            //                Sensors::colorValue = Color::WHITE;
-            //            }
-            //            else
-            //            {
-            //                if (r * 1.5 > g and r * 1.5 > b)
-            //                {
-            //                    Sensors::colorValue = Color::RED;
-            //                }
-            //                else if (g * 1.5 > r and g * 1.5 > b)
-            //                {
-            //                    Sensors::colorValue = Color::GREEN;
-            //                }
-            //                else if (b * 1.5 > r and b * 1.5 > g)
-            //                {
-            //                    Sensors::colorValue = Color::BLUE;
-            //                }
-            //                else if (r * 1.5 > b and g * 1.5 > b)
-            //                {
-            //                    Sensors::colorValue = Color::YELLOW;
-            //                }
-            //                else if (r * 1.5 > g and b * 1.5 > g)
-            //                {
-            //                    Sensors::colorValue = Color::MAGENTA;
-            //                }
-            //                else if (g * 1.5 > r and b * 1.5 > r)
-            //                {
-            //                    Sensors::colorValue = Color::CYAN;
-            //                }
-            //                else
-            //                {
-            //                    Sensors::colorValue = Color::GRAY;
-            //                }
-            //            }
-        }
-    }
+                auto &distanceSensor{Sensors::distanceSensors[n]};
+                auto &xshut{Peripherals::Distances::XSHUT[n]};
 
-    static auto readGyroAccelMag() -> void
-    {
-        if (gyroAccelMagSensor.readSensor() > 0)
-        {
-            Sensors::accelerationValues = {
-                gyroAccelMagSensor.getAccelY_mss() - accelerationOffset[0],
-                gyroAccelMagSensor.getAccelX_mss() - accelerationOffset[1],
-                gyroAccelMagSensor.getAccelZ_mss() - accelerationOffset[2]};
+                log_d("initializing distance[%d]", n);
 
-            Sensors::rotationValues = {
-                gyroAccelMagSensor.getGyroY_rads() - rotationOffset[0],
-                gyroAccelMagSensor.getGyroX_rads() - rotationOffset[1],
-                gyroAccelMagSensor.getGyroZ_rads() - rotationOffset[2]};
+                digitalWrite(xshut, HIGH);
+                delay(10);
 
-            Sensors::magneticValues = {
-                gyroAccelMagSensor.getMagY_uT() - magneticOffset[0],
-                gyroAccelMagSensor.getMagX_uT() - magneticOffset[1],
-                gyroAccelMagSensor.getMagZ_uT() - magneticOffset[2]};
-
-            Sensors::temperatureValue = gyroAccelMagSensor.getTemperature_C();
-        }
-    }
-
-    static auto readDistances() -> void
-    {
-        for (auto n{0}; n < Sensors::distanceSensors.size(); ++n)
-        {
-            auto &distanceSensor{Sensors::distanceSensors[n]};
-            auto &distance{Sensors::distanceValues[n]};
-            auto &angle{Peripherals::Distances::ANGLES[n]};
-
-            distance.first = angle;
-
-            if (distanceSensor.Status == VL53L0X_ERROR_NONE)
-            {
-                if (distanceSensor.isRangeComplete())
+                if (not distanceSensor.begin(0x30 + n, false, &Peripherals::Distances::I2C, Adafruit_VL53L0X::VL53L0X_SENSE_HIGH_ACCURACY))
                 {
-                    const auto reading{distanceSensor.readRangeResult()};
-                    if (reading < 4000)
-                    {
-                        distance.second = reading / 1000.0f;
-                    }
-                    else
-                    {
-                        distance.second = +INFINITY;
-                    }
+                    log_e("failed to initialize distance[%d]", n);
+                }
+                else
+                {
+                    distanceSensor.startRangeContinuous(30);
                 }
             }
-            else
+        }
+
+        auto initBattery() -> void
+        {
+            analogReadResolution(12);
+            analogSetAttenuation(adc_attenuation_t::ADC_11db);
+            analogSetClockDiv(1);
+        }
+
+        auto readColor() -> void
+        {
+            if (Sensors::colorSensor.colorDataReady())
             {
-                distance.second = NAN;
+                uint16_t r, g, b, c;
+                Sensors::colorSensor.getColorData(&r, &g, &b, &c);
+                Sensors::colorValues = {r, g, b};
+
+                const auto currentDuty{ledcRead(1)};
+                if (c < 500 and currentDuty < 255)
+                {
+                    ledcWrite(1, currentDuty + 15);
+                }
+                else if (c > 600 and currentDuty > 0)
+                {
+                    ledcWrite(1, currentDuty - 15);
+                }
+                //            if (c < 300)
+                //            {
+                //                Sensors::colorValue = Color::BLACK;
+                //            }
+                //            else if (c > 1500)
+                //            {
+                //                Sensors::colorValue = Color::WHITE;
+                //            }
+                //            else
+                //            {
+                //                if (r * 1.5 > g and r * 1.5 > b)
+                //                {
+                //                    Sensors::colorValue = Color::RED;
+                //                }
+                //                else if (g * 1.5 > r and g * 1.5 > b)
+                //                {
+                //                    Sensors::colorValue = Color::GREEN;
+                //                }
+                //                else if (b * 1.5 > r and b * 1.5 > g)
+                //                {
+                //                    Sensors::colorValue = Color::BLUE;
+                //                }
+                //                else if (r * 1.5 > b and g * 1.5 > b)
+                //                {
+                //                    Sensors::colorValue = Color::YELLOW;
+                //                }
+                //                else if (r * 1.5 > g and b * 1.5 > g)
+                //                {
+                //                    Sensors::colorValue = Color::MAGENTA;
+                //                }
+                //                else if (g * 1.5 > r and b * 1.5 > r)
+                //                {
+                //                    Sensors::colorValue = Color::CYAN;
+                //                }
+                //                else
+                //                {
+                //                    Sensors::colorValue = Color::GRAY;
+                //                }
+                //            }
             }
         }
-    }
 
-    static auto readBattery() -> void
-    {
-        const auto reading{analogRead(Peripherals::Battery::VIN)};
-        //Sensors::batteryValue = map(reading, 4000, 6400, 0, 100);
-        Sensors::batteryValue = reading;
-    }
+        auto readGyroAccelMag() -> void
+        {
+            if (gyroAccelMagSensor.readSensor() > 0)
+            {
+                Sensors::accelerationValues = {
+                    gyroAccelMagSensor.getAccelY_mss() - accelerationOffset[0],
+                    gyroAccelMagSensor.getAccelX_mss() - accelerationOffset[1],
+                    gyroAccelMagSensor.getAccelZ_mss() - accelerationOffset[2]};
 
+                Sensors::rotationValues = {
+                    gyroAccelMagSensor.getGyroY_rads() - rotationOffset[0],
+                    gyroAccelMagSensor.getGyroX_rads() - rotationOffset[1],
+                    gyroAccelMagSensor.getGyroZ_rads() - rotationOffset[2]};
+
+                Sensors::magneticValues = {
+                    gyroAccelMagSensor.getMagY_uT() - magneticOffset[0],
+                    gyroAccelMagSensor.getMagX_uT() - magneticOffset[1],
+                    gyroAccelMagSensor.getMagZ_uT() - magneticOffset[2]};
+
+                Sensors::temperatureValue = gyroAccelMagSensor.getTemperature_C();
+            }
+        }
+
+        auto readDistances() -> void
+        {
+            for (auto n{0}; n < Sensors::distanceSensors.size(); ++n)
+            {
+                auto &distanceSensor{Sensors::distanceSensors[n]};
+                auto &distance{Sensors::distanceValues[n]};
+                auto &angle{Peripherals::Distances::ANGLES[n]};
+
+                distance.first = angle;
+
+                if (distanceSensor.Status == VL53L0X_ERROR_NONE)
+                {
+                    if (distanceSensor.isRangeComplete())
+                    {
+                        const auto reading{distanceSensor.readRangeResult()};
+                        if (reading < 4000)
+                        {
+                            distance.second = reading / 1000.0f;
+                        }
+                        else
+                        {
+                            distance.second = +INFINITY;
+                        }
+                    }
+                }
+                else
+                {
+                    distance.second = NAN;
+                }
+            }
+        }
+
+        auto readBattery() -> void
+        {
+            const auto reading{analogRead(Peripherals::Battery::VIN)};
+            Sensors::batteryValue = std::clamp(cfg.calibration.battery.factor * reading + cfg.calibration.battery.bias, 0.0f, 100.0f);
+        }
+    } // namespace
     auto init() -> void
     {
         log_d("begin");
