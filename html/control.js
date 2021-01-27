@@ -1,29 +1,67 @@
-$(document).ready(() => {
-    connectWebSocket().then(() => assignButtons());
+$(document).ready(() => 
+{
+    handleMode();
+    handleManual();
+    handleAuto();
+    
+    connectWsControl();
 });
 
 
 let wsControl;
 let mouseTimer;
 
-function sendWhileHolding(id, downVal, upVal){
-    $(id).on("mousedown touchstart", () => {
-        wsControl.send(downVal);
-        mouseTimer = setInterval(() => wsControl.send(downVal), 30);
-    }).on("mouseup mouseleave touchend", () => {
-        clearTimeout(mouseTimer);
-        wsControl.send(upVal);
+function handleMode()
+{
+    $("input[name=mode]").change((event) => 
+    {
+        if(event.target.value == "manual")
+        {
+            $("#manual").css("visibility", "visible");
+            $("#auto").css("visibility", "collapse");
+            
+            wsControl.send("manual");
+        }
+        else if(event.target.value == "auto")
+        {
+            $("#manual").css("visibility", "collapse");
+            $("#auto").css("visibility", "visible");
+            
+            wsControl.send("auto");
+        }
     });
 }
 
-function assignButtons(){
+function handleManual()
+{
     sendWhileHolding("#up", "U", "X");
     sendWhileHolding("#down", "D", "X");
     sendWhileHolding("#left", "L", "X");
     sendWhileHolding("#right", "R", "X");
 }
 
-function connectWebSocket() {
+function handleAuto()
+{
+    $("#start").click((event) => wsControl.send("start"));
+    $("#stop").click((event) => wsControl.send("stop"));
+}
+
+function sendWhileHolding(id, downVal, upVal)
+{
+    $(id).on("mousedown touchstart", () => 
+    {
+        wsControl.send(downVal);
+        mouseTimer = setInterval(() => wsControl.send(downVal), 30);
+    })
+    .on("mouseup mouseleave touchend", () => 
+    {
+        clearTimeout(mouseTimer);
+        wsControl.send(upVal);
+    });
+}
+
+function connectWsControl() 
+{
   let deferred = new $.Deferred();
   
   infoMessage("Socket connecting");
@@ -42,7 +80,7 @@ function connectWebSocket() {
     else {
         errorMessage("Socket error");
     }
-    setTimeout(() => connectWebSocket(), 10000);
+    setTimeout(() => connectWsControl(), 10000);
   };
 
   wsControl.onerror = (evt) => {
@@ -56,25 +94,30 @@ function connectWebSocket() {
   return deferred.promise();
 }
 
-function clearMessage() {
+function clearMessage() 
+{
     if (typeof this.fadeOutHandle != "undefined") {
         clearTimeout(this.fadeOutHandle);
     }
     this.fadeOutHandle = setTimeout(() => $("#message").fadeOut(250), 2000);
 }
 
-function infoMessage(text) {
+function infoMessage(text) 
+{
     return $("#message").prop("class", "info").text(text).fadeTo(250, 1.0).promise();
 }
 
-function successMessage(text) {
+function successMessage(text) 
+{
     return $("#message").prop("class", "success").text(text).fadeTo(250, 1.0).promise();
 }
 
-function warningMessage(text) {
+function warningMessage(text) 
+{
     return $("#message").prop("class", "warning").text(text).fadeTo(250, 1.0).promise();
 }
 
-function errorMessage(text) {
+function errorMessage(text) 
+{
     return $("#message").prop("class", "error").text(text).fadeTo(250, 1.0).promise();
 }

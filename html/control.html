@@ -17,7 +17,38 @@
 			<a href="/sensors.html">Sensors</a>
 		</nav>
 		<h2>Control</h2>
-		<div id="control">
+		<div id="mode">
+			<fieldset>
+				<legend> Mode </legend>
+				<table>
+					<tr>
+						<td>
+							<label for="mode_manual"> Manual </label>
+						</td>
+						<td>
+							<input type="radio" id="mode_manual" name="mode" value="manual" checked>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<label for="mode_auto"> Auto </label>
+						</td>
+						<td>
+							<input type="radio" id="mode_auto" name="mode" value="auto">
+						</td>
+					</tr>
+				</table>
+			</fieldset>
+		</div>
+		<div id="auto">
+			<table>
+				<tr>
+					<td> <button id="start">&#x25B6;</button> </td>
+					<td> <button id="stop">&#x23F9;</button> </td>
+				</tr>
+			</table>
+		</div>
+		<div id="manual">
 			<table>
 				<tr>
 					<td> </td>

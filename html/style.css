@@ -93,7 +93,19 @@ table th, table td{
 
 /***************************************************/
 
-#control {
+#mode {
+	display: inline-block;
+}
+
+#manual {
+	visibility: visible;
+}
+
+#auto {
+	visibility: collapse;
+}
+
+#manual, #auto {
   position: absolute;
   top: 0;
   left: 0;
@@ -105,10 +117,24 @@ table th, table td{
   z-index: -1;
 }
 
-#control button {
+#manual button {
   width: 25vmin;
   height: 25vmin;
   font-size: 10vmin;
+}
+
+#auto button {
+  width: 40vmin;
+  height: 40vmin;
+  font-size: 25vmin;
+}
+
+#start {
+	color: green;
+}
+
+#stop {
+	color: red;
 }
 
 /***************************************************/

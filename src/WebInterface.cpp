@@ -330,31 +330,40 @@ namespace WebInterface
                     if (info->opcode == WS_TEXT and info->final and info->index == 0)
                     {
                         const auto text{reinterpret_cast<const char *>(data)};
-                        if (info->len == 1)
+                        if (info->len == 1 and strncmp(text, "U", 1) == 0)
                         {
-                            if (text[0] == 'U')
-                            {
-                                Motors::move(Move::MOVE_FORWARD);
-                            }
-                            else if (text[0] == 'D')
-                            {
-                                Motors::move(Move::MOVE_BACKWARD);
-                            }
-                            else if (text[0] == 'L')
-                            {
-                                Motors::move(Move::ROTATE_LEFT);
-                            }
-                            else if (text[0] == 'R')
-                            {
-                                Motors::move(Move::ROTATE_RIGHT);
-                            }
-                            else if (text[0] == 'X')
-                            {
-                                Motors::move(Move::STOP);
-                            }
-
-                            controlTimeoutTimer = millis();
+                            Motors::move(Move::MOVE_FORWARD);
                         }
+                        else if (info->len == 1 and strncmp(text, "D", 1) == 0)
+                        {
+                            Motors::move(Move::MOVE_BACKWARD);
+                        }
+                        else if (info->len == 1 and strncmp(text, "L", 1) == 0)
+                        {
+                            Motors::move(Move::ROTATE_LEFT);
+                        }
+                        else if (info->len == 1 and strncmp(text, "R", 1) == 0)
+                        {
+                            Motors::move(Move::ROTATE_RIGHT);
+                        }
+                        else if (info->len == 1 and strncmp(text, "X", 1) == 0)
+                        {
+                            Motors::move(Move::STOP);
+                        }
+                        else if (info->len == 5 and strncmp(text, "manual", 5) == 0)
+                        {
+                        }
+                        else if (info->len == 4 and strncmp(text, "auto", 4) == 0)
+                        {
+                        }
+                        else if (info->len == 4 and strncmp(text, "stop", 4) == 0)
+                        {
+                        }
+                        else if (info->len == 5 and strncmp(text, "start", 5) == 0)
+                        {
+                        }
+
+                        controlTimeoutTimer = millis();
                     }
                 }
             }
