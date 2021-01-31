@@ -12,7 +12,7 @@ enum class Move
 namespace Motors
 {
     auto init() -> void;
-    auto process() -> void;
+    auto process(uint64_t syncTimer) -> void;
 
     auto move(Move moveValue, float speedPercent = 100.0f) -> void;
 } // namespace Motors

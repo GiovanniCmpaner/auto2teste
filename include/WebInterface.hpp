@@ -3,5 +3,5 @@
 namespace WebInterface
 {
     auto init() -> void;
-    auto process() -> void;
+    auto process(uint64_t syncTimer) -> void;
 }

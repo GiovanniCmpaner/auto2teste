@@ -33,7 +33,7 @@ namespace Sensors
     static constexpr auto batteryUnit{"%"};
 
     auto init() -> void;
-    auto process() -> void;
+    auto process(uint64_t syncTimer) -> void;
     auto resetOffset() -> void;
     auto debug() -> void;
     auto serialize(ArduinoJson::JsonVariant &json) -> void;

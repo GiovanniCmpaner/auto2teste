@@ -5,78 +5,82 @@
 
 namespace Motors
 {
-    static auto moveValue{Move::STOP};
-    static auto speedPercent{100.0f};
-
-    static auto forward() -> void
+    namespace
     {
-        //digitalWrite(Peripherals::Motors::STBY, HIGH);
-        //digitalWrite(Peripherals::Motors::PWM, HIGH);
-        digitalWrite(Peripherals::Motors::AIN1, HIGH);
-        digitalWrite(Peripherals::Motors::AIN2, LOW);
-        digitalWrite(Peripherals::Motors::BIN1, HIGH);
-        digitalWrite(Peripherals::Motors::BIN2, LOW);
-        digitalWrite(Peripherals::Motors::CIN1, HIGH);
-        digitalWrite(Peripherals::Motors::CIN2, LOW);
-        digitalWrite(Peripherals::Motors::DIN1, HIGH);
-        digitalWrite(Peripherals::Motors::DIN2, LOW);
-    }
+        auto moveValue{Move::STOP};
+        auto speedPercent{100.0f};
+        auto moveTimer{0UL};
 
-    static auto backward() -> void
-    {
-        //digitalWrite(Peripherals::Motors::STBY, HIGH);
-        //digitalWrite(Peripherals::Motors::PWM, HIGH);
-        digitalWrite(Peripherals::Motors::AIN1, LOW);
-        digitalWrite(Peripherals::Motors::AIN2, HIGH);
-        digitalWrite(Peripherals::Motors::BIN1, LOW);
-        digitalWrite(Peripherals::Motors::BIN2, HIGH);
-        digitalWrite(Peripherals::Motors::CIN1, LOW);
-        digitalWrite(Peripherals::Motors::CIN2, HIGH);
-        digitalWrite(Peripherals::Motors::DIN1, LOW);
-        digitalWrite(Peripherals::Motors::DIN2, HIGH);
-    }
+        auto forward() -> void
+        {
+            //digitalWrite(Peripherals::Motors::STBY, HIGH);
+            //digitalWrite(Peripherals::Motors::PWM, HIGH);
+            digitalWrite(Peripherals::Motors::AIN1, HIGH);
+            digitalWrite(Peripherals::Motors::AIN2, LOW);
+            digitalWrite(Peripherals::Motors::BIN1, HIGH);
+            digitalWrite(Peripherals::Motors::BIN2, LOW);
+            digitalWrite(Peripherals::Motors::CIN1, HIGH);
+            digitalWrite(Peripherals::Motors::CIN2, LOW);
+            digitalWrite(Peripherals::Motors::DIN1, HIGH);
+            digitalWrite(Peripherals::Motors::DIN2, LOW);
+        }
 
-    static auto left() -> void
-    {
-        //digitalWrite(Peripherals::Motors::STBY, HIGH);
-        //digitalWrite(Peripherals::Motors::PWM, HIGH);
-        digitalWrite(Peripherals::Motors::AIN1, HIGH);
-        digitalWrite(Peripherals::Motors::AIN2, LOW);
-        digitalWrite(Peripherals::Motors::BIN1, HIGH);
-        digitalWrite(Peripherals::Motors::BIN2, LOW);
-        digitalWrite(Peripherals::Motors::CIN1, LOW);
-        digitalWrite(Peripherals::Motors::CIN2, HIGH);
-        digitalWrite(Peripherals::Motors::DIN1, LOW);
-        digitalWrite(Peripherals::Motors::DIN2, HIGH);
-    }
+        auto backward() -> void
+        {
+            //digitalWrite(Peripherals::Motors::STBY, HIGH);
+            //digitalWrite(Peripherals::Motors::PWM, HIGH);
+            digitalWrite(Peripherals::Motors::AIN1, LOW);
+            digitalWrite(Peripherals::Motors::AIN2, HIGH);
+            digitalWrite(Peripherals::Motors::BIN1, LOW);
+            digitalWrite(Peripherals::Motors::BIN2, HIGH);
+            digitalWrite(Peripherals::Motors::CIN1, LOW);
+            digitalWrite(Peripherals::Motors::CIN2, HIGH);
+            digitalWrite(Peripherals::Motors::DIN1, LOW);
+            digitalWrite(Peripherals::Motors::DIN2, HIGH);
+        }
 
-    static auto right() -> void
-    {
-        //digitalWrite(Peripherals::Motors::STBY, HIGH);
-        //digitalWrite(Peripherals::Motors::PWM, HIGH);
-        digitalWrite(Peripherals::Motors::AIN1, LOW);
-        digitalWrite(Peripherals::Motors::AIN2, HIGH);
-        digitalWrite(Peripherals::Motors::BIN1, LOW);
-        digitalWrite(Peripherals::Motors::BIN2, HIGH);
-        digitalWrite(Peripherals::Motors::CIN1, HIGH);
-        digitalWrite(Peripherals::Motors::CIN2, LOW);
-        digitalWrite(Peripherals::Motors::DIN1, HIGH);
-        digitalWrite(Peripherals::Motors::DIN2, LOW);
-    }
+        auto left() -> void
+        {
+            //digitalWrite(Peripherals::Motors::STBY, HIGH);
+            //digitalWrite(Peripherals::Motors::PWM, HIGH);
+            digitalWrite(Peripherals::Motors::AIN1, HIGH);
+            digitalWrite(Peripherals::Motors::AIN2, LOW);
+            digitalWrite(Peripherals::Motors::BIN1, HIGH);
+            digitalWrite(Peripherals::Motors::BIN2, LOW);
+            digitalWrite(Peripherals::Motors::CIN1, LOW);
+            digitalWrite(Peripherals::Motors::CIN2, HIGH);
+            digitalWrite(Peripherals::Motors::DIN1, LOW);
+            digitalWrite(Peripherals::Motors::DIN2, HIGH);
+        }
 
-    static auto stop() -> void
-    {
-        //digitalWrite(Peripherals::Motors::STBY, HIGH);
-        //digitalWrite(Peripherals::Motors::PWM, LOW);
-        digitalWrite(Peripherals::Motors::AIN1, LOW);
-        digitalWrite(Peripherals::Motors::AIN2, LOW);
-        digitalWrite(Peripherals::Motors::BIN1, LOW);
-        digitalWrite(Peripherals::Motors::BIN2, LOW);
-        digitalWrite(Peripherals::Motors::CIN1, LOW);
-        digitalWrite(Peripherals::Motors::CIN2, LOW);
-        digitalWrite(Peripherals::Motors::DIN1, LOW);
-        digitalWrite(Peripherals::Motors::DIN2, LOW);
-    }
+        auto right() -> void
+        {
+            //digitalWrite(Peripherals::Motors::STBY, HIGH);
+            //digitalWrite(Peripherals::Motors::PWM, HIGH);
+            digitalWrite(Peripherals::Motors::AIN1, LOW);
+            digitalWrite(Peripherals::Motors::AIN2, HIGH);
+            digitalWrite(Peripherals::Motors::BIN1, LOW);
+            digitalWrite(Peripherals::Motors::BIN2, HIGH);
+            digitalWrite(Peripherals::Motors::CIN1, HIGH);
+            digitalWrite(Peripherals::Motors::CIN2, LOW);
+            digitalWrite(Peripherals::Motors::DIN1, HIGH);
+            digitalWrite(Peripherals::Motors::DIN2, LOW);
+        }
+
+        auto stop() -> void
+        {
+            //digitalWrite(Peripherals::Motors::STBY, HIGH);
+            //digitalWrite(Peripherals::Motors::PWM, LOW);
+            digitalWrite(Peripherals::Motors::AIN1, LOW);
+            digitalWrite(Peripherals::Motors::AIN2, LOW);
+            digitalWrite(Peripherals::Motors::BIN1, LOW);
+            digitalWrite(Peripherals::Motors::BIN2, LOW);
+            digitalWrite(Peripherals::Motors::CIN1, LOW);
+            digitalWrite(Peripherals::Motors::CIN2, LOW);
+            digitalWrite(Peripherals::Motors::DIN1, LOW);
+            digitalWrite(Peripherals::Motors::DIN2, LOW);
+        }
+    } // namespace
 
     auto init() -> void
     {
@@ -91,12 +95,11 @@ namespace Motors
         log_d("end");
     }
 
-    auto process() -> void
+    auto process(uint64_t syncTimer) -> void
     {
-        static auto moveTimer{0UL};
-        if (millis() - moveTimer >= 30UL)
+        if (syncTimer - moveTimer >= 30UL)
         {
-            moveTimer = millis();
+            moveTimer = syncTimer;
 
             switch (Motors::moveValue)
             {

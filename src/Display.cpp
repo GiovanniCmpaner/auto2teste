@@ -11,7 +11,24 @@
 
 namespace Display
 {
-    static auto display{Adafruit_SSD1306{Peripherals::Display::WIDTH, Peripherals::Display::HEIGHT, &Peripherals::Display::I2C}};
+    namespace
+    {
+        auto display{Adafruit_SSD1306{Peripherals::Display::WIDTH, Peripherals::Display::HEIGHT, &Peripherals::Display::I2C}};
+
+        auto updateStatus(uint64_t syncTimer) -> void
+        {
+            static auto updateTimer{0UL};
+            if (syncTimer - updateTimer >= 2000UL)
+            {
+                updateTimer = syncTimer;
+
+                //display.fillRect(0, 0, Peripherals::Display::WIDTH, 16, SSD1306_BLACK);
+                //display.setCursor(0, 0);
+                //display.printf("BAT %.0f %%", Sensors::battery());
+                //display.display();
+            }
+        }
+    } // namespace
 
     auto init() -> void
     {
@@ -37,23 +54,9 @@ namespace Display
         log_d("end");
     }
 
-    static auto updateStatus() -> void
+    auto process(uint64_t syncTimer) -> void
     {
-        static auto updateTimer{0UL};
-        if (millis() - updateTimer >= 2000UL)
-        {
-            updateTimer = millis();
-
-            //display.fillRect(0, 0, Peripherals::Display::WIDTH, 16, SSD1306_BLACK);
-            //display.setCursor(0, 0);
-            //display.printf("BAT %.0f %%", Sensors::battery());
-            //display.display();
-        }
-    }
-
-    auto process() -> void
-    {
-        Display::updateStatus();
+        Display::updateStatus(syncTimer);
     }
 
     auto printf(const char *format, ...) -> void

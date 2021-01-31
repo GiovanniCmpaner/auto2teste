@@ -360,14 +360,14 @@ auto Configuration::load(Configuration *cfg) -> void
 
     if (not SPIFFS.exists("/configuration.json"))
     {
-        log_d("file not found");
+        log_d("config file not found");
     }
     else
     {
         auto file{SPIFFS.open("/configuration.json", FILE_READ)};
         if (not file)
         {
-            log_e("file error");
+            log_e("config file error");
         }
         else
         {
@@ -405,7 +405,7 @@ auto Configuration::save(const Configuration &cfg) -> void
     auto file{SPIFFS.open("/configuration.json", FILE_WRITE)};
     if (not file)
     {
-        log_e("file error");
+        log_e("config file error");
     }
     else
     {

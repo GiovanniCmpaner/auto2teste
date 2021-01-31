@@ -17,25 +17,25 @@
 			<a href="/sensors.html">Sensors</a>
 		</nav>
 		<h2>Configuration</h2>
-		<form id="neural_network">
+		<form id="model">
 			<fieldset>
-				<legend> Neural Network </legend>
+				<legend> Model TFlite </legend>
 				<table>
 					<tr>
 						<td>
-							<label for="neural_network_file"> File </label>
+							<label for="model_file"> File </label>
 						</td>
 						<td>
-							<input type="file" id="neural_network_file" accept=".json" required>
+							<input type="file" id="model_file" accept=".tflite" required>
 						</td>
 					</tr>
 				</table>
-				<input type="submit" id="neural_network_upload" value="Upload">
+				<input type="submit" id="model_upload" value="Upload">
 			</fieldset>
 		</form>
 		<form id="firmware">
 			<fieldset>
-				<legend> Firmware </legend>
+				<legend> Firmware Binary </legend>
 				<table>
 					<tr>
 						<td>

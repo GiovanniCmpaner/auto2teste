@@ -9,10 +9,10 @@ $(document).ready(() =>
 
 function handleFiles()
 {
-	$("#neural_network").submit((event) =>
+	$("#model").submit((event) =>
 	{
 		event.preventDefault();
-		if ($("#neural_network")[0].checkValidity())
+		if ($("#model")[0].checkValidity())
 		{
 			uploadNeuralNetwork().then(() => clearMessage());
 		}
@@ -279,21 +279,21 @@ function uploadNeuralNetwork()
 {
 	let deferred = new $.Deferred();
 
-	let file = $("#neural_network_file")[0].files[0];
-	if (file.size > 32768)
+	let file = $("#model_file")[0].files[0];
+	if (file.size > 16384)
 	{
-		errorMessage("File size must be 32768 bytes or less");
+		errorMessage("File size must be 16384 bytes or less");
 		deferred.reject();
 	}
 	else
 	{
 		let formData = new FormData();
-		formData.append("neural_network.json", file, file.name);
+		formData.append("model.tflite", file, file.name);
 
 		$.ajax(
 			{
 				type: "POST",
-				url: "/neural_network.json",
+				url: "/model.tflite",
 				contentType: false,
 				processData: false,
 				data: formData,

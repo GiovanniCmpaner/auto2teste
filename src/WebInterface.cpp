@@ -13,8 +13,8 @@
 #include <soc/rtc_wdt.h>
 
 #include "Configuration.hpp"
+#include "Control.hpp"
 #include "Files.hpp"
-#include "Motors.hpp"
 #include "Sensors.hpp"
 #include "WebInterface.hpp"
 
@@ -190,17 +190,25 @@ namespace WebInterface
                         return;
                     }
 
+                    if (request->contentLength() > 1945600)
+                    {
+                        request->send(400, "text/plain", "File size must be 1945600 bytes or less");
+                        return;
+                    }
+
                     if (not Update.begin(request->contentLength()))
                     {
                         request->send(500, "text/plain", Update.errorString());
                         return;
                     }
                 }
+
                 if (Update.write(data, len) != len)
                 {
                     request->send(500, "text/plain", Update.errorString());
                     return;
                 }
+
                 if (final)
                 {
                     if (not Update.end(true))
@@ -214,53 +222,61 @@ namespace WebInterface
                 }
             }
 
-            auto handleNetJson(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final) -> void
+            auto handleModelTflite(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final) -> void
             {
                 auto file{fs::File{}};
 
                 if (index == 0)
                 {
-                    log_d("POST /neural_network.json");
+                    log_d("POST /model.tflite");
 
-                    if (not filename.endsWith(".json"))
+                    if (not filename.endsWith(".tflite"))
                     {
-                        request->send(400, "text/plain", "File extension must be .json");
+                        request->send(400, "text/plain", "File extension must be .tflite");
                         return;
                     }
 
-                    file = SPIFFS.open("/neural_network.json", "w");
+                    if (request->contentLength() > 16384)
+                    {
+                        request->send(400, "text/plain", "File size must be 16384 bytes or less");
+                        return;
+                    }
+
+                    file = SPIFFS.open("/model.tflite", FILE_WRITE);
                     if (not file)
                     {
                         request->send(500, "text/plain", "Error opening file");
                         return;
                     }
                 }
+
                 if (file.write(data, len) != len)
                 {
                     request->send(500, "text/plain", "Error writing to file, probably there's no space left");
 
                     file.close();
-                    SPIFFS.remove("/neural_network.json");
+                    SPIFFS.remove("/model.tflite");
 
                     return;
                 }
+
                 if (final)
                 {
-                    if (file.size() <= 32768)
-                    {
-                        file.close();
+                    //if (file.size() <= 16384)
+                    //{
+                    file.close();
 
-                        request->send(200, "text/plain", "Success, rebooting in 3 seconds");
-                        delay(3000);
-                        ESP.restart();
-                    }
-                    else
-                    {
-                        file.close();
-                        SPIFFS.remove("/neural_network.json");
-
-                        request->send(400, "text/plain", "File size must be 32768 bytes or less");
-                    }
+                    request->send(200, "text/plain", "Success, rebooting in 3 seconds");
+                    delay(3000);
+                    ESP.restart();
+                    //}
+                    //else
+                    //{
+                    //    file.close();
+                    //    SPIFFS.remove("/model.tflite");
+                    //
+                    //    request->send(400, "text/plain", "File size must be 16384 bytes or less");
+                    //}
                 }
             }
         } // namespace File
@@ -292,9 +308,9 @@ namespace WebInterface
                 {
                     File::handleFirmwareBin(request, filename, index, data, len, final);
                 }
-                else if (request->url() == "/neural_network.json")
+                else if (request->url() == "/model.tflite")
                 {
-                    File::handleNetJson(request, filename, index, data, len, final);
+                    File::handleModelTflite(request, filename, index, data, len, final);
                 }
                 else
                 {
@@ -332,38 +348,42 @@ namespace WebInterface
                         const auto text{reinterpret_cast<const char *>(data)};
                         if (info->len == 1 and strncmp(text, "U", 1) == 0)
                         {
-                            Motors::move(Move::MOVE_FORWARD);
+                            Control::action(Manual::MOVE_FORWARD);
                         }
                         else if (info->len == 1 and strncmp(text, "D", 1) == 0)
                         {
-                            Motors::move(Move::MOVE_BACKWARD);
+                            Control::action(Manual::MOVE_BACKWARD);
                         }
                         else if (info->len == 1 and strncmp(text, "L", 1) == 0)
                         {
-                            Motors::move(Move::ROTATE_LEFT);
+                            Control::action(Manual::ROTATE_LEFT);
                         }
                         else if (info->len == 1 and strncmp(text, "R", 1) == 0)
                         {
-                            Motors::move(Move::ROTATE_RIGHT);
+                            Control::action(Manual::ROTATE_RIGHT);
                         }
                         else if (info->len == 1 and strncmp(text, "X", 1) == 0)
                         {
-                            Motors::move(Move::STOP);
+                            Control::action(Manual::STOP);
                         }
                         else if (info->len == 5 and strncmp(text, "manual", 5) == 0)
                         {
+                            Control::mode(Mode::MANUAL);
                         }
                         else if (info->len == 4 and strncmp(text, "auto", 4) == 0)
                         {
+                            Control::mode(Mode::AUTO);
                         }
                         else if (info->len == 4 and strncmp(text, "stop", 4) == 0)
                         {
+                            Control::action(Auto::STOP);
                         }
                         else if (info->len == 5 and strncmp(text, "start", 5) == 0)
                         {
+                            Control::action(Auto::START);
                         }
 
-                        controlTimeoutTimer = millis();
+                        controlTimeoutTimer = 0;
                     }
                 }
             }
@@ -420,10 +440,10 @@ namespace WebInterface
                         const auto text{reinterpret_cast<const char *>(data)};
                         if (info->len == 4 and strncmp(text, "gyro", 4) == 0)
                         {
-                            if (not calibrateGyro and calibrationStartTimer == 0)
+                            if (not calibrateGyro and not calibrateAccel and not calibrateMag)
                             {
                                 calibrateGyro = true;
-                                calibrationStartTimer = millis();
+                                calibrationStartTimer = 0;
                                 calibrationWs.textAll("starting");
                             }
                             else
@@ -433,10 +453,10 @@ namespace WebInterface
                         }
                         else if (info->len == 5 and strncmp(text, "accel", 5) == 0)
                         {
-                            if (not calibrateAccel and calibrationStartTimer == 0)
+                            if (not calibrateGyro and not calibrateAccel and not calibrateMag)
                             {
                                 calibrateAccel = true;
-                                calibrationStartTimer = millis();
+                                calibrationStartTimer = 0;
                                 calibrationWs.textAll("starting");
                             }
                             else
@@ -446,10 +466,10 @@ namespace WebInterface
                         }
                         else if (info->len == 3 and strncmp(text, "mag", 3) == 0)
                         {
-                            if (not calibrateMag and calibrationStartTimer == 0)
+                            if (not calibrateGyro and not calibrateAccel and not calibrateMag)
                             {
                                 calibrateMag = true;
-                                calibrationStartTimer = millis();
+                                calibrationStartTimer = 0;
                                 calibrationWs.textAll("starting");
                             }
                             else
@@ -622,24 +642,26 @@ namespace WebInterface
 
             WebInterface::configureServer();
 
-            accessPointTimer = millis();
-
             return true;
         }
 
-        auto checkAccessPoint() -> void
+        auto checkAccessPoint(uint64_t syncTimer) -> void
         {
-            if (millis() - modeCheckTimer >= 1000UL)
+            if (syncTimer - modeCheckTimer >= 1000UL)
             {
-                modeCheckTimer = millis();
+                modeCheckTimer = syncTimer;
 
                 if (WiFi.getMode() == WIFI_MODE_AP)
                 {
-                    if (WiFi.softAPgetStationNum() > 0)
+                    if (accessPointTimer == 0)
                     {
-                        accessPointTimer = millis();
+                        accessPointTimer = syncTimer;
                     }
-                    else if (millis() - accessPointTimer >= cfg.accessPoint.duration * 1000UL)
+                    else if (WiFi.softAPgetStationNum() > 0)
+                    {
+                        accessPointTimer = syncTimer;
+                    }
+                    else if (syncTimer - accessPointTimer >= cfg.accessPoint.duration * 1000UL)
                     {
                         WebInterface::configureStation();
                     }
@@ -647,22 +669,22 @@ namespace WebInterface
             }
         }
 
-        auto cleanupWebSockets() -> void
+        auto cleanupWebSockets(uint64_t syncTimer) -> void
         {
-            if (millis() - wsCleanupTimer >= 1000UL)
+            if (syncTimer - wsCleanupTimer >= 1000UL)
             {
-                wsCleanupTimer = millis();
+                wsCleanupTimer = syncTimer;
 
                 WebInterface::controlWs.cleanupClients(1);
                 WebInterface::sensorsWs.cleanupClients(1);
             }
         }
 
-        auto sendSensors() -> void
+        auto sendSensors(uint64_t syncTimer) -> void
         {
-            if (millis() - sensorsSendTimer >= 100UL)
+            if (syncTimer - sensorsSendTimer >= 100UL)
             {
-                sensorsSendTimer = millis();
+                sensorsSendTimer = syncTimer;
 
                 if (sensorsWs.count() > 0)
                 {
@@ -678,20 +700,27 @@ namespace WebInterface
             }
         }
 
-        auto checkControlTimeout() -> void
+        auto checkControlTimeout(uint64_t syncTimer) -> void
         {
-            if (controlTimeoutTimer != 0 and millis() - controlTimeoutTimer >= 100UL)
+            if (controlTimeoutTimer == 0)
             {
-                Motors::move(Move::STOP);
-                controlTimeoutTimer = 0;
+                controlTimeoutTimer = syncTimer;
+            }
+            else if (syncTimer - controlTimeoutTimer >= 100UL)
+            {
+                Control::action(Manual::STOP);
             }
         }
 
-        auto doCalibration() -> void
+        auto doCalibration(uint64_t syncTimer) -> void
         {
             if (calibrateGyro)
             {
-                if (millis() - calibrationStartTimer >= 5000UL)
+                if (calibrationStartTimer == 0)
+                {
+                    calibrationStartTimer = syncTimer;
+                }
+                else if (syncTimer - calibrationStartTimer >= 5000UL)
                 {
                     calibrationWs.textAll("calibrating");
 
@@ -711,7 +740,11 @@ namespace WebInterface
             }
             else if (calibrateAccel)
             {
-                if (millis() - calibrationStartTimer >= 5000UL)
+                if (calibrationStartTimer == 0)
+                {
+                    calibrationStartTimer = syncTimer;
+                }
+                else if (syncTimer - calibrationStartTimer >= 5000UL)
                 {
                     calibrationWs.textAll("calibrating");
 
@@ -731,7 +764,11 @@ namespace WebInterface
             }
             else if (calibrateMag)
             {
-                if (millis() - calibrationStartTimer >= 5000UL)
+                if (calibrationStartTimer == 0)
+                {
+                    calibrationStartTimer = syncTimer;
+                }
+                else if (syncTimer - calibrationStartTimer >= 5000UL)
                 {
                     calibrationWs.textAll("calibrating");
 
@@ -766,13 +803,13 @@ namespace WebInterface
         log_d("end");
     }
 
-    auto process() -> void
+    auto process(uint64_t syncTimer) -> void
     {
-        WebInterface::checkAccessPoint();
-        WebInterface::cleanupWebSockets();
-        WebInterface::sendSensors();
-        WebInterface::checkControlTimeout();
-        WebInterface::doCalibration();
+        WebInterface::checkAccessPoint(syncTimer);
+        WebInterface::cleanupWebSockets(syncTimer);
+        WebInterface::sendSensors(syncTimer);
+        WebInterface::checkControlTimeout(syncTimer);
+        WebInterface::doCalibration(syncTimer);
     }
 
 } // namespace WebInterface

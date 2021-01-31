@@ -260,6 +260,7 @@ namespace Sensors
             Sensors::batteryValue = std::clamp(cfg.calibration.battery.factor * reading + cfg.calibration.battery.bias, 0.0f, 100.0f);
         }
     } // namespace
+
     auto init() -> void
     {
         log_d("begin");
@@ -279,12 +280,12 @@ namespace Sensors
         log_d("end");
     }
 
-    auto process() -> void
+    auto process(uint64_t syncTimer) -> void
     {
         static auto readTimer{0UL};
-        if (millis() - readTimer >= 10UL)
+        if (syncTimer - readTimer >= 10UL)
         {
-            readTimer = millis();
+            readTimer = syncTimer;
 
             Sensors::readDistances();
             Sensors::readGyroAccelMag();

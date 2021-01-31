@@ -5,6 +5,7 @@
 #include "Control.hpp"
 #include "Display.hpp"
 #include "Motors.hpp"
+#include "Neural.hpp"
 #include "Peripherals.hpp"
 #include "Sensors.hpp"
 #include "WebInterface.hpp"
@@ -72,6 +73,7 @@ void setup()
     Configuration::init();
     Sensors::init();
     Motors::init();
+    Neural::init();
     Control::init();
     WebInterface::init();
 
@@ -82,10 +84,12 @@ void setup()
 
 void loop()
 {
-    Display::process();
-    Sensors::process();
-    Motors::process();
-    Control::process();
-    WebInterface::process();
+    const auto syncTimer{millis()};
+    Display::process(syncTimer);
+    Sensors::process(syncTimer);
+    Motors::process(syncTimer);
+    Neural::process(syncTimer);
+    Control::process(syncTimer);
+    WebInterface::process(syncTimer);
     delay(1); // Necessário para o ESP TCP Async
 }
