@@ -1,12 +1,10 @@
 #pragma once
 
+#include <array>
 #include <string>
-#include <vector>
 
 namespace Neural
 {
     auto init() -> void;
-    auto process(uint64_t syncTimer) -> void;
-    auto inputs(const std::vector<float> &inputValues) -> bool;
-    auto outputs(std::vector<float> *outputValues) -> bool;
+    auto inference(const std::array<float, 7> &inputs) -> std::array<float, 5>;
 } // namespace Neural

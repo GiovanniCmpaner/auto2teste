@@ -15,9 +15,10 @@ namespace Display
     {
         auto display{Adafruit_SSD1306{Peripherals::Display::WIDTH, Peripherals::Display::HEIGHT, &Peripherals::Display::I2C}};
 
+        auto updateTimer{0UL};
+
         auto updateStatus(uint64_t syncTimer) -> void
         {
-            static auto updateTimer{0UL};
             if (syncTimer - updateTimer >= 2000UL)
             {
                 updateTimer = syncTimer;

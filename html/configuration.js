@@ -4,7 +4,7 @@ $(document).ready(() =>
 	handleConfiguration();
 	handleCalibrate();
 
-	getConfiguration().then(() => clearMessage());
+	getConfiguration();
 });
 
 function handleFiles()
@@ -12,18 +12,29 @@ function handleFiles()
 	$("#model").submit((event) =>
 	{
 		event.preventDefault();
-		if ($("#model")[0].checkValidity())
+		
+		let submitter = event.originalEvent.submitter.id;
+
+		if (submitter == "model_upload")
 		{
-			uploadNeuralNetwork().then(() => clearMessage());
+			if ($("#model")[0].checkValidity())
+			{
+				uploadModel();
+			}
+		}
+		else if (submitter == "model_download")
+		{
+			window.location.href = "model.tflite";
 		}
 	});
 
 	$("#firmware").submit((event) =>
 	{
 		event.preventDefault();
+
 		if ($("#firmware")[0].checkValidity())
 		{
-			uploadFirmware().then(() => clearMessage());
+			uploadFirmware();
 		}
 	});
 }
@@ -171,32 +182,24 @@ function setConfiguration(cfg)
 			contentType: 'application/json',
 			data: JSON.stringify(cfg),
 			timeout: 5000,
-			beforeSend: () =>
-			{
+			beforeSend: () => {
 				disableInput();
 				infoMessage("Saving");
 			}
 		})
-		.done((msg) =>
-		{
-			successMessage(msg ?? "Configuration saved").then(() =>
-			{
-				setTimeout(() =>
-				{
-					infoMessage("Reloading page in 15 seconds");
-					setTimeout(() => {
-						location.reload();
-					}, 15000);
-				}, 3000);
-			});
-			deferred.resolve();
+		.done((msg) => {
+			successMessage(msg ?? "Configuration saved").then(() => reload());
+			//deferred.resolve();
 		})
-		.fail((xhr, status, error) =>
-		{
+		.fail((xhr, status, error) => {
 			errorMessage(status == "timeout" ? "Fail: Timeout" : `Fail: ${xhr.status} ${xhr.statusText}`);
 			enableInput();
 			deferred.reject();
-		})
+		});
+		//.always(() =>
+		//{
+		//	enableInput();
+		//});
 
 	return deferred.promise();
 }
@@ -259,7 +262,7 @@ function getConfiguration()
 			$("#station_user").prop("value", cfg.station.user);
 			$("#station_password").prop("value", cfg.station.password);
 
-			successMessage("Configuration loaded");
+			successMessage("Configuration loaded").then(() => clearMessage());
 			deferred.resolve();
 		})
 		.fail((xhr, status, error) =>
@@ -275,7 +278,7 @@ function getConfiguration()
 	return deferred.promise();
 }
 
-function uploadNeuralNetwork()
+function uploadModel()
 {
 	let deferred = new $.Deferred();
 
@@ -298,26 +301,23 @@ function uploadNeuralNetwork()
 				processData: false,
 				data: formData,
 				timeout: 30000,
-				beforeSend: () =>
-				{
+				beforeSend: () => {
 					disableInput();
 					infoMessage("Uploading");
 				}
 			})
-			.done((msg) =>
-			{
-				successMessage(msg ?? "Done");
-				deferred.resolve();
+			.done((msg) => {
+				successMessage(msg ?? "Done").then(() => reload());
+				//deferred.resolve();
 			})
-			.fail((xhr, status, error) =>
-			{
+			.fail((xhr, status, error) => {
 				errorMessage(status == "timeout" ? "Fail: Timeout" : `Fail: ${xhr.status} ${xhr.statusText}`);
 				deferred.reject();
-			})
-			.always(() =>
-			{
-				enableInput();
 			});
+			//.always(() =>
+			//{
+			//	enableInput();
+			//});
 	}
 
 	return deferred.promise();
@@ -346,26 +346,23 @@ function uploadFirmware()
 				processData: false,
 				data: formData,
 				timeout: 300000,
-				beforeSend: () =>
-				{
+				beforeSend: () => {
 					disableInput();
 					infoMessage("Uploading");
 				}
 			})
-			.done((msg) =>
-			{
-				successMessage(msg ?? "Done");
-				deferred.resolve();
+			.done((msg) => {
+				successMessage(msg ?? "Done").then(() => reload());
+				//deferred.resolve();
 			})
-			.fail((xhr, status, error) =>
-			{
+			.fail((xhr, status, error) => {
 				errorMessage(status == "timeout" ? "Fail: Timeout" : `Fail: ${xhr.status} ${xhr.statusText}`);
 				deferred.reject();
-			})
-			.always(() =>
-			{
-				enableInput();
 			});
+			//.always(() =>
+			//{
+			//	enableInput();
+			//});
 	}
 
 	return deferred.promise();
@@ -420,6 +417,15 @@ function doCalibrate(sensor)
 	};
 
 	return deferred.promise();
+}
+
+function reload()
+{
+	setTimeout(() =>
+	{
+		infoMessage("Reloading page in 15 seconds");
+		setTimeout(() => location.reload(), 15000);
+	}, 3000);
 }
 
 function disableInput()

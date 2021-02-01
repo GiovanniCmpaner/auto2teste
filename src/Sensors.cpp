@@ -63,6 +63,8 @@ namespace Sensors
         auto accelerationOffset{std::array<float, 3>{}};
         auto magneticOffset{std::array<float, 3>{}};
 
+        auto readTimer{0UL};
+
         auto initColor() -> void
         {
             log_d("initializing color");
@@ -282,7 +284,6 @@ namespace Sensors
 
     auto process(uint64_t syncTimer) -> void
     {
-        static auto readTimer{0UL};
         if (syncTimer - readTimer >= 10UL)
         {
             readTimer = syncTimer;

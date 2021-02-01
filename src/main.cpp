@@ -87,8 +87,6 @@ void loop()
     const auto syncTimer{millis()};
     Display::process(syncTimer);
     Sensors::process(syncTimer);
-    Motors::process(syncTimer);
-    Neural::process(syncTimer);
     Control::process(syncTimer);
     WebInterface::process(syncTimer);
     delay(1); // Necessário para o ESP TCP Async

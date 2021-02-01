@@ -1,3 +1,5 @@
+
+
 #include <Arduino.h>
 #include <ArduinoJson.hpp>
 #include <AsyncJson.h>
@@ -8,6 +10,7 @@
 
 #include <esp32s2/rom/rtc.h>
 #include <esp_log.h>
+#include <esp_ota_ops.h>
 #include <esp_task_wdt.h>
 #include <esp_wifi.h>
 #include <soc/rtc_wdt.h>
@@ -29,7 +32,6 @@ namespace WebInterface
 
         auto modeCheckTimer{0UL};
         auto accessPointTimer{0UL};
-        auto controlTimeoutTimer{0UL};
         auto sensorsSendTimer{0UL};
         auto wsCleanupTimer{0UL};
         auto calibrationStartTimer{0UL};
@@ -174,6 +176,13 @@ namespace WebInterface
                 }
             }
 
+            auto handleModelTflite(AsyncWebServerRequest *request) -> void
+            {
+                log_d("GET /model.tflite");
+
+                request->send(SPIFFS, "/model.tflite", "application/octet-stream", true);
+            }
+
         } // namespace Get
 
         namespace File
@@ -193,6 +202,12 @@ namespace WebInterface
                     if (request->contentLength() > 1945600)
                     {
                         request->send(400, "text/plain", "File size must be 1945600 bytes or less");
+                        return;
+                    }
+
+                    if (Update.size() > 0)
+                    {
+                        request->send(500, "text/plain", "Already uploading");
                         return;
                     }
 
@@ -224,7 +239,7 @@ namespace WebInterface
 
             auto handleModelTflite(AsyncWebServerRequest *request, String filename, size_t index, uint8_t *data, size_t len, bool final) -> void
             {
-                auto file{fs::File{}};
+                static auto file{fs::File{}};
 
                 if (index == 0)
                 {
@@ -239,6 +254,12 @@ namespace WebInterface
                     if (request->contentLength() > 16384)
                     {
                         request->send(400, "text/plain", "File size must be 16384 bytes or less");
+                        return;
+                    }
+
+                    if (file.size() > 0)
+                    {
+                        request->send(500, "text/plain", "Already uploading");
                         return;
                     }
 
@@ -262,21 +283,11 @@ namespace WebInterface
 
                 if (final)
                 {
-                    //if (file.size() <= 16384)
-                    //{
                     file.close();
 
                     request->send(200, "text/plain", "Success, rebooting in 3 seconds");
                     delay(3000);
                     ESP.restart();
-                    //}
-                    //else
-                    //{
-                    //    file.close();
-                    //    SPIFFS.remove("/model.tflite");
-                    //
-                    //    request->send(400, "text/plain", "File size must be 16384 bytes or less");
-                    //}
                 }
             }
         } // namespace File
@@ -382,8 +393,6 @@ namespace WebInterface
                         {
                             Control::action(Auto::START);
                         }
-
-                        controlTimeoutTimer = 0;
                     }
                 }
             }
@@ -518,6 +527,7 @@ namespace WebInterface
                 webServer->on("/measure.js", HTTP_GET, Get::handleMeasureJs);
                 webServer->on("/style.css", HTTP_GET, Get::handleStyleCss);
                 webServer->on("/configuration.json", HTTP_GET, Get::handleConfigurationJson);
+                webServer->on("/model.tflite", HTTP_GET, Get::handleModelTflite);
 
                 webServer->addHandler(new AsyncCallbackJsonWebHandler{"/configuration.json", Post::handleConfigurationJson, 2048});
                 webServer->onFileUpload(Post::handleFile);
@@ -657,7 +667,7 @@ namespace WebInterface
                     {
                         accessPointTimer = syncTimer;
                     }
-                    else if (WiFi.softAPgetStationNum() > 0)
+                    if (WiFi.softAPgetStationNum() > 0)
                     {
                         accessPointTimer = syncTimer;
                     }
@@ -700,18 +710,6 @@ namespace WebInterface
             }
         }
 
-        auto checkControlTimeout(uint64_t syncTimer) -> void
-        {
-            if (controlTimeoutTimer == 0)
-            {
-                controlTimeoutTimer = syncTimer;
-            }
-            else if (syncTimer - controlTimeoutTimer >= 100UL)
-            {
-                Control::action(Manual::STOP);
-            }
-        }
-
         auto doCalibration(uint64_t syncTimer) -> void
         {
             if (calibrateGyro)
@@ -720,7 +718,7 @@ namespace WebInterface
                 {
                     calibrationStartTimer = syncTimer;
                 }
-                else if (syncTimer - calibrationStartTimer >= 5000UL)
+                if (syncTimer - calibrationStartTimer >= 5000UL)
                 {
                     calibrationWs.textAll("calibrating");
 
@@ -744,7 +742,7 @@ namespace WebInterface
                 {
                     calibrationStartTimer = syncTimer;
                 }
-                else if (syncTimer - calibrationStartTimer >= 5000UL)
+                if (syncTimer - calibrationStartTimer >= 5000UL)
                 {
                     calibrationWs.textAll("calibrating");
 
@@ -768,7 +766,7 @@ namespace WebInterface
                 {
                     calibrationStartTimer = syncTimer;
                 }
-                else if (syncTimer - calibrationStartTimer >= 5000UL)
+                if (syncTimer - calibrationStartTimer >= 5000UL)
                 {
                     calibrationWs.textAll("calibrating");
 
@@ -808,7 +806,6 @@ namespace WebInterface
         WebInterface::checkAccessPoint(syncTimer);
         WebInterface::cleanupWebSockets(syncTimer);
         WebInterface::sendSensors(syncTimer);
-        WebInterface::checkControlTimeout(syncTimer);
         WebInterface::doCalibration(syncTimer);
     }
 

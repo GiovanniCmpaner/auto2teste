@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <SPIFFS.h>
 #include <Wire.h>
 
 #include <esp_log.h>
@@ -46,6 +47,8 @@ namespace Peripherals
         Color::I2C.begin(Color::SDA, Color::SCL);
         GyroAccelMag::I2C.begin(GyroAccelMag::SDA, GyroAccelMag::SCL);
         Display::I2C.begin(Display::SDA, Display::SCL);
+
+        SPIFFS.begin(true);
 
         delay(100);
 

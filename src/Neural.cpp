@@ -19,19 +19,14 @@ namespace Neural
 {
     namespace
     {
-        auto inputValues{std::vector<float>{}};
-        auto outputValues{std::vector<float>{}};
-        auto doInference{false};
-
         auto modelBuffer{std::vector<char>{}};
         auto errorReporter{static_cast<tflite::ErrorReporter *>(nullptr)};
         auto model{static_cast<const tflite::Model *>(nullptr)};
         auto interpreter{static_cast<tflite::MicroInterpreter *>(nullptr)};
         auto tensorArena{std::array<uint8_t, 2 * 1024>{}};
+
         auto inputTensor{static_cast<TfLiteTensor *>(nullptr)};
         auto outputTensor{static_cast<TfLiteTensor *>(nullptr)};
-        auto inputSize{0};
-        auto outputSize{0};
 
         auto load() -> void
         {
@@ -41,10 +36,7 @@ namespace Neural
                 return;
             }
 
-            SPIFFS.remove("/model_loading.tflite");
-            SPIFFS.rename("/model.tflite", "/model_loading.tflite");
-
-            auto file{SPIFFS.open("/model_loading.tflite", FILE_READ)};
+            auto file{SPIFFS.open("/model.tflite", FILE_READ)};
             if (not file)
             {
                 log_e("model file error");
@@ -65,10 +57,12 @@ namespace Neural
             auto model{tflite::GetModel(modelBuffer.data())};
             if (model->version() != TFLITE_SCHEMA_VERSION)
             {
+                log_e("version error");
                 errorReporter->Report(
                     "Model provided is schema version %d not equal "
                     "to supported version %d.",
                     model->version(), TFLITE_SCHEMA_VERSION);
+
                 return;
             }
 
@@ -84,6 +78,7 @@ namespace Neural
             auto allocate_status{interpreter->AllocateTensors()};
             if (allocate_status != kTfLiteOk)
             {
+                log_e("alocate error");
                 errorReporter->Report("AllocateTensors() failed");
                 return;
             }
@@ -92,33 +87,35 @@ namespace Neural
             inputTensor = interpreter->input(0);
             outputTensor = interpreter->output(0);
 
-            inputSize = inputTensor->dims->data[1];
-            outputSize = outputTensor->dims->data[1];
-
-            log_d("inputSize = %d", inputSize);
-            log_d("outputSize = %d", outputSize);
-
-            SPIFFS.rename("/model_loading.tflite", "/model.tflite");
-        }
-
-        auto inference() -> void
-        {
-            if (interpreter == nullptr)
+            for (auto n{0}; n < interpreter->tensors_size(); ++n)
             {
+                auto tensor{interpreter->tensor(n)};
+                log_d("tensor[%d] = %s", n, tensor->name);
+            }
+
+            if (inputTensor->dims->size != 2 or inputTensor->dims->data[0] != 1 or inputTensor->dims->data[1] != 7)
+            {
+                errorReporter->Report("input size mismatch, expected [1,7]");
                 return;
             }
 
-            std::memcpy(inputTensor->data.f, Neural::inputValues.data(), Neural::inputValues.size());
-
-            // Run inference, and report any error
-            const auto invoke_status{interpreter->Invoke()};
-            if (invoke_status != kTfLiteOk)
+            if (inputTensor->type != TfLiteType::kTfLiteFloat32)
             {
-                errorReporter->Report("Invoke failed on inputs");
+                errorReporter->Report("input type mismatch, expected FLOAT32");
                 return;
             }
 
-            std::memcpy(Neural::outputValues.data(), outputTensor->data.f, Neural::outputValues.size());
+            if (outputTensor->dims->size != 2 or outputTensor->dims->data[0] != 1 or outputTensor->dims->data[1] != 5)
+            {
+                errorReporter->Report("output size mismatch, expected [1,5]");
+                return;
+            }
+
+            if (outputTensor->type != TfLiteType::kTfLiteFloat32)
+            {
+                errorReporter->Report("output type mismatch, expected FLOAT32");
+                return;
+            }
         }
 
     } // namespace
@@ -127,45 +124,40 @@ namespace Neural
     {
         log_d("begin");
 
-        SPIFFS.begin(true);
-
         Neural::load();
 
         log_d("end");
     }
 
-    auto process(uint64_t syncTimer) -> void
+    auto inference(const std::array<float, 7> &inputs) -> std::array<float, 5>
     {
-        if (doInference)
+        if (interpreter == nullptr)
         {
-            Neural::inference();
-            doInference = false;
-        }
-    }
-
-    auto inputs(const std::vector<float> &inputValues) -> bool
-    {
-        if (Neural::inputTensor == nullptr or inputValues.size() != inputSize)
-        {
-            return false;
+            log_e("interpreter error");
+            errorReporter->Report("invoker not initialized");
+            return {};
         }
 
-        Neural::inputValues = inputValues;
-        doInference = true;
+        const auto inputs2{std::array<float, 7>{1, 2, 3, 4, 5, 6, 7}};
 
-        return true;
-    }
+        std::memcpy(inputTensor->data.f, inputs2.data(), inputs2.size());
 
-    auto outputs(std::vector<float> *outputValues) -> bool
-    {
-        if (Neural::outputTensor == nullptr or outputValues->size() != outputSize)
+        // Run inference, and report any error
+        const auto invoke_status{interpreter->Invoke()};
+        if (invoke_status != kTfLiteOk)
         {
-            return false;
+            log_e("invoke error");
+            errorReporter->Report("invoke failed on inputs");
+            return {};
         }
 
-        *outputValues = Neural::outputValues;
+        auto outputs{std::array<float, 5>{}};
+        std::memcpy(outputs.data(), outputTensor->data.f, outputs.size());
 
-        return true;
+        log_d("inputs = [%.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f]", inputs[0], inputs[1], inputs[2], inputs[3], inputs[4], inputs[5], inputs[6]);
+        log_d("outputs = [%.2f, %.2f, %.2f, %.2f, %.2f]", outputs[0], outputs[1], outputs[2], outputs[3], outputs[4]);
+
+        return outputs;
     }
 
 } // namespace Neural
