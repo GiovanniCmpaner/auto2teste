@@ -38,7 +38,7 @@ namespace Control
             return inputs;
         }
 
-        auto move(Manual manualValue)
+        auto move(Manual manualValue) -> void
         {
             switch (manualValue)
             {

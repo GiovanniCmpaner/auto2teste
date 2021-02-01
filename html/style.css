@@ -23,6 +23,7 @@ table th, table td{
 #menu {
   padding-bottom: 0.4em;
   border-bottom: 0.15em groove rgb(227, 227, 227);
+
 }
 
 #menu a {
@@ -94,7 +95,7 @@ table th, table td{
 /***************************************************/
 
 #mode {
-	display: inline-block;
+  display: inline-block;
 }
 
 #manual {
@@ -106,27 +107,32 @@ table th, table td{
 }
 
 #manual, #auto {
+  display: flex;
   position: absolute;
+  z-index: 999;
   top: 0;
   left: 0;
   width: 100vw;
   height: 100vh;
-  display: flex;
   align-items: center;
   justify-content: center;
-  z-index: -1;
+  pointer-events: none;
 }
 
 #manual button {
   width: 25vmin;
   height: 25vmin;
   font-size: 10vmin;
+  pointer-events: auto;
+  user-select: none;
 }
 
 #auto button {
   width: 40vmin;
   height: 40vmin;
   font-size: 25vmin;
+  pointer-events: auto;
+  user-select: none;
 }
 
 #start {
