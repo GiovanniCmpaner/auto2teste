@@ -78,8 +78,7 @@ namespace Neural
             auto allocate_status{interpreter->AllocateTensors()};
             if (allocate_status != kTfLiteOk)
             {
-                log_e("alocate error");
-                errorReporter->Report("AllocateTensors() failed");
+                log_e("allocate error");
                 return;
             }
 
@@ -134,28 +133,21 @@ namespace Neural
         if (interpreter == nullptr)
         {
             log_e("interpreter error");
-            errorReporter->Report("invoker not initialized");
             return {};
         }
 
-        const auto inputs2{std::array<float, 7>{1, 2, 3, 4, 5, 6, 7}};
-
-        std::memcpy(inputTensor->data.f, inputs2.data(), inputs2.size());
+        std::memcpy(inputTensor->data.f, inputs.data(), inputs.size() * sizeof(float));
 
         // Run inference, and report any error
         const auto invoke_status{interpreter->Invoke()};
         if (invoke_status != kTfLiteOk)
         {
             log_e("invoke error");
-            errorReporter->Report("invoke failed on inputs");
             return {};
         }
 
         auto outputs{std::array<float, 5>{}};
-        std::memcpy(outputs.data(), outputTensor->data.f, outputs.size());
-
-        log_d("inputs = [%.2f, %.2f, %.2f, %.2f, %.2f, %.2f, %.2f]", inputs[0], inputs[1], inputs[2], inputs[3], inputs[4], inputs[5], inputs[6]);
-        log_d("outputs = [%.2f, %.2f, %.2f, %.2f, %.2f]", outputs[0], outputs[1], outputs[2], outputs[3], outputs[4]);
+        std::memcpy(outputs.data(), outputTensor->data.f, outputs.size() * sizeof(float));
 
         return outputs;
     }

@@ -92,18 +92,28 @@ namespace Control
             {
                 case Auto::START:
                 {
-                    const auto outputs{Neural::inference(Control::inputs())};
+                    auto inputs{Control::inputs()};
 
-                    auto maxIndex{0};
-                    for (auto n{1}; n < 5; ++n)
+                    for (auto n{0}; n < inputs.size(); ++n)
                     {
-                        if (outputs[n] > outputs[maxIndex])
+                        if (std::isnan(inputs[n]) or std::isinf(inputs[n]) or inputs[n] > 2.0f)
                         {
-                            maxIndex = n;
+                            inputs[n] = 2.0f;
                         }
                     }
 
-                    Control::move(static_cast<Manual>(maxIndex));
+                    const auto outputs{Neural::inference(inputs)};
+
+                    auto max{0};
+                    for (auto n{1}; n < outputs.size(); ++n)
+                    {
+                        if (std::abs(outputs[n]) > std::abs(outputs[max]))
+                        {
+                            max = n;
+                        }
+                    }
+
+                    Control::move(static_cast<Manual>(max));
                     break;
                 }
                 default:

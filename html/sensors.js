@@ -14,7 +14,8 @@ let rotationChart;
 let accelerationChart;
 let magneticChart;
 
-function connectWsSensors() {
+function connectWsSensors()
+{
 	let deferred = new $.Deferred();
 	
 	infoMessage("Socket connecting");
@@ -25,7 +26,8 @@ function connectWsSensors() {
 		successMessage("Socket opened").then(() => clearMessage());
 	};
 
-	wsSensors.onclose = (evt) => {
+	wsSensors.onclose = (evt) =>
+	{
 		if(evt.wasClean){
 				warningMessage("Socket closed");
 		}
@@ -48,24 +50,28 @@ function connectWsSensors() {
 	return deferred.promise();
 }
 
-function smoothValue(id, val){
+function smoothValue(id, val)
+{
     let obj = $(id);
     let factor = 0.05;
     if(val == null)
     {
-             obj.prop("value", "");
+		obj.prop("value", "");
     }
     else {
-        if(obj.prop("value") == ""){
-                obj.prop("value", val.toFixed(3));
+		if (obj.prop("value") == "")
+		{
+			obj.prop("value", val.toFixed(3));
         }
-        else {
-                obj.prop("value", ( factor * val + ( 1 - factor ) * obj.prop("value")).toFixed(3) );
+		else
+		{
+			obj.prop("value", ( factor * val + ( 1 - factor ) * obj.prop("value")).toFixed(3) );
         }
     }
 }
 
-function updateCharts(sensors){
+function updateCharts(sensors)
+{
     updateDistancesChart(sensors.dist);
     updateColorChart(sensors.color);
     updateRotationChart(sensors.rot);
@@ -74,8 +80,8 @@ function updateCharts(sensors){
     updateBatteryChart(sensors.bat);
 }
 
-function updateValues(sensors){
-    
+function updateValues(sensors)
+{
     smoothValue("#distances_0", sensors.dist["0"]);
     smoothValue("#distances_1", sensors.dist["33"]);
     smoothValue("#distances_2", sensors.dist["-33"]);
@@ -105,100 +111,100 @@ function updateValues(sensors){
 }
 
 function createDistancesChart(){
-		let ctx = document.getElementById('distances_chart').getContext('2d');
-		distancesChart = new Chart(ctx, {
-				type: 'line',
-				data: {
-						datasets: [
-								{ 
-										label: '0',
-										pointBackgroundColor: 'green',
-										borderColor: 'green'
-								},
-								{ 
-										label: '33',
-										pointBackgroundColor: 'blue',
-										borderColor: 'blue'
-								},
-								{ 
-										label: '-33',
-										pointBackgroundColor: 'red',
-										borderColor: 'red'
-								},
-								{ 
-										label: '90',
-										pointBackgroundColor: 'yellow',
-										borderColor: 'yellow'
-								},
-								{ 
-										label: '-90',
-										pointBackgroundColor: 'magenta',
-										borderColor: 'magenta'
-								},
-								{ 
-										label: '180',
-										pointBackgroundColor: 'cyan',
-										borderColor: 'cyan'
-								}
-						]
+	let ctx = document.getElementById('distances_chart').getContext('2d');
+	distancesChart = new Chart(ctx, {
+		type: 'line',
+		data: {
+			datasets: [
+				{   
+					label: '0',
+					pointBackgroundColor: 'green',
+					borderColor: 'green'
 				},
-				options: {
-						tooltips: {
-								enabled: false
-						},
-						hover: {
-								mode: null
-						},
-						spanGaps: true,
-						scales: {
-								yAxes: [{
-										ticks: {
-												suggestedMin: 0,
-												suggestedMax: 1
-										}
-								}],
-								xAxes: [{
-										gridLines: {
-												drawOnChartArea: false
-										},
-										ticks: {
-												display: false
-										}
-								}]
-						},
-						elements: {
-								line: {
-										fill: false
-								},
-								point:{
-										radius: 1
-								}
-						}
+				{ 
+					label: '33',
+					pointBackgroundColor: 'blue',
+					borderColor: 'blue'
+				},
+				{ 
+					label: '-33',
+					pointBackgroundColor: 'red',
+					borderColor: 'red'
+				},
+				{ 
+					label: '90',
+					pointBackgroundColor: 'yellow',
+					borderColor: 'yellow'
+				},
+				{ 
+					label: '-90',
+					pointBackgroundColor: 'magenta',
+					borderColor: 'magenta'
+				},
+				{ 
+					label: '180',
+					pointBackgroundColor: 'cyan',
+					borderColor: 'cyan'
 				}
-		});
+			]
+		},
+		options: {
+			tooltips: {
+					enabled: false
+			},
+			hover: {
+					mode: null
+			},
+			spanGaps: true,
+			scales: {
+				yAxes: [{
+					ticks: {
+						suggestedMin: 0,
+						suggestedMax: 1
+					}
+				}],
+				xAxes: [{
+					gridLines: {
+						drawOnChartArea: false
+					},
+					ticks: {
+						display: false
+					}
+				}]
+			},
+			elements: {
+				line: {
+					fill: false
+				},
+				point:{
+					radius: 1
+				}
+			}
+		}
+	});
 }
 
-function updateDistancesChart(distances){
-		
-		distancesChart.data.labels.push(Date.now());
-		if(distancesChart.data.labels.length > 100){
-				distancesChart.data.labels.shift();
+function updateDistancesChart(distances)
+{
+	distancesChart.data.labels.push(Date.now());
+	if (distancesChart.data.labels.length > 100)
+	{
+		distancesChart.data.labels.shift();
+	}
+	
+	distancesChart.data.datasets[0].data.push((distances["0"] <= +9999.9 ? distances["0"] : null ));
+	distancesChart.data.datasets[1].data.push((distances["33"] <= +9999.9 ? distances["33"] : null ));
+	distancesChart.data.datasets[2].data.push((distances["-33"] <= +9999.9 ? distances["-33"] : null ));
+	distancesChart.data.datasets[3].data.push((distances["90"] <= +9999.9 ? distances["90"] : null ));
+	distancesChart.data.datasets[4].data.push((distances["-90"] <= +9999.9 ? distances["-90"] : null ));
+	distancesChart.data.datasets[5].data.push((distances["180"] <= +9999.9 ? distances["0"] : null ));
+	
+	distancesChart.data.datasets.forEach((dataset) => {
+		if(dataset.data.length > 100){
+			dataset.data.shift();
 		}
-	 
-		distancesChart.data.datasets[0].data.push(distances["0"]);
-		distancesChart.data.datasets[1].data.push(distances["33"]);
-		distancesChart.data.datasets[2].data.push(distances["-33"]);
-		distancesChart.data.datasets[3].data.push(distances["90"]);
-		distancesChart.data.datasets[4].data.push(distances["-90"]);
-		distancesChart.data.datasets[5].data.push(distances["180"]);
-	 
-		distancesChart.data.datasets.forEach((dataset) => {
-				if(dataset.data.length > 100){
-						dataset.data.shift();
-				}
-		});
-
-		distancesChart.update();
+	});
+	distancesChart.update();
 }
 
 function createColorChart(){
