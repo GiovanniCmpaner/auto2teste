@@ -50,6 +50,23 @@
 				<input type="submit" id="firmware_upload" value="Upload">
 			</fieldset>
 		</form>
+		<form id="configuration">
+			<fieldset>
+				<legend> Configuration Json </legend>
+				<table>
+					<tr>
+						<td>
+							<label for="configuration_file"> File </label>
+						</td>
+						<td>
+							<input type="file" id="configuration_file" accept=".json" required>
+						</td>
+					</tr>
+				</table>
+				<input type="submit" id="configuration_upload" value="Upload">
+				<input type="submit" id="configuration_download" value="Download" formnovalidate>
+			</fieldset>
+		</form>
 		<form id="calibration">
 			<fieldset>
 				<legend> Calibration </legend>
@@ -75,7 +92,7 @@
 							<input type="number" id="calibration_battery_bias" step="any" required>
 						</td>
 					</tr>
-					<tr style="height: 16px;"/>
+					<tr style="height: 16px;"></tr>
 					<tr>
 						<td> 
 						</td>
@@ -108,12 +125,7 @@
 							<input type="number" id="calibration_gyroscope_bias_z" step="any" required>
 						</td>
 					</tr>
-					<tr>
-						<td> 
-							<input type="button" id="calibrate_gyroscope" value="Calibrate">
-						</td>
-					</tr>
-					<tr style="height: 16px;"/>
+					<tr style="height: 16px;"></tr>
 					<tr>
 						<td> 
 						</td>
@@ -148,7 +160,6 @@
 					</tr>
 					<tr>
 						<td>
-							<input type="button" id="calibrate_accelerometer" value="Calibrate">	
 						</td>
 						<td>
 							<span>Bias</span>
@@ -163,7 +174,7 @@
 							<input type="number" id="calibration_accelerometer_bias_z" step="any" required>
 						</td>
 					</tr>
-					<tr style="height: 16px;"/>
+					<tr style="height: 16px;"></tr>
 					<tr>
 						<td> 
 						</td>
@@ -198,7 +209,6 @@
 					</tr>
 					<tr>
 						<td>
-							<input type="button" id="calibrate_magnetometer" value="Calibrate">	
 						</td>
 						<td>
 							<span>Bias</span>
@@ -211,6 +221,131 @@
 						</td>
 						<td>
 							<input type="number" id="calibration_magnetometer_bias_z" step="any" required>
+						</td>
+					</tr>
+					<tr style="height: 16px;"></tr>
+					<tr>
+						<td> 
+						</td>
+						<td>
+						</td>
+						<td>
+							<span>0</span>
+						</td>
+						<td>
+							<span>+33</span>
+						</td>
+						<td>
+							<span>-33</span>
+						</td>
+						<td>
+							<span>+90</span>
+						</td>
+						<td>
+							<span>-90</span>
+						</td>
+						<td>
+							<span>180</span>
+						</td>
+					</tr>
+					<tr>
+						<td> 
+							<span>Distance</span>
+						</td>
+						<td>
+							<span>Factor</span>
+						</td>
+						<td>
+							<input type="number" id="calibration_distance_factor_0" step="any" required>
+						</td>
+						<td>
+							<input type="number" id="calibration_distance_factor_1" step="any" required>
+						</td>
+						<td>
+							<input type="number" id="calibration_distance_factor_2" step="any" required>
+						</td>
+						<td>
+							<input type="number" id="calibration_distance_factor_3" step="any" required>
+						</td>
+						<td>
+							<input type="number" id="calibration_distance_factor_4" step="any" required>
+						</td>
+						<td>
+							<input type="number" id="calibration_distance_factor_5" step="any" required>
+						</td>
+					</tr>
+					<tr>
+						<td>
+						</td>
+						<td>
+							<span>Bias</span>
+						</td>
+						<td>
+							<input type="number" id="calibration_distance_bias_0" step="any" required>
+						</td>
+						<td>
+							<input type="number" id="calibration_distance_bias_1" step="any" required>
+						</td>
+						<td>
+							<input type="number" id="calibration_distance_bias_2" step="any" required>
+						</td>
+						<td>
+							<input type="number" id="calibration_distance_bias_3" step="any" required>
+						</td>
+						<td>
+							<input type="number" id="calibration_distance_bias_4" step="any" required>
+						</td>
+						<td>
+							<input type="number" id="calibration_distance_bias_5" step="any" required>
+						</td>
+					</tr>
+					<tr style="height: 16px;"></tr>
+					<tr>
+						<td> 
+						</td>
+						<td>
+						</td>
+						<td>
+							<span>r</span>
+						</td>
+						<td>
+							<span>g</span>
+						</td>
+						<td>
+							<span>b</span>
+						</td>
+					</tr>
+					<tr>
+						<td> 
+							<span>Color</span>
+						</td>
+						<td>
+							<span>Factor</span>
+						</td>
+						<td>
+							<input type="number" id="calibration_color_factor_r" step="any" required>
+						</td>
+						<td>
+							<input type="number" id="calibration_color_factor_g" step="any" required>
+						</td>
+						<td>
+							<input type="number" id="calibration_color_factor_b" step="any" required>
+						</td>
+					</tr>
+					<tr>
+						<td>
+						</td>
+						<td>
+							<span>Bias</span>
+						</td>
+						<td>
+							<input type="number" id="calibration_color_bias_r" step="any" required>
+						</td>
+						<td>
+							<input type="number" id="calibration_color_bias_g" step="any" required>
+						</td>
+						<td>
+							<input type="number" id="calibration_color_bias_b" step="any" required>
 						</td>
 					</tr>
 				</table>

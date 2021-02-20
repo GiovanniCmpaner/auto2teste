@@ -28,7 +28,6 @@ namespace WebInterface
         auto webServer{std::unique_ptr<AsyncWebServer>{}};
         auto controlWs{AsyncWebSocket{"/control.ws"}};
         auto sensorsWs{AsyncWebSocket{"/sensors.ws"}};
-        auto calibrationWs{AsyncWebSocket{"/calibration.ws"}};
 
         auto modeCheckTimer{0UL};
         auto accessPointTimer{0UL};
@@ -422,74 +421,6 @@ namespace WebInterface
                 }
             }
 
-            auto handleCalibrationWs(AsyncWebSocket *server, AsyncWebSocketClient *client, AwsEventType type, void *arg, uint8_t *data, size_t len) -> void
-            {
-                if (type == WS_EVT_CONNECT)
-                {
-                    log_d("WS %s (%u) connect", server->url(), client->id());
-                    client->ping();
-                }
-                else if (type == WS_EVT_DISCONNECT)
-                {
-                    log_d("WS %s (%u) disconnect", server->url(), client->id());
-                }
-                else if (type == WS_EVT_ERROR)
-                {
-                    log_e("WS %s (%u) error (%u): %s", server->url(), client->id(), *reinterpret_cast<const uint16_t *>(arg), reinterpret_cast<const char *>(data));
-                }
-                else if (type == WS_EVT_PONG)
-                {
-                    log_d("WS %s (%u) pong", server->url(), client->id());
-                }
-                else if (type == WS_EVT_DATA)
-                {
-                    auto info{reinterpret_cast<const AwsFrameInfo *>(arg)};
-                    if (info->opcode == WS_TEXT and info->final and info->index == 0)
-                    {
-                        const auto text{reinterpret_cast<const char *>(data)};
-                        if (info->len == 4 and strncmp(text, "gyro", 4) == 0)
-                        {
-                            if (not calibrateGyro and not calibrateAccel and not calibrateMag)
-                            {
-                                calibrateGyro = true;
-                                calibrationStartTimer = 0;
-                                calibrationWs.textAll("starting");
-                            }
-                            else
-                            {
-                                client->text("ongoing");
-                            }
-                        }
-                        else if (info->len == 5 and strncmp(text, "accel", 5) == 0)
-                        {
-                            if (not calibrateGyro and not calibrateAccel and not calibrateMag)
-                            {
-                                calibrateAccel = true;
-                                calibrationStartTimer = 0;
-                                calibrationWs.textAll("starting");
-                            }
-                            else
-                            {
-                                client->text("ongoing");
-                            }
-                        }
-                        else if (info->len == 3 and strncmp(text, "mag", 3) == 0)
-                        {
-                            if (not calibrateGyro and not calibrateAccel and not calibrateMag)
-                            {
-                                calibrateMag = true;
-                                calibrationStartTimer = 0;
-                                calibrationWs.textAll("starting");
-                            }
-                            else
-                            {
-                                client->text("ongoing");
-                            }
-                        }
-                    }
-                }
-            }
-
         } // namespace WebSocket
 
         auto getMac() -> void
@@ -537,9 +468,6 @@ namespace WebInterface
 
                 sensorsWs.onEvent(WebSocket::handleSensorsWs);
                 webServer->addHandler(&sensorsWs);
-
-                calibrationWs.onEvent(WebSocket::handleCalibrationWs);
-                webServer->addHandler(&calibrationWs);
 
                 DefaultHeaders::Instance().addHeader("Access-Control-Allow-Origin", "*");
                 DefaultHeaders::Instance().addHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS");

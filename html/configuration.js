@@ -2,7 +2,6 @@ $(document).ready(() =>
 {
 	handleFiles();
 	handleConfiguration();
-	handleCalibrate();
 
 	getConfiguration();
 });
@@ -69,22 +68,6 @@ function handleConfiguration()
 	});
 }
 
-function handleCalibrate()
-{
-	$("#calibrate_gyroscope").click(() =>
-	{
-		doCalibrate("gyro").then(() => getConfiguration()).then(() => clearMessage());
-	});
-	$("#calibrate_accelerometer").click(() =>
-	{
-		doCalibrate("accel").then(() => getConfiguration()).then(() => clearMessage());
-	});
-	$("#calibrate_magnetometer").click(() =>
-	{
-		doCalibrate("mag").then(() => getConfiguration()).then(() => clearMessage());
-	});
-}
-
 function setCalibration()
 {
 	let cfg = {
@@ -101,6 +84,11 @@ function setCalibration()
 					parseFloat($("#calibration_gyroscope_bias_x").prop("value")),
 					parseFloat($("#calibration_gyroscope_bias_y").prop("value")),
 					parseFloat($("#calibration_gyroscope_bias_z").prop("value"))
+				],
+				factor: [
+					parseFloat($("#calibration_gyroscope_factor_x").prop("value")),
+					parseFloat($("#calibration_gyroscope_factor_y").prop("value")),
+					parseFloat($("#calibration_gyroscope_factor_z").prop("value"))
 				]
 			},
 			accelerometer:
@@ -127,6 +115,38 @@ function setCalibration()
 					parseFloat($("#calibration_magnetometer_factor_x").prop("value")),
 					parseFloat($("#calibration_magnetometer_factor_y").prop("value")),
 					parseFloat($("#calibration_magnetometer_factor_z").prop("value"))
+				]
+			},
+			distance:
+			{
+				bias: [
+					parseFloat($("#calibration_distance_bias_0").prop("value")),
+					parseFloat($("#calibration_distance_bias_1").prop("value")),
+					parseFloat($("#calibration_distance_bias_2").prop("value")),
+					parseFloat($("#calibration_distance_bias_3").prop("value")),
+					parseFloat($("#calibration_distance_bias_4").prop("value")),
+					parseFloat($("#calibration_distance_bias_5").prop("value"))
+				],
+				factor: [
+					parseFloat($("#calibration_distance_factor_0").prop("value")),
+					parseFloat($("#calibration_distance_factor_1").prop("value")),
+					parseFloat($("#calibration_distance_factor_2").prop("value")),
+					parseFloat($("#calibration_distance_factor_3").prop("value")),
+					parseFloat($("#calibration_distance_factor_4").prop("value")),
+					parseFloat($("#calibration_distance_factor_5").prop("value"))
+				]
+			},
+			color:
+			{
+				bias: [
+					parseFloat($("#calibration_color_bias_r").prop("value")),
+					parseFloat($("#calibration_color_bias_g").prop("value")),
+					parseFloat($("#calibration_color_bias_b").prop("value"))
+				],
+				factor: [
+					parseFloat($("#calibration_color_factor_r").prop("value")),
+					parseFloat($("#calibration_color_factor_g").prop("value")),
+					parseFloat($("#calibration_color_factor_b").prop("value"))
 				]
 			}
 		}
@@ -228,6 +248,9 @@ function getConfiguration()
 			$("#calibration_gyroscope_bias_x").prop("value", cfg.calibration.gyroscope.bias[0]);
 			$("#calibration_gyroscope_bias_y").prop("value", cfg.calibration.gyroscope.bias[1]);
 			$("#calibration_gyroscope_bias_z").prop("value", cfg.calibration.gyroscope.bias[2]);
+			$("#calibration_gyroscope_factor_x").prop("value", cfg.calibration.gyroscope.factor[0]);
+			$("#calibration_gyroscope_factor_y").prop("value", cfg.calibration.gyroscope.factor[1]);
+			$("#calibration_gyroscope_factor_z").prop("value", cfg.calibration.gyroscope.factor[2]);
 
 			$("#calibration_accelerometer_bias_x").prop("value", cfg.calibration.accelerometer.bias[0]);
 			$("#calibration_accelerometer_bias_y").prop("value", cfg.calibration.accelerometer.bias[1]);
@@ -242,6 +265,26 @@ function getConfiguration()
 			$("#calibration_magnetometer_factor_x").prop("value", cfg.calibration.magnetometer.factor[0]);
 			$("#calibration_magnetometer_factor_y").prop("value", cfg.calibration.magnetometer.factor[1]);
 			$("#calibration_magnetometer_factor_z").prop("value", cfg.calibration.magnetometer.factor[2]);
+
+			$("#calibration_distance_bias_0").prop("value", cfg.calibration.distance.bias[0]);
+			$("#calibration_distance_bias_1").prop("value", cfg.calibration.distance.bias[1]);
+			$("#calibration_distance_bias_2").prop("value", cfg.calibration.distance.bias[2]);
+			$("#calibration_distance_bias_3").prop("value", cfg.calibration.distance.bias[3]);
+			$("#calibration_distance_bias_4").prop("value", cfg.calibration.distance.bias[4]);
+			$("#calibration_distance_bias_5").prop("value", cfg.calibration.distance.bias[5]);
+			$("#calibration_distance_factor_0").prop("value", cfg.calibration.distance.factor[0]);
+			$("#calibration_distance_factor_1").prop("value", cfg.calibration.distance.factor[1]);
+			$("#calibration_distance_factor_2").prop("value", cfg.calibration.distance.factor[2]);
+			$("#calibration_distance_factor_3").prop("value", cfg.calibration.distance.factor[3]);
+			$("#calibration_distance_factor_4").prop("value", cfg.calibration.distance.factor[4]);
+			$("#calibration_distance_factor_5").prop("value", cfg.calibration.distance.factor[5]);
+
+			$("#calibration_color_bias_r").prop("value", cfg.calibration.color.bias[0]);
+			$("#calibration_color_bias_g").prop("value", cfg.calibration.color.bias[1]);
+			$("#calibration_color_bias_b").prop("value", cfg.calibration.color.bias[2]);
+			$("#calibration_color_factor_r").prop("value", cfg.calibration.color.factor[0]);
+			$("#calibration_color_factor_g").prop("value", cfg.calibration.color.factor[1]);
+			$("#calibration_color_factor_b").prop("value", cfg.calibration.color.factor[2]);
 
 			$("#access_point_enabled").prop("checked", cfg.access_point.enabled);
 			$("#access_point_mac").prop("value", cfg.access_point.mac.map((n) => n.toString(16).toUpperCase().padStart(2, "0")).join("-"));
@@ -364,57 +407,6 @@ function uploadFirmware()
 			//	enableInput();
 			//});
 	}
-
-	return deferred.promise();
-}
-
-function doCalibrate(sensor)
-{
-	let deferred = new $.Deferred();
-
-	disableInput();
-	
-	infoMessage("Calibration starting");
-
-	let wsCalibration = new WebSocket(`ws://${window.location.host}/calibration.ws`);
-
-	wsCalibration.onopen = (evt) =>
-	{
-		wsCalibration.send(sensor);
-	};
-
-	wsCalibration.onclose = (evt) =>
-	{
-		if (!evt.wasClean)
-		{
-			errorMessage("Calibration failed");
-		}
-		enableInput();
-	};
-
-	wsCalibration.onmessage = (evt) =>
-	{
-		if (evt.data == "calibrating")
-		{
-			infoMessage("Calibrating");
-		}
-		else if (evt.data == "ongoing")
-		{
-			warningMessage("Calibration ongoing");
-		}
-		else if (evt.data == "done")
-		{
-			successMessage("Calibration done");
-			wsCalibration.close();
-			deferred.resolve();
-		}
-		else if (evt.data == "fail")
-		{
-			errorMessage("Calibration failed");
-			wsCalibration.close();
-			deferred.reject();
-		}
-	};
 
 	return deferred.promise();
 }

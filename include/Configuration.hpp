@@ -18,6 +18,7 @@ struct Configuration
         struct Gyroscope
         {
             std::array<float, 3> bias;
+            std::array<float, 3> factor;
         };
 
         struct Accelerometer
@@ -32,10 +33,24 @@ struct Configuration
             std::array<float, 3> factor;
         };
 
+        struct Distance
+        {
+            std::array<float, 6> bias;
+            std::array<float, 6> factor;
+        };
+
+        struct Color
+        {
+            std::array<float, 3> bias;
+            std::array<float, 3> factor;
+        };
+
         Battery battery;
         Gyroscope gyroscope;
         Accelerometer accelerometer;
         Magnetometer magnetometer;
+        Distance distance;
+        Color color;
     };
 
     struct Station

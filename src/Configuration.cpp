@@ -17,6 +17,8 @@ static const Configuration defaultCfg{
     {{-166.67f, 0.0417f},
      {{0.0f, 0.0f, 0.0f}},
      {{0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f}},
+     {{0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f}},
+     {{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f}},
      {{0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f}}},
     {true,
      {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED},
@@ -61,6 +63,10 @@ auto Configuration::serialize(ArduinoJson::JsonVariant &json) const -> void
             {
                 gyroscope["bias"].add(n);
             }
+            for (auto n : this->calibration.gyroscope.factor)
+            {
+                gyroscope["factor"].add(n);
+            }
         }
         {
             auto accelerometer{calibration["accelerometer"]};
@@ -82,6 +88,28 @@ auto Configuration::serialize(ArduinoJson::JsonVariant &json) const -> void
             for (auto n : this->calibration.magnetometer.factor)
             {
                 magnetometer["factor"].add(n);
+            }
+        }
+        {
+            auto distance{calibration["distance"]};
+            for (auto n : this->calibration.distance.bias)
+            {
+                distance["bias"].add(n);
+            }
+            for (auto n : this->calibration.distance.factor)
+            {
+                distance["factor"].add(n);
+            }
+        }
+        {
+            auto color{calibration["color"]};
+            for (auto n : this->calibration.color.bias)
+            {
+                color["bias"].add(n);
+            }
+            for (auto n : this->calibration.color.factor)
+            {
+                color["factor"].add(n);
             }
         }
     }
@@ -169,6 +197,16 @@ auto Configuration::deserialize(const ArduinoJson::JsonVariant &json) -> void
                     }
                 }
             }
+            {
+                const auto factor{gyroscope["factor"]};
+                if (factor.is<ArduinoJson::JsonArray>() and factor.size() == this->calibration.gyroscope.factor.size())
+                {
+                    for (auto i{0}; i < this->calibration.gyroscope.factor.size(); ++i)
+                    {
+                        this->calibration.gyroscope.factor[i] = factor[i].as<float>();
+                    }
+                }
+            }
         }
         {
             const auto accelerometer{calibration["accelerometer"]};
@@ -212,6 +250,52 @@ auto Configuration::deserialize(const ArduinoJson::JsonVariant &json) -> void
                     for (auto i{0}; i < this->calibration.magnetometer.factor.size(); ++i)
                     {
                         this->calibration.magnetometer.factor[i] = factor[i].as<float>();
+                    }
+                }
+            }
+        }
+        {
+            const auto distance{calibration["distance"]};
+            {
+                const auto bias{distance["bias"]};
+                if (bias.is<ArduinoJson::JsonArray>() and bias.size() == this->calibration.distance.bias.size())
+                {
+                    for (auto i{0}; i < this->calibration.distance.bias.size(); ++i)
+                    {
+                        this->calibration.distance.bias[i] = bias[i].as<float>();
+                    }
+                }
+            }
+            {
+                const auto factor{distance["factor"]};
+                if (factor.is<ArduinoJson::JsonArray>() and factor.size() == this->calibration.distance.factor.size())
+                {
+                    for (auto i{0}; i < this->calibration.distance.factor.size(); ++i)
+                    {
+                        this->calibration.distance.factor[i] = factor[i].as<float>();
+                    }
+                }
+            }
+        }
+        {
+            const auto color{calibration["color"]};
+            {
+                const auto bias{color["bias"]};
+                if (bias.is<ArduinoJson::JsonArray>() and bias.size() == this->calibration.color.bias.size())
+                {
+                    for (auto i{0}; i < this->calibration.color.bias.size(); ++i)
+                    {
+                        this->calibration.color.bias[i] = bias[i].as<float>();
+                    }
+                }
+            }
+            {
+                const auto factor{color["factor"]};
+                if (factor.is<ArduinoJson::JsonArray>() and factor.size() == this->calibration.color.factor.size())
+                {
+                    for (auto i{0}; i < this->calibration.color.factor.size(); ++i)
+                    {
+                        this->calibration.color.factor[i] = factor[i].as<float>();
                     }
                 }
             }

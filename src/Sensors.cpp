@@ -97,18 +97,6 @@ namespace Sensors
                 gyroAccelMagSensor.setGyroRange(MPU9250::GYRO_RANGE_500DPS);
                 gyroAccelMagSensor.setDlpfBandwidth(MPU9250::DLPF_BANDWIDTH_41HZ);
                 gyroAccelMagSensor.setSrd(19); // 50 Hz
-
-                gyroAccelMagSensor.setGyroBiasY_rads(cfg.calibration.gyroscope.bias[0]);
-                gyroAccelMagSensor.setGyroBiasX_rads(cfg.calibration.gyroscope.bias[1]);
-                gyroAccelMagSensor.setGyroBiasZ_rads(cfg.calibration.gyroscope.bias[2]);
-
-                gyroAccelMagSensor.setAccelCalY(cfg.calibration.accelerometer.bias[0], cfg.calibration.accelerometer.factor[0]);
-                gyroAccelMagSensor.setAccelCalX(cfg.calibration.accelerometer.bias[1], cfg.calibration.accelerometer.factor[1]);
-                gyroAccelMagSensor.setAccelCalZ(cfg.calibration.accelerometer.bias[2], cfg.calibration.accelerometer.factor[2]);
-
-                gyroAccelMagSensor.setMagCalY(cfg.calibration.magnetometer.bias[0], cfg.calibration.magnetometer.factor[0]);
-                gyroAccelMagSensor.setMagCalX(cfg.calibration.magnetometer.bias[1], cfg.calibration.magnetometer.factor[1]);
-                gyroAccelMagSensor.setMagCalZ(cfg.calibration.magnetometer.bias[2], cfg.calibration.magnetometer.factor[2]);
             }
         }
 
@@ -148,7 +136,10 @@ namespace Sensors
             {
                 uint16_t r, g, b, c;
                 Sensors::colorSensor.getColorData(&r, &g, &b, &c);
-                Sensors::colorValues = {r, g, b};
+                Sensors::colorValues = {
+                    r * cfg.calibration.color.factor[0] + cfg.calibration.color.bias[0],
+                    g * cfg.calibration.color.factor[1] + cfg.calibration.color.bias[1],
+                    b * cfg.calibration.color.factor[2] + cfg.calibration.color.bias[2]};
 
                 const auto currentDuty{ledcRead(1)};
                 if (c < 500 and currentDuty < 255)
@@ -206,19 +197,19 @@ namespace Sensors
             if (gyroAccelMagSensor.readSensor() > 0)
             {
                 Sensors::accelerationValues = {
-                    gyroAccelMagSensor.getAccelY_mss() - accelerationOffset[0],
-                    gyroAccelMagSensor.getAccelX_mss() - accelerationOffset[1],
-                    gyroAccelMagSensor.getAccelZ_mss() - accelerationOffset[2]};
+                    gyroAccelMagSensor.getAccelY_mss() * cfg.calibration.gyroscope.factor[0] + cfg.calibration.gyroscope.bias[0],
+                    gyroAccelMagSensor.getAccelX_mss() * cfg.calibration.gyroscope.factor[1] + cfg.calibration.gyroscope.bias[1],
+                    gyroAccelMagSensor.getAccelZ_mss() * cfg.calibration.gyroscope.factor[2] + cfg.calibration.gyroscope.bias[2]};
 
                 Sensors::rotationValues = {
-                    gyroAccelMagSensor.getGyroY_rads() - rotationOffset[0],
-                    gyroAccelMagSensor.getGyroX_rads() - rotationOffset[1],
-                    gyroAccelMagSensor.getGyroZ_rads() - rotationOffset[2]};
+                    gyroAccelMagSensor.getGyroY_rads() * cfg.calibration.gyroscope.factor[0] + cfg.calibration.gyroscope.bias[0],
+                    gyroAccelMagSensor.getGyroX_rads() * cfg.calibration.gyroscope.factor[1] + cfg.calibration.gyroscope.bias[1],
+                    gyroAccelMagSensor.getGyroZ_rads() * cfg.calibration.gyroscope.factor[2] + cfg.calibration.gyroscope.bias[2]};
 
                 Sensors::magneticValues = {
-                    gyroAccelMagSensor.getMagY_uT() - magneticOffset[0],
-                    gyroAccelMagSensor.getMagX_uT() - magneticOffset[1],
-                    gyroAccelMagSensor.getMagZ_uT() - magneticOffset[2]};
+                    gyroAccelMagSensor.getMagY_uT() * cfg.calibration.magnetometer.factor[0] + cfg.calibration.magnetometer.bias[0],
+                    gyroAccelMagSensor.getMagX_uT() * cfg.calibration.magnetometer.factor[1] + cfg.calibration.magnetometer.bias[1],
+                    gyroAccelMagSensor.getMagZ_uT() * cfg.calibration.magnetometer.factor[2] + cfg.calibration.magnetometer.bias[2]};
 
                 Sensors::temperatureValue = gyroAccelMagSensor.getTemperature_C();
             }
@@ -241,7 +232,7 @@ namespace Sensors
                         const auto reading{distanceSensor.readRangeResult()};
                         if (reading < 4000)
                         {
-                            distance.second = reading / 1000.0f;
+                            distance.second = (reading / 1000.0f) * cfg.calibration.distance[n].factor + cfg.calibration.distance[n].bias;
                         }
                         else
                         {
