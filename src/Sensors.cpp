@@ -52,7 +52,7 @@ namespace Sensors
         auto gyroAccelMagSensor{MPU9250{Peripherals::GyroAccelMag::I2C, Peripherals::GyroAccelMag::ADDRESS}};
 
         auto distanceValues{std::array<std::pair<int, float>, 6>{}};
-        auto colorValues{std::array<uint16_t, 3>{}};
+        auto colorValues{std::array<float, 3>{}};
         auto rotationValues{std::array<float, 3>{}};
         auto accelerationValues{std::array<float, 3>{}};
         auto magneticValues{std::array<float, 3>{}};
@@ -232,7 +232,7 @@ namespace Sensors
                         const auto reading{distanceSensor.readRangeResult()};
                         if (reading < 4000)
                         {
-                            distance.second = (reading / 1000.0f) * cfg.calibration.distance[n].factor + cfg.calibration.distance[n].bias;
+                            distance.second = (reading / 1000.0f) * cfg.calibration.distance.factor[n] + cfg.calibration.distance.bias[n];
                         }
                         else
                         {
@@ -309,7 +309,7 @@ namespace Sensors
         log_d("rotation = %.2f, %.2f, %.2f (%s)", Sensors::rotationValues[0], Sensors::rotationValues[1], Sensors::rotationValues[2], Sensors::rotationUnit);
         log_d("temperature = %.2f (%s)", Sensors::temperatureValue, Sensors::temperatureUnit);
         log_d("battery = %.2f (%s)", Sensors::batteryValue, Sensors::batteryUnit);
-        log_d("color = %u, %u, %u", Sensors::colorValues[0], Sensors::colorValues[1], Sensors::colorValues[2]);
+        log_d("color = %.2f, %.2f, %.2f", Sensors::colorValues[0], Sensors::colorValues[1], Sensors::colorValues[2]);
         for (auto [angle, distanceValue] : Sensors::distanceValues)
         {
             log_d("distance[ %d (%s) ] = %.3f (%s)", angle, Sensors::angleUnit, distanceValue, Sensors::distanceUnit);
@@ -321,7 +321,7 @@ namespace Sensors
         return Sensors::distanceValues;
     }
 
-    auto colors() -> std::array<uint16_t, 3>
+    auto colors() -> std::array<float, 3>
     {
         return Sensors::colorValues;
     }

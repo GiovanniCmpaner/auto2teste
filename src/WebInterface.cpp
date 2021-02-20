@@ -135,46 +135,6 @@ namespace WebInterface
                 request->send(response);
             }
 
-            auto handleCalibrateJson(AsyncWebServerRequest *request) -> void
-            {
-                if (request->url().endsWith("gyroscope.json"))
-                {
-                    log_d("GET /calibrate/gyroscope.json");
-                    if (Sensors::calibrateGyroscope())
-                    {
-                        request->send(204);
-                    }
-                    else
-                    {
-                        request->send(500);
-                    }
-                }
-                else if (request->url().endsWith("accelerometer.json"))
-                {
-                    log_d("GET /calibrate/accelerometer.json");
-                    if (Sensors::calibrateAccelerometer())
-                    {
-                        request->send(204);
-                    }
-                    else
-                    {
-                        request->send(500);
-                    }
-                }
-                else if (request->url().endsWith("magnetometer.json"))
-                {
-                    log_d("GET /calibrate/magnetometer.json");
-                    if (Sensors::calibrateMagnetometer())
-                    {
-                        request->send(204);
-                    }
-                    else
-                    {
-                        request->send(500);
-                    }
-                }
-            }
-
             auto handleModelTflite(AsyncWebServerRequest *request) -> void
             {
                 log_d("GET /model.tflite");
@@ -637,82 +597,6 @@ namespace WebInterface
                 }
             }
         }
-
-        auto doCalibration(uint64_t syncTimer) -> void
-        {
-            if (calibrateGyro)
-            {
-                if (calibrationStartTimer == 0)
-                {
-                    calibrationStartTimer = syncTimer;
-                }
-                if (syncTimer - calibrationStartTimer >= 5000UL)
-                {
-                    calibrationWs.textAll("calibrating");
-
-                    if (Sensors::calibrateGyroscope())
-                    {
-                        calibrationWs.textAll("done");
-                    }
-                    else
-                    {
-                        calibrationWs.textAll("fail");
-                    }
-
-                    calibrationWs.closeAll();
-                    calibrateGyro = false;
-                    calibrationStartTimer = 0;
-                }
-            }
-            else if (calibrateAccel)
-            {
-                if (calibrationStartTimer == 0)
-                {
-                    calibrationStartTimer = syncTimer;
-                }
-                if (syncTimer - calibrationStartTimer >= 5000UL)
-                {
-                    calibrationWs.textAll("calibrating");
-
-                    if (Sensors::calibrateAccelerometer())
-                    {
-                        calibrationWs.textAll("done");
-                    }
-                    else
-                    {
-                        calibrationWs.textAll("fail");
-                    }
-
-                    calibrationWs.closeAll();
-                    calibrateAccel = false;
-                    calibrationStartTimer = 0;
-                }
-            }
-            else if (calibrateMag)
-            {
-                if (calibrationStartTimer == 0)
-                {
-                    calibrationStartTimer = syncTimer;
-                }
-                if (syncTimer - calibrationStartTimer >= 5000UL)
-                {
-                    calibrationWs.textAll("calibrating");
-
-                    if (Sensors::calibrateMagnetometer())
-                    {
-                        calibrationWs.textAll("done");
-                    }
-                    else
-                    {
-                        calibrationWs.textAll("fail");
-                    }
-
-                    calibrationWs.closeAll();
-                    calibrateMag = false;
-                    calibrationStartTimer = 0;
-                }
-            }
-        }
     } // namespace
 
     auto init() -> void
@@ -734,7 +618,6 @@ namespace WebInterface
         WebInterface::checkAccessPoint(syncTimer);
         WebInterface::cleanupWebSockets(syncTimer);
         WebInterface::sendSensors(syncTimer);
-        WebInterface::doCalibration(syncTimer);
     }
 
 } // namespace WebInterface
