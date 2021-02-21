@@ -1,40 +1,81 @@
 $(document).ready(() => {
+		handleMeasure();
+		
     createMeasureChart();
     connectWsSensors().then(() => connectWsControl());
 });
 
-var wsSensors;
-var wsControl;
-var measureChart;
+let wsSensors = null;
+let wsControl = null;
+let measureChart = null;
+let moveTimer = null;
+
+let measuring = false;
+let id = 0;
+let start = 0;
+
+function handleMeasure()
+{
+	$("#start").click((event) =>
+	{
+		if(measuring)
+		{
+			return;
+		}
+		
+		clearDataTable();
+		clearMeasureChart();
+		measuring = true;
+		
+		wsControl.send("U");
+		moveTimer = setInterval(() => wsControl.send("U"), 30);
+		
+		setTimeout(() => 
+		{
+			measuring = false;
+
+			clearTimeout(moveTimer);
+			wsControl.send("X");
+		}, 2000);
+	});
+}
 
 function connectWsSensors() {
   var deferred = new $.Deferred();
   
-  infoMessage("Socket connecting");
+  infoMessage("Sensors socket connecting");
   
-  wsSensors = new WebSocket(`ws://${window.location.host}/sensors.ws`);
+  //wsSensors = new WebSocket(`ws://${window.location.host}/sensors.ws`);
+  wsSensors = new WebSocket(`ws://192.168.1.210/sensors.ws`);
   wsSensors.onopen = (evt) => {
     deferred.resolve(wsSensors);
-    successMessage("Socket opened").then(() => clearMessage());
+    successMessage("Sensors socket opened").then(() => clearMessage());
   };
 
-  wsSensors.onclose = (evt) => {
+  wsSensors.onclose = (evt) => 
+	{
     if(evt.wasClean){
-        warningMessage("Socket closed");
+        warningMessage("Sensors socket closed");
     }
     else {
-        errorMessage("Socket error");
+        errorMessage("Sensors socket error");
     }
     setTimeout(() => connectWsSensors(), 10000);
   };
 
-  wsSensors.onerror = (evt) => {
+  wsSensors.onerror = (evt) => 
+	{
     // NOTHING
   };
   
-  wsSensors.onmessage = (evt) => {
-    var sensors = JSON.parse(evt.data);  
-    updateMeasureChartChart(sensors.distances["0"]);
+  wsSensors.onmessage = (evt) => 
+	{
+		if(measuring)
+		{
+			var sensors = JSON.parse(evt.data);  
+			updateMeasureChart(sensors.dist["180"]);
+			updateDataTable(sensors.dist["180"]);
+		}
   };
   
   return deferred.promise();
@@ -43,21 +84,22 @@ function connectWsSensors() {
 function connectWsControl() {
   var deferred = new $.Deferred();
   
-  infoMessage("Socket connecting");
+  infoMessage("Control socket connecting");
   
-  wsControl = new WebSocket(`ws://${window.location.host}/control.ws`);
+  //wsControl = new WebSocket(`ws://${window.location.host}/control.ws`);
+  wsControl = new WebSocket(`ws://192.168.1.210/control.ws`);
   
   wsControl.onopen = (evt) => {
     deferred.resolve(wsControl);
-    successMessage("Socket opened").then(() => clearMessage());
+    successMessage("Control socket opened").then(() => clearMessage());
   };
 
   wsControl.onclose = (evt) => {
     if(evt.wasClean){
-        warningMessage("Socket closed");
+        warningMessage("Control socket closed");
     }
     else {
-        errorMessage("Socket error");
+        errorMessage("Control socket error");
     }
     setTimeout(() => connectWsControl(), 10000);
   };
@@ -73,7 +115,8 @@ function connectWsControl() {
   return deferred.promise();
 }
 
-function createMeasureChart(){
+function createMeasureChart()
+{
     var ctx = document.getElementById('measure_chart').getContext('2d');
     measureChart = new Chart(ctx, {
         type: 'line',
@@ -89,10 +132,18 @@ function createMeasureChart(){
         options: {
             spanGaps: true,
             scales: {
-                xAxes: [{
+                yAxes: [{
                     ticks: {
-                        autoSkip: true,
-                        maxTicksLimit: 20
+                        suggestedMin: 0,
+                        suggestedMax: 2
+                    }
+                }],
+                xAxes: [{
+                    gridLines: {
+                        drawOnChartArea: false
+                    },
+                    ticks: {
+                        display: false
                     }
                 }]
             },
@@ -108,11 +159,44 @@ function createMeasureChart(){
     });
 }
 
-function updateMeasureChart(distance){
-    
+function clearMeasureChart()
+{
+	measureChart.data.labels = [];
+	measureChart.data.datasets[0].data = [];
+	measureChart.update();
+}
+
+function updateMeasureChart(distance)
+{
     measureChart.data.labels.push(Date.now());
     measureChart.data.datasets[0].data.push(distance);
     measureChart.update();
+}
+
+function clearDataTable()
+{
+	id = 0;
+	start = Date.now();
+	$("#data_table tbody tr").remove(); 
+}
+
+function updateDataTable(distance)
+{
+	let template = $($.parseHTML($("#data_template").html()));
+	let row = template.clone();
+	
+	row.find("#data_id").text(id++);
+	row.find("#data_time").text((Date.now() - start) / 1000.0);
+	row.find("#data_distance").text(distance);
+	for (let c of row.find("*")) {
+			if (c.id) {
+					c.id += `_${id}`;
+			}
+			if (c.htmlFor) {
+					c.htmlFor += `_${id}`;
+			}
+	}
+	row.appendTo($("#data_table tbody"));
 }
 
 function clearMessage() {

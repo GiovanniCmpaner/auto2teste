@@ -108,7 +108,7 @@ namespace Sensors
                 digitalWrite(xshut, HIGH);
                 delay(10);
 
-                if (not distanceSensor.begin(0x30 + n, false, &Peripherals::Distances::I2C, Adafruit_VL53L0X::VL53L0X_SENSE_HIGH_ACCURACY))
+                if (not distanceSensor.begin(0x30 + n, false, &Peripherals::Distances::I2C, Adafruit_VL53L0X::VL53L0X_SENSE_DEFAULT))
                 {
                     log_e("failed to initialize distance[%d]", n);
                 }
@@ -193,9 +193,9 @@ namespace Sensors
             if (gyroAccelMagSensor.readSensor() > 0)
             {
                 Sensors::accelerationValues = {
-                    gyroAccelMagSensor.getAccelY_mss() * cfg.calibration.gyroscope.factor[0] + cfg.calibration.gyroscope.bias[0],
-                    gyroAccelMagSensor.getAccelX_mss() * cfg.calibration.gyroscope.factor[1] + cfg.calibration.gyroscope.bias[1],
-                    gyroAccelMagSensor.getAccelZ_mss() * cfg.calibration.gyroscope.factor[2] + cfg.calibration.gyroscope.bias[2]};
+                    gyroAccelMagSensor.getAccelY_mss() * cfg.calibration.accelerometer.factor[0] + cfg.calibration.accelerometer.bias[0],
+                    gyroAccelMagSensor.getAccelX_mss() * cfg.calibration.accelerometer.factor[1] + cfg.calibration.accelerometer.bias[1],
+                    gyroAccelMagSensor.getAccelZ_mss() * cfg.calibration.accelerometer.factor[2] + cfg.calibration.accelerometer.bias[2]};
 
                 Sensors::rotationValues = {
                     gyroAccelMagSensor.getGyroY_rads() * cfg.calibration.gyroscope.factor[0] + cfg.calibration.gyroscope.bias[0],
@@ -226,19 +226,21 @@ namespace Sensors
                     if (distanceSensor.isRangeComplete())
                     {
                         const auto reading{distanceSensor.readRangeResult()};
-                        if (reading < 4000)
+                        if (reading < 2000)
                         {
                             distance.second = (reading / 1000.0f) * cfg.calibration.distance.factor[n] + cfg.calibration.distance.bias[n];
                         }
                         else
                         {
-                            distance.second = +INFINITY;
+                            //distance.second = +INFINITY;
+                            distance.second = 2.0f;
                         }
                     }
                 }
                 else
                 {
-                    distance.second = NAN;
+                    //distance.second = NAN;
+                    distance.second = 2.0f;
                 }
             }
         }
@@ -269,7 +271,7 @@ namespace Sensors
 
     auto process(uint64_t syncTimer) -> void
     {
-        if (syncTimer - readTimer >= 10UL)
+        if (syncTimer - readTimer >= 30UL)
         {
             readTimer = syncTimer;
 

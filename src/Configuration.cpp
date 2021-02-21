@@ -28,7 +28,7 @@ static const Configuration defaultCfg{
      80,
      "WORKGROUP",
      "49WNN7F3CD@22"},
-    {true,
+    {false,
      {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED},
      {192, 168, 1, 210},
      {255, 255, 255, 0},

@@ -1,11 +1,12 @@
-$(document).ready(() => {
-    createDistancesChart();
-    createColorChart();
-    createRotationChart();
-    createAccelerationChart();
-    createMagneticChart();
-    createBatteryChart();
-    connectWsSensors();
+$(document).ready(() => 
+{
+		createDistancesChart();
+		createColorChart();
+		createRotationChart();
+		createAccelerationChart();
+		createMagneticChart();
+		createBatteryChart();
+		connectWsSensors();
 });
 
 let wsSensors;
@@ -52,62 +53,62 @@ function connectWsSensors()
 
 function smoothValue(id, val)
 {
-    let obj = $(id);
-    let factor = 0.05;
-    if(val == null)
-    {
+		let obj = $(id);
+		let factor = 0.05;
+		if(val == null)
+		{
 		obj.prop("value", "");
-    }
-    else {
+		}
+		else {
 		if (obj.prop("value") == "")
 		{
 			obj.prop("value", val.toFixed(3));
-        }
+				}
 		else
 		{
 			obj.prop("value", ( factor * val + ( 1 - factor ) * obj.prop("value")).toFixed(3) );
-        }
-    }
+				}
+		}
 }
 
 function updateCharts(sensors)
 {
-    updateDistancesChart(sensors.dist);
-    updateColorChart(sensors.color);
-    updateRotationChart(sensors.rot);
-    updateAccelerationChart(sensors.accel);
-    updateMagneticChart(sensors.mag);
-    updateBatteryChart(sensors.bat);
+		updateDistancesChart(sensors.dist);
+		updateColorChart(sensors.color);
+		updateRotationChart(sensors.rot);
+		updateAccelerationChart(sensors.accel);
+		updateMagneticChart(sensors.mag);
+		updateBatteryChart(sensors.bat);
 }
 
 function updateValues(sensors)
 {
-    smoothValue("#distances_0", sensors.dist["0"]);
-    smoothValue("#distances_1", sensors.dist["33"]);
-    smoothValue("#distances_2", sensors.dist["-33"]);
-    smoothValue("#distances_3", sensors.dist["90"]);
-    smoothValue("#distances_4", sensors.dist["-90"]);
-    smoothValue("#distances_5", sensors.dist["180"]);
-    
-    smoothValue("#color_r", sensors.color[0]);
-    smoothValue("#color_g", sensors.color[1]);
-    smoothValue("#color_b", sensors.color[2]);
-    
-    smoothValue("#rotation_x", sensors.rot[0]);
-    smoothValue("#rotation_y", sensors.rot[1]);
-    smoothValue("#rotation_z", sensors.rot[2]);
-    
-    smoothValue("#acceleration_x", sensors.accel[0]);
-    smoothValue("#acceleration_y", sensors.accel[1]);
-    smoothValue("#acceleration_z", sensors.accel[2]);
-    
-    smoothValue("#magnetic_x", sensors.mag[0]);
-    smoothValue("#magnetic_y", sensors.mag[1]);
-    smoothValue("#magnetic_z", sensors.mag[2]);
-    
-    smoothValue("#temperature", sensors.temp);
-    
-    smoothValue("#battery", sensors.bat);
+		smoothValue("#distances_0", sensors.dist["0"]);
+		smoothValue("#distances_1", sensors.dist["33"]);
+		smoothValue("#distances_2", sensors.dist["-33"]);
+		smoothValue("#distances_3", sensors.dist["90"]);
+		smoothValue("#distances_4", sensors.dist["-90"]);
+		smoothValue("#distances_5", sensors.dist["180"]);
+		
+		smoothValue("#color_r", sensors.color[0]);
+		smoothValue("#color_g", sensors.color[1]);
+		smoothValue("#color_b", sensors.color[2]);
+		
+		smoothValue("#rotation_x", sensors.rot[0]);
+		smoothValue("#rotation_y", sensors.rot[1]);
+		smoothValue("#rotation_z", sensors.rot[2]);
+		
+		smoothValue("#acceleration_x", sensors.accel[0]);
+		smoothValue("#acceleration_y", sensors.accel[1]);
+		smoothValue("#acceleration_z", sensors.accel[2]);
+		
+		smoothValue("#magnetic_x", sensors.mag[0]);
+		smoothValue("#magnetic_y", sensors.mag[1]);
+		smoothValue("#magnetic_z", sensors.mag[2]);
+		
+		smoothValue("#temperature", sensors.temp);
+		
+		smoothValue("#battery", sensors.bat);
 }
 
 function createDistancesChart(){
@@ -116,7 +117,7 @@ function createDistancesChart(){
 		type: 'line',
 		data: {
 			datasets: [
-				{   
+				{	 
 					label: '0',
 					pointBackgroundColor: 'green',
 					borderColor: 'green'

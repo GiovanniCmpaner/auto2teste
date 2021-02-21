@@ -62,10 +62,10 @@ table th, table td{
     width: 100%;
     min-width: 6em;
   }
-  .responsive tbody th:first-child, .responsive tbody td:first-child {
+  .responsive tbody th:nth-child(odd), .responsive tbody td:nth-child(odd) {
     display: none;
   }
-  .responsive tbody th:last-child, .responsive tbody td:last-child {
+  .responsive tbody th:nth-child(even), .responsive tbody td:nth-child(even) {
     width: auto;
   }
 }
