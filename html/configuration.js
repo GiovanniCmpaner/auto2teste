@@ -36,6 +36,25 @@ function handleFiles()
 			uploadFirmware();
 		}
 	});
+
+	$("#configuration").submit((event) =>
+	{
+		event.preventDefault();
+		
+		let submitter = event.originalEvent.submitter.id;
+
+		if (submitter == "configuration_upload")
+		{
+			if ($("#configuration")[0].checkValidity())
+			{
+				uploadConfiguration();
+			}
+		}
+		else if (submitter == "configuration_download")
+		{
+			window.location.href = "configuration.json";
+		}
+	});
 }
 
 function handleConfiguration()
@@ -389,6 +408,51 @@ function uploadFirmware()
 				processData: false,
 				data: formData,
 				timeout: 300000,
+				beforeSend: () => {
+					disableInput();
+					infoMessage("Uploading");
+				}
+			})
+			.done((msg) => {
+				successMessage(msg ?? "Done").then(() => reload());
+				//deferred.resolve();
+			})
+			.fail((xhr, status, error) => {
+				errorMessage(status == "timeout" ? "Fail: Timeout" : `Fail: ${xhr.status} ${xhr.statusText}`);
+				deferred.reject();
+			});
+			//.always(() =>
+			//{
+			//	enableInput();
+			//});
+	}
+
+	return deferred.promise();
+}
+
+function uploadConfiguration()
+{
+	let deferred = new $.Deferred();
+
+	let file = $("#configuration_file")[0].files[0];
+	if (file.size > 4096)
+	{
+		errorMessage("File size must be 4096 bytes or less");
+		deferred.reject();
+	}
+	else
+	{
+		let formData = new FormData();
+		formData.append("configuration.json", file, file.name);
+
+		$.ajax(
+			{
+				type: "POST",
+				url: "/configuration.json",
+				contentType: false,
+				processData: false,
+				data: formData,
+				timeout: 30000,
 				beforeSend: () => {
 					disableInput();
 					infoMessage("Uploading");

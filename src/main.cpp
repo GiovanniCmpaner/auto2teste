@@ -1,4 +1,5 @@
 #include <Arduino.h>
+#include <WiFi.h>
 #include <esp_log.h>
 
 #include "Configuration.hpp"
@@ -67,17 +68,17 @@ void setup()
 
     //scan();
 
-    Display::init();
-    Display::printf("initializing");
+    //Display::init();
+    //Display::printf("initializing");
 
     Configuration::init();
     Sensors::init();
-    Motors::init();
-    Neural::init();
-    Control::init();
+    //Motors::init();
+    //Neural::init();
+    //Control::init();
     WebInterface::init();
 
-    Display::printf("ready");
+    //Display::printf("ready");
 
     log_d("end");
 }
@@ -85,9 +86,9 @@ void setup()
 void loop()
 {
     const auto syncTimer{millis()};
-    Display::process(syncTimer);
+    //Display::process(syncTimer);
     Sensors::process(syncTimer);
-    Control::process(syncTimer);
+    //Control::process(syncTimer);
     WebInterface::process(syncTimer);
     delay(1); // Necessário para o ESP TCP Async
 }
