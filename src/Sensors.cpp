@@ -132,10 +132,7 @@ namespace Sensors
             {
                 uint16_t r, g, b, c;
                 Sensors::colorSensor.getColorData(&r, &g, &b, &c);
-                Sensors::colorValues = {
-                    r * cfg.calibration.color.factor[0] + cfg.calibration.color.bias[0],
-                    g * cfg.calibration.color.factor[1] + cfg.calibration.color.bias[1],
-                    b * cfg.calibration.color.factor[2] + cfg.calibration.color.bias[2]};
+                Sensors::colorValues = {r, g, b};
 
                 const auto currentDuty{ledcRead(1)};
                 if (c < 500 and currentDuty < 255)
@@ -146,6 +143,7 @@ namespace Sensors
                 {
                     ledcWrite(1, currentDuty - 15);
                 }
+
                 //            if (c < 300)
                 //            {
                 //                Sensors::colorValue = Color::BLACK;

@@ -157,15 +157,10 @@ function setCalibration()
 			},
 			color:
 			{
-				bias: [
-					parseFloat($("#calibration_color_bias_r").prop("value")),
-					parseFloat($("#calibration_color_bias_g").prop("value")),
-					parseFloat($("#calibration_color_bias_b").prop("value"))
-				],
-				factor: [
-					parseFloat($("#calibration_color_factor_r").prop("value")),
-					parseFloat($("#calibration_color_factor_g").prop("value")),
-					parseFloat($("#calibration_color_factor_b").prop("value"))
+				threshold: [
+					parseFloat($("#calibration_color_threshold_r").prop("value")),
+					parseFloat($("#calibration_color_threshold_g").prop("value")),
+					parseFloat($("#calibration_color_threshold_b").prop("value"))
 				]
 			}
 		}
@@ -298,12 +293,9 @@ function getConfiguration()
 			$("#calibration_distance_factor_4").prop("value", cfg.calibration.distance.factor[4]);
 			$("#calibration_distance_factor_5").prop("value", cfg.calibration.distance.factor[5]);
 
-			$("#calibration_color_bias_r").prop("value", cfg.calibration.color.bias[0]);
-			$("#calibration_color_bias_g").prop("value", cfg.calibration.color.bias[1]);
-			$("#calibration_color_bias_b").prop("value", cfg.calibration.color.bias[2]);
-			$("#calibration_color_factor_r").prop("value", cfg.calibration.color.factor[0]);
-			$("#calibration_color_factor_g").prop("value", cfg.calibration.color.factor[1]);
-			$("#calibration_color_factor_b").prop("value", cfg.calibration.color.factor[2]);
+			$("#calibration_color_threshold_r").prop("value", cfg.calibration.color.threshold[0]);
+			$("#calibration_color_threshold_g").prop("value", cfg.calibration.color.threshold[1]);
+			$("#calibration_color_threshold_b").prop("value", cfg.calibration.color.threshold[2]);
 
 			$("#access_point_enabled").prop("checked", cfg.access_point.enabled);
 			$("#access_point_mac").prop("value", cfg.access_point.mac.map((n) => n.toString(16).toUpperCase().padStart(2, "0")).join("-"));

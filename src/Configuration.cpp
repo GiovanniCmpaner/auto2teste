@@ -19,7 +19,7 @@ static const Configuration defaultCfg{
      {{0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f}},
      {{0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f}},
      {{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f}},
-     {{0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f}}},
+     {{100.0f, 100.0f, 100.0f}}},
     {true,
      {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED},
      {192, 168, 1, 210},
@@ -103,13 +103,9 @@ auto Configuration::serialize(ArduinoJson::JsonVariant &json) const -> void
         }
         {
             auto color{calibration["color"]};
-            for (auto n : this->calibration.color.bias)
+            for (auto n : this->calibration.color.threshold)
             {
-                color["bias"].add(n);
-            }
-            for (auto n : this->calibration.color.factor)
-            {
-                color["factor"].add(n);
+                color["threshold"].add(n);
             }
         }
     }
@@ -280,22 +276,12 @@ auto Configuration::deserialize(const ArduinoJson::JsonVariant &json) -> void
         {
             const auto color{calibration["color"]};
             {
-                const auto bias{color["bias"]};
-                if (bias.is<ArduinoJson::JsonArray>() and bias.size() == this->calibration.color.bias.size())
+                const auto threshold{color["threshold"]};
+                if (threshold.is<ArduinoJson::JsonArray>() and threshold.size() == this->calibration.color.threshold.size())
                 {
-                    for (auto i{0}; i < this->calibration.color.bias.size(); ++i)
+                    for (auto i{0}; i < this->calibration.color.threshold.size(); ++i)
                     {
-                        this->calibration.color.bias[i] = bias[i].as<float>();
-                    }
-                }
-            }
-            {
-                const auto factor{color["factor"]};
-                if (factor.is<ArduinoJson::JsonArray>() and factor.size() == this->calibration.color.factor.size())
-                {
-                    for (auto i{0}; i < this->calibration.color.factor.size(); ++i)
-                    {
-                        this->calibration.color.factor[i] = factor[i].as<float>();
+                        this->calibration.color.threshold[i] = threshold[i].as<float>();
                     }
                 }
             }

@@ -41,8 +41,7 @@ struct Configuration
 
         struct Color
         {
-            std::array<float, 3> bias;
-            std::array<float, 3> factor;
+            std::array<float, 3> threshold;
         };
 
         Battery battery;
