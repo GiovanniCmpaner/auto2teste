@@ -34,8 +34,6 @@ auto text(Color color) -> const char *
             return "magenta";
         case Color::CYAN:
             return "cyan";
-        case Color::GRAY:
-            return "gray";
         case Color::WHITE:
             return "white";
         default:
@@ -52,7 +50,8 @@ namespace Sensors
         auto gyroAccelMagSensor{MPU9250{Peripherals::GyroAccelMag::I2C, Peripherals::GyroAccelMag::ADDRESS}};
 
         auto distanceValues{std::array<std::pair<int, float>, 6>{}};
-        auto colorValues{std::array<float, 3>{}};
+        auto colorValues{std::array<float, 4>{}};
+        auto colorName{"black"};
         auto rotationValues{std::array<float, 3>{}};
         auto accelerationValues{std::array<float, 3>{}};
         auto magneticValues{std::array<float, 3>{}};
@@ -132,57 +131,69 @@ namespace Sensors
             {
                 uint16_t r, g, b, c;
                 Sensors::colorSensor.getColorData(&r, &g, &b, &c);
-                Sensors::colorValues = {r, g, b};
+
+                static const auto factor{0.05f};
+                Sensors::colorValues[0] = (r * factor) + (1 - factor) * Sensors::colorValues[0];
+                Sensors::colorValues[1] = (g * factor) + (1 - factor) * Sensors::colorValues[1];
+                Sensors::colorValues[2] = (b * factor) + (1 - factor) * Sensors::colorValues[2];
+                Sensors::colorValues[3] = (c * factor) + (1 - factor) * Sensors::colorValues[3];
 
                 const auto currentDuty{ledcRead(1)};
-                if (c < 500 and currentDuty < 255)
+
+                const auto min{cfg.calibration.color.target};
+                const auto max{static_cast<uint16_t>(cfg.calibration.color.target * 1.2f)};
+                if (c < min and currentDuty < 255)
                 {
                     ledcWrite(1, currentDuty + 15);
                 }
-                else if (c > 600 and currentDuty > 0)
+                else if (c > max and currentDuty > 0)
                 {
                     ledcWrite(1, currentDuty - 15);
                 }
 
-                //            if (c < 300)
-                //            {
-                //                Sensors::colorValue = Color::BLACK;
-                //            }
-                //            else if (c > 1500)
-                //            {
-                //                Sensors::colorValue = Color::WHITE;
-                //            }
-                //            else
-                //            {
-                //                if (r * 1.5 > g and r * 1.5 > b)
-                //                {
-                //                    Sensors::colorValue = Color::RED;
-                //                }
-                //                else if (g * 1.5 > r and g * 1.5 > b)
-                //                {
-                //                    Sensors::colorValue = Color::GREEN;
-                //                }
-                //                else if (b * 1.5 > r and b * 1.5 > g)
-                //                {
-                //                    Sensors::colorValue = Color::BLUE;
-                //                }
-                //                else if (r * 1.5 > b and g * 1.5 > b)
-                //                {
-                //                    Sensors::colorValue = Color::YELLOW;
-                //                }
-                //                else if (r * 1.5 > g and b * 1.5 > g)
-                //                {
-                //                    Sensors::colorValue = Color::MAGENTA;
-                //                }
-                //                else if (g * 1.5 > r and b * 1.5 > r)
-                //                {
-                //                    Sensors::colorValue = Color::CYAN;
-                //                }
-                //                else
-                //                {
-                //                    Sensors::colorValue = Color::GRAY;
-                //                }
-                //            }
+                const auto ratio(cfg.calibration.color.target / static_cast<float>(c));
+
+                if (Sensors::colorValues[0] > cfg.calibration.color.threshold[0])
+                {
+                    if (Sensors::colorValues[1] > cfg.calibration.color.threshold[1])
+                    {
+                        if (Sensors::colorValues[2] > cfg.calibration.color.threshold[2])
+                        {
+                            colorName = "white";
+                        }
+                        else
+                        {
+                            colorName = "yellow";
+                        }
+                    }
+                    else if (Sensors::colorValues[2] > cfg.calibration.color.threshold[2])
+                    {
+                        colorName = "magenta";
+                    }
+                    else
+                    {
+                        colorName = "red";
+                    }
+                }
+                else if (Sensors::colorValues[1] > cfg.calibration.color.threshold[1])
+                {
+                    if (Sensors::colorValues[2] > cfg.calibration.color.threshold[2])
+                    {
+                        colorName = "cyan";
+                    }
+                    else
+                    {
+                        colorName = "green";
+                    }
+                }
+                else if (Sensors::colorValues[2] > cfg.calibration.color.threshold[2])
+                {
+                    colorName = "blue";
+                }
+                else
+                {
+                    colorName = "black";
+                }
             }
         }
 
@@ -298,7 +309,7 @@ namespace Sensors
         return Sensors::distanceValues;
     }
 
-    auto colors() -> std::array<float, 3>
+    auto colors() -> std::array<float, 4>
     {
         return Sensors::colorValues;
     }
@@ -339,10 +350,11 @@ namespace Sensors
         }
         {
             auto color{json["color"]};
-            for (auto colorValue : Sensors::colorValues)
-            {
-                color.add(colorValue);
-            }
+            color["r"] = Sensors::colorValues[0];
+            color["g"] = Sensors::colorValues[1];
+            color["b"] = Sensors::colorValues[2];
+            color["c"] = Sensors::colorValues[3];
+            color["name"] = Sensors::colorName;
         }
         {
             auto rotation{json["rot"]};

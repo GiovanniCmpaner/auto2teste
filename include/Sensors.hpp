@@ -16,7 +16,6 @@ enum class Color
     YELLOW,
     MAGENTA,
     CYAN,
-    GRAY,
     WHITE
 };
 
@@ -43,7 +42,7 @@ namespace Sensors
     auto calibrateMagnetometer() -> bool;
 
     auto distances() -> std::array<std::pair<int, float>, 6>;
-    auto colors() -> std::array<float, 3>;
+    auto colors() -> std::array<float, 4>;
     auto rotation() -> std::array<float, 3>;
     auto acceleration() -> std::array<float, 3>;
     auto magnetic() -> std::array<float, 3>;

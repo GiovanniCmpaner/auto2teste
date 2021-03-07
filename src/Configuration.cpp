@@ -19,7 +19,7 @@ static const Configuration defaultCfg{
      {{0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f}},
      {{0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f}},
      {{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f, 1.0f, 1.0f, 1.0f}},
-     {{100.0f, 100.0f, 100.0f}}},
+     {500, {115.0f, 152.0f, 200.0f}}},
     {true,
      {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED},
      {192, 168, 1, 210},
@@ -103,6 +103,9 @@ auto Configuration::serialize(ArduinoJson::JsonVariant &json) const -> void
         }
         {
             auto color{calibration["color"]};
+
+            color["target"] = this->calibration.color.target;
+
             for (auto n : this->calibration.color.threshold)
             {
                 color["threshold"].add(n);
@@ -275,6 +278,13 @@ auto Configuration::deserialize(const ArduinoJson::JsonVariant &json) -> void
         }
         {
             const auto color{calibration["color"]};
+            {
+                const auto target{color["target"]};
+                if (target.is<float>())
+                {
+                    this->calibration.color.target = target.as<float>();
+                }
+            }
             {
                 const auto threshold{color["threshold"]};
                 if (threshold.is<ArduinoJson::JsonArray>() and threshold.size() == this->calibration.color.threshold.size())

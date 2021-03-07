@@ -157,6 +157,7 @@ function setCalibration()
 			},
 			color:
 			{
+				target: parseFloat($("#calibration_color_target_c").prop("value")),
 				threshold: [
 					parseFloat($("#calibration_color_threshold_r").prop("value")),
 					parseFloat($("#calibration_color_threshold_g").prop("value")),
@@ -293,6 +294,7 @@ function getConfiguration()
 			$("#calibration_distance_factor_4").prop("value", cfg.calibration.distance.factor[4]);
 			$("#calibration_distance_factor_5").prop("value", cfg.calibration.distance.factor[5]);
 
+			$("#calibration_color_target_c").prop("value", cfg.calibration.color.target);
 			$("#calibration_color_threshold_r").prop("value", cfg.calibration.color.threshold[0]);
 			$("#calibration_color_threshold_g").prop("value", cfg.calibration.color.threshold[1]);
 			$("#calibration_color_threshold_b").prop("value", cfg.calibration.color.threshold[2]);

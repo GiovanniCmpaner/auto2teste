@@ -41,6 +41,7 @@ struct Configuration
 
         struct Color
         {
+            float target;
             std::array<float, 3> threshold;
         };
 
