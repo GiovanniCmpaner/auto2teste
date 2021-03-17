@@ -68,11 +68,11 @@ function smoothValue(id, val)
 	{
 		if (obj.prop("value") == "")
 		{
-			obj.prop("value", val.toFixed(3));
+			obj.prop("value", val.toFixed(2));
 		}
 		else
 		{
-			obj.prop("value", (factor * val + (1 - factor) * obj.prop("value")).toFixed(3));
+			obj.prop("value", (factor * val + (1 - factor) * obj.prop("value")).toFixed(2));
 		}
 	}
 }
@@ -97,10 +97,10 @@ function updateValues(sensors)
 	smoothValue("#distances_5", sensors.dist["180"]);
 
 	$("#color_name").prop("value", sensors.color["name"]);
-	$("#color_r").prop("value", sensors.color["r"]);
-	$("#color_g").prop("value", sensors.color["g"]);
-	$("#color_b").prop("value", sensors.color["b"]);
-	$("#color_c").prop("value", sensors.color["c"]);
+	$("#color_r").prop("value", sensors.color["r"].toFixed(0));
+	$("#color_g").prop("value", sensors.color["g"].toFixed(0));
+	$("#color_b").prop("value", sensors.color["b"].toFixed(0));
+	$("#color_c").prop("value", sensors.color["c"].toFixed(0));
 
 	smoothValue("#rotation_x", sensors.rot[0]);
 	smoothValue("#rotation_y", sensors.rot[1]);

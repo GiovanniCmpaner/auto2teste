@@ -132,11 +132,11 @@ namespace Sensors
                 uint16_t r, g, b, c;
                 Sensors::colorSensor.getColorData(&r, &g, &b, &c);
 
-                static const auto factor{0.05f};
-                Sensors::colorValues[0] = (r * factor) + (1 - factor) * Sensors::colorValues[0];
-                Sensors::colorValues[1] = (g * factor) + (1 - factor) * Sensors::colorValues[1];
-                Sensors::colorValues[2] = (b * factor) + (1 - factor) * Sensors::colorValues[2];
-                Sensors::colorValues[3] = (c * factor) + (1 - factor) * Sensors::colorValues[3];
+                static const auto smoothingFactor{0.10f};
+                Sensors::colorValues[0] = (r * smoothingFactor) + (1 - smoothingFactor) * Sensors::colorValues[0];
+                Sensors::colorValues[1] = (g * smoothingFactor) + (1 - smoothingFactor) * Sensors::colorValues[1];
+                Sensors::colorValues[2] = (b * smoothingFactor) + (1 - smoothingFactor) * Sensors::colorValues[2];
+                Sensors::colorValues[3] = (c * smoothingFactor) + (1 - smoothingFactor) * Sensors::colorValues[3];
 
                 const auto currentDuty{ledcRead(1)};
 
@@ -151,13 +151,12 @@ namespace Sensors
                     ledcWrite(1, currentDuty - 15);
                 }
 
-                const auto ratio(cfg.calibration.color.target / static_cast<float>(c));
-
-                if (Sensors::colorValues[0] > cfg.calibration.color.threshold[0])
+                const auto scalingFactor(cfg.calibration.color.target / static_cast<float>(c));
+                if ((Sensors::colorValues[0] * scalingFactor) > cfg.calibration.color.threshold[0])
                 {
-                    if (Sensors::colorValues[1] > cfg.calibration.color.threshold[1])
+                    if ((Sensors::colorValues[1] * scalingFactor) > cfg.calibration.color.threshold[1])
                     {
-                        if (Sensors::colorValues[2] > cfg.calibration.color.threshold[2])
+                        if ((Sensors::colorValues[2] * scalingFactor) > cfg.calibration.color.threshold[2])
                         {
                             colorName = "white";
                         }
@@ -166,7 +165,7 @@ namespace Sensors
                             colorName = "yellow";
                         }
                     }
-                    else if (Sensors::colorValues[2] > cfg.calibration.color.threshold[2])
+                    else if ((Sensors::colorValues[2] * scalingFactor) > cfg.calibration.color.threshold[2])
                     {
                         colorName = "magenta";
                     }
@@ -175,9 +174,9 @@ namespace Sensors
                         colorName = "red";
                     }
                 }
-                else if (Sensors::colorValues[1] > cfg.calibration.color.threshold[1])
+                else if ((Sensors::colorValues[1] * scalingFactor) > cfg.calibration.color.threshold[1])
                 {
-                    if (Sensors::colorValues[2] > cfg.calibration.color.threshold[2])
+                    if ((Sensors::colorValues[2] * scalingFactor) > cfg.calibration.color.threshold[2])
                     {
                         colorName = "cyan";
                     }
@@ -186,7 +185,7 @@ namespace Sensors
                         colorName = "green";
                     }
                 }
-                else if (Sensors::colorValues[2] > cfg.calibration.color.threshold[2])
+                else if ((Sensors::colorValues[2] * scalingFactor) > cfg.calibration.color.threshold[2])
                 {
                     colorName = "blue";
                 }
