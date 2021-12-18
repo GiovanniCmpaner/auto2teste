@@ -2,6 +2,9 @@
 #include <SPIFFS.h>
 #include <Wire.h>
 
+#include <FFat.h>
+#include <FS.h>
+
 #include <esp_log.h>
 
 #include "Peripherals.hpp"
@@ -43,10 +46,10 @@ namespace Peripherals
         //pinMode(LED::CTRL, OUTPUT);
         //digitalWrite(LED::CTRL, LOW);
 
-        //Distances::I2C.begin(Distances::SDA, Distances::SCL, 400000);
-        //Color::I2C.begin(Color::SDA, Color::SCL, 400000);
-        //GyroAccelMag::I2C.begin(GyroAccelMag::SDA, GyroAccelMag::SCL, 400000);
-        //Display::I2C.begin(Display::SDA, Display::SCL, 400000);
+        Distances::I2C.setPins(Distances::SDA, Distances::SCL);
+        Color::I2C.setPins(Color::SDA, Color::SCL);
+        GyroAccelMag::I2C.setPins(GyroAccelMag::SDA, GyroAccelMag::SCL);
+        Display::I2C.setPins(Display::SDA, Display::SCL);
 
         SPIFFS.begin(true);
 
