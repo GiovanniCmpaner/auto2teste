@@ -107,7 +107,7 @@ namespace Sensors
                 digitalWrite(xshut, HIGH);
                 delay(10);
 
-                if (not distanceSensor.begin(0x30 + n, false, &Peripherals::Distances::I2C, Adafruit_VL53L0X::VL53L0X_SENSE_DEFAULT))
+                if (not distanceSensor.begin(0x30 + n, false, &Peripherals::Distances::I2C, Adafruit_VL53L0X::VL53L0X_SENSE_HIGH_SPEED))
                 {
                     log_e("failed to initialize distance[%d]", n);
                 }

@@ -1,5 +1,6 @@
 #include <Arduino.h>
 
+#include "Configuration.hpp"
 #include "Motors.hpp"
 #include "Peripherals.hpp"
 
@@ -11,7 +12,7 @@ namespace Motors
 
         ledcSetup(0, 10000, 8);
         ledcAttachPin(Peripherals::Motors::PWM, 0);
-        ledcWrite(0, 255);
+        ledcWrite(0, 128.0f + cfg.calibration.motor.speed * 127.0f);
 
         digitalWrite(Peripherals::Motors::STBY, HIGH);
 

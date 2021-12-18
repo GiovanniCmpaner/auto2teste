@@ -43,10 +43,10 @@ namespace Peripherals
         //pinMode(LED::CTRL, OUTPUT);
         //digitalWrite(LED::CTRL, LOW);
 
-        Distances::I2C.begin(Distances::SDA, Distances::SCL, 400000);
-        Color::I2C.begin(Color::SDA, Color::SCL, 400000);
-        GyroAccelMag::I2C.begin(GyroAccelMag::SDA, GyroAccelMag::SCL, 400000);
-        Display::I2C.begin(Display::SDA, Display::SCL, 400000);
+        //Distances::I2C.begin(Distances::SDA, Distances::SCL, 400000);
+        //Color::I2C.begin(Color::SDA, Color::SCL, 400000);
+        //GyroAccelMag::I2C.begin(GyroAccelMag::SDA, GyroAccelMag::SCL, 400000);
+        //Display::I2C.begin(Display::SDA, Display::SCL, 400000);
 
         SPIFFS.begin(true);
 

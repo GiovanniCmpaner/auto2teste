@@ -92,6 +92,10 @@ function setCalibration()
 	let cfg = {
 		calibration:
 		{
+			motor:
+			{
+				speed: parseFloat($("#calibration_motor_speed").prop("value"))
+			},
 			battery:
 			{
 				bias: parseFloat($("#calibration_battery_bias").prop("value")),
@@ -257,6 +261,8 @@ function getConfiguration()
 		})
 		.done((cfg) =>
 		{
+			$("#calibration_motor_speed").prop("value", cfg.calibration.motor.speed);
+
 			$("#calibration_battery_bias").prop("value", cfg.calibration.battery.bias);
 			$("#calibration_battery_factor").prop("value", cfg.calibration.battery.factor);
 
@@ -339,9 +345,9 @@ function uploadModel()
 	let deferred = new $.Deferred();
 
 	let file = $("#model_file")[0].files[0];
-	if (file.size > 16384)
+	if (file.size > 32767)
 	{
-		errorMessage("File size must be 16384 bytes or less");
+		errorMessage("File size must be 32767 bytes or less");
 		deferred.reject();
 	}
 	else

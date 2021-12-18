@@ -14,7 +14,8 @@
 #include "Peripherals.hpp"
 
 static const Configuration defaultCfg{
-    {{-166.67f, 0.0417f},
+    {{1.00f},
+     {-166.67f, 0.0417f},
      {{0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f}},
      {{0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f}},
      {{0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f}},
@@ -51,6 +52,11 @@ auto Configuration::serialize(ArduinoJson::JsonVariant &json) const -> void
 {
     {
         auto calibration{json["calibration"]};
+        {
+            auto motor{calibration["motor"]};
+
+            motor["speed"] = constrain(this->calibration.motor.speed, 0.01f, 1.00f);
+        }
         {
             auto battery{calibration["battery"]};
 
@@ -167,6 +173,16 @@ auto Configuration::deserialize(const ArduinoJson::JsonVariant &json) -> void
 {
     {
         const auto calibration{json["calibration"]};
+        {
+            const auto motor{calibration["motor"]};
+            {
+                const auto speed{motor["speed"]};
+                if (speed.is<float>())
+                {
+                    this->calibration.motor.speed = constrain(speed.as<float>(), 0.01f, 1.00f);
+                }
+            }
+        }
         {
             const auto battery{calibration["battery"]};
             {

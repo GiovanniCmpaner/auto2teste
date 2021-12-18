@@ -7,6 +7,8 @@
 #include <SPIFFS.h>
 #include <Update.h>
 #include <WiFi.h>
+#include <WiFiAP.h>
+#include <WiFiSTA.h>
 
 #include <esp32s2/rom/rtc.h>
 #include <esp_log.h>
@@ -205,9 +207,9 @@ namespace WebInterface
                         return;
                     }
 
-                    if (request->contentLength() > 16384)
+                    if (request->contentLength() > 32767)
                     {
-                        request->send(400, "text/plain", "File size must be 16384 bytes or less");
+                        request->send(400, "text/plain", "File size must be 32767 bytes or less");
                         return;
                     }
 
@@ -487,17 +489,18 @@ namespace WebInterface
                 DefaultHeaders::Instance().addHeader("Access-Control-Allow-Methods", "POST, GET, OPTIONS");
                 DefaultHeaders::Instance().addHeader("Access-Control-Allow-Headers", "Content-Type");
                 DefaultHeaders::Instance().addHeader("Access-Control-Max-Age", "86400");
-                webServer->onNotFound([](AsyncWebServerRequest *request) {
-                    log_d("not found = %s", request->url().c_str());
-                    if (request->method() == HTTP_OPTIONS)
-                    {
-                        request->send(200);
-                    }
-                    else
-                    {
-                        request->send(404, "not found");
-                    }
-                });
+                webServer->onNotFound([](AsyncWebServerRequest *request)
+                                      {
+                                          log_d("not found = %s", request->url().c_str());
+                                          if (request->method() == HTTP_OPTIONS)
+                                          {
+                                              request->send(200);
+                                          }
+                                          else
+                                          {
+                                              request->send(404, "not found");
+                                          }
+                                      });
                 webServer->begin();
             }
         }

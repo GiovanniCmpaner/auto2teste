@@ -20,9 +20,9 @@ namespace Control
         auto actionTimer{0UL};
         auto manualTimeoutTimer{0UL};
 
-        auto inputs() -> std::array<float, 7>
+        auto inputs() -> std::array<float, 6>
         {
-            auto inputs{std::array<float, 7>{}};
+            auto inputs{std::array<float, 6>{}};
 
             const auto distances{Sensors::distances()};
             const auto colors{Sensors::colors()};
@@ -137,7 +137,7 @@ namespace Control
 
     auto process(uint64_t syncTimer) -> void
     {
-        if (syncTimer - Control::actionTimer >= 30UL)
+        if (syncTimer - Control::actionTimer >= 33UL)
         {
             Control::actionTimer = syncTimer;
 

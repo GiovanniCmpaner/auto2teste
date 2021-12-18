@@ -9,6 +9,11 @@ struct Configuration
 {
     struct Calibration
     {
+        struct Motor
+        {
+            float speed;
+        };
+
         struct Battery
         {
             float bias;
@@ -45,6 +50,7 @@ struct Configuration
             std::array<float, 3> threshold;
         };
 
+        Motor motor;
         Battery battery;
         Gyroscope gyroscope;
         Accelerometer accelerometer;

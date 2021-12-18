@@ -11,6 +11,8 @@
 #include "Sensors.hpp"
 #include "WebInterface.hpp"
 
+#include "fl/Headers.h"
+
 void scan()
 {
     Wire1.begin();
@@ -59,6 +61,9 @@ void scan()
 
 void setup()
 {
+    fl::fuzzylite::setDebugging(false);
+    fl::fuzzylite::setLogging(true);
+
     Serial.begin(115200);
     Serial.setDebugOutput(true);
 

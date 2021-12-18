@@ -54,6 +54,7 @@ namespace Neural
 
             // Map the model into a usable data structure. This doesn't involve any
             // copying or parsing, it's a very lightweight operation.
+
             auto model{tflite::GetModel(modelBuffer.data())};
             if (model->version() != TFLITE_SCHEMA_VERSION)
             {
@@ -62,7 +63,6 @@ namespace Neural
                     "Model provided is schema version %d not equal "
                     "to supported version %d.",
                     model->version(), TFLITE_SCHEMA_VERSION);
-
                 return;
             }
 
@@ -86,15 +86,15 @@ namespace Neural
             inputTensor = interpreter->input(0);
             outputTensor = interpreter->output(0);
 
-            for (auto n{0}; n < interpreter->tensors_size(); ++n)
-            {
-                auto tensor{interpreter->tensor(n)};
-                log_d("tensor[%d] = %s", n, tensor->name);
-            }
+            //for (auto n{0}; n < interpreter->tensors_size(); ++n)
+            //{
+            //    auto tensor{interpreter->tensor(n)};
+            //    log_d("tensor[%d] = %s", n, tensor->name);
+            //}
 
-            if (inputTensor->dims->size != 2 or inputTensor->dims->data[0] != 1 or inputTensor->dims->data[1] != 7)
+            if (inputTensor->dims->size != 2 or inputTensor->dims->data[0] != 1 or inputTensor->dims->data[1] != 6)
             {
-                errorReporter->Report("input size mismatch, expected [1,7]");
+                errorReporter->Report("input size mismatch, expected [1,6]");
                 return;
             }
 
@@ -128,7 +128,7 @@ namespace Neural
         log_d("end");
     }
 
-    auto inference(const std::array<float, 7> &inputs) -> std::array<float, 5>
+    auto inference(const std::array<float, 6> &inputs) -> std::array<float, 5>
     {
         if (interpreter == nullptr)
         {
