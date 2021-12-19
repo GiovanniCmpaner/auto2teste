@@ -10,6 +10,7 @@
 #include <WiFiAP.h>
 #include <WiFiSTA.h>
 
+#include <cstring>
 #include <esp32s2/rom/rtc.h>
 #include <esp_log.h>
 #include <esp_ota_ops.h>
@@ -139,6 +140,39 @@ namespace WebInterface
                 request->send(SPIFFS, "/model.tflite", "application/octet-stream", true);
             }
 
+            auto handleCaptureCsv(AsyncWebServerRequest *request) -> void
+            {
+                log_d("GET /text/csv");
+
+                static auto line{std::string{}};
+                static auto lineIndex{0};
+
+                if (not(Control::Capture::beginReadCsv() and Control::Capture::headerLineCsv(&line)))
+                {
+                    log_d("capture error");
+                    return;
+                }
+
+                request->sendChunked("text/csv", [](uint8_t *buffer, size_t maxLen, size_t index) -> size_t
+                {
+                    if (lineIndex == line.size())
+                    {
+                        lineIndex = 0;
+
+                        if (not Control::Capture::nextLineCsv(&line))
+                        {
+                            Control::Capture::endReadCsv();
+                            return 0;
+                        }
+                    }
+
+                    const auto actualLength{std::min(maxLen, line.size() - lineIndex)};
+                    std::memcpy(buffer, line.data() + lineIndex, actualLength);
+                    lineIndex += actualLength;
+
+                    return actualLength;
+                });
+            }
         } // namespace Get
 
         namespace File
@@ -408,6 +442,18 @@ namespace WebInterface
                         {
                             Control::action(Auto::START);
                         }
+                        else if (info->len == 14 and strncmp(text, "capture_enable", 14) == 0)
+                        {
+                            Control::Capture::enable();
+                        }
+                        else if (info->len == 15 and strncmp(text, "capture_disable", 15) == 0)
+                        {
+                            Control::Capture::disable();
+                        }
+                        else if (info->len == 13 and strncmp(text, "capture_clear", 13) == 0)
+                        {
+                            Control::Capture::clear();
+                        }
                     }
                 }
             }
@@ -475,6 +521,7 @@ namespace WebInterface
                 webServer->on("/style.css", HTTP_GET, Get::handleStyleCss);
                 webServer->on("/configuration.json", HTTP_GET, Get::handleConfigurationJson);
                 webServer->on("/model.tflite", HTTP_GET, Get::handleModelTflite);
+                webServer->on("/capture.csv", HTTP_GET, Get::handleCaptureCsv);
 
                 webServer->addHandler(new AsyncCallbackJsonWebHandler{"/configuration.json", Post::handleConfigurationJson, 2048});
                 webServer->onFileUpload(Post::handleFile);

@@ -2,8 +2,12 @@
 #include <Arduino.h>
 #include <SPIFFS.h>
 
+#include <array>
 #include <cstdint>
 #include <esp_log.h>
+#include <functional>
+#include <iomanip>
+#include <sstream>
 
 #include "Control.hpp"
 #include "Motors.hpp"
@@ -19,6 +23,9 @@ namespace Control
         auto manualValue{Manual::STOP};
         auto actionTimer{0UL};
         auto manualTimeoutTimer{0UL};
+        auto captureEnabled{false};
+        auto captureReading{false};
+        auto captureFile{fs::File{}};
 
         auto inputs() -> std::array<float, 6>
         {
@@ -83,6 +90,13 @@ namespace Control
             else
             {
                 Control::move(Control::manualValue);
+
+                if (Control::captureEnabled)
+                {
+                    const auto inputs{Control::inputs()};
+                    Control::captureFile.write(reinterpret_cast<const uint8_t *>(&inputs), sizeof(inputs));
+                    Control::captureFile.write(reinterpret_cast<const uint8_t *>(&Control::manualValue), sizeof(Control::manualValue));
+                }
             }
         }
 
@@ -94,14 +108,6 @@ namespace Control
                 {
                     auto inputs{Control::inputs()};
 
-                    for (auto n{0}; n < inputs.size(); ++n)
-                    {
-                        if (std::isnan(inputs[n]) or std::isinf(inputs[n]) or inputs[n] > 2.0f)
-                        {
-                            inputs[n] = 2.0f;
-                        }
-                    }
-
                     const auto outputs{Neural::inference(inputs)};
 
                     auto max{0};
@@ -112,6 +118,9 @@ namespace Control
                             max = n;
                         }
                     }
+
+                    //log_d("inputs = %.2f %.2f %.2f %.2f %.2f %.2f", inputs[0], inputs[1], inputs[2], inputs[3], inputs[4], inputs[5]);
+                    //log_d("outputs = %.2f %.2f %.2f %.2f %.2f", outputs[0], outputs[1], outputs[2], outputs[3], outputs[4]);
 
                     Control::move(static_cast<Manual>(max));
                     break;
@@ -131,6 +140,8 @@ namespace Control
         log_d("begin");
 
         // Nothing
+        Capture::enable();
+        Capture::disable();
 
         log_d("end");
     }
@@ -172,4 +183,130 @@ namespace Control
         log_d("action(auto) = %d", static_cast<int>(autoValue));
         Control::autoValue = autoValue;
     }
+
+    namespace Capture
+    {
+        auto enable() -> bool
+        {
+            if (Control::captureEnabled or Control::captureReading)
+            {
+                log_d("capture busy");
+                return false;
+            }
+
+            Control::captureFile = SPIFFS.open("/capture.bin", FILE_APPEND);
+            if (not Control::captureFile)
+            {
+                log_e("capture file write error");
+                return false;
+            }
+
+            Control::captureFile.write(reinterpret_cast<const uint8_t *>("teste"), 5);
+
+            Control::captureEnabled = true;
+            return true;
+        }
+
+        auto disable() -> void
+        {
+            if (not Control::captureEnabled)
+            {
+                log_d("capture not enabled");
+                return;
+            }
+
+            Control::captureFile.close();
+            Control::captureEnabled = false;
+        }
+
+        auto clear() -> bool
+        {
+            if (Control::captureEnabled or Control::captureReading)
+            {
+                log_d("capture busy");
+                return false;
+            }
+
+            SPIFFS.remove("/capture.bin");
+            return true;
+        }
+
+        auto beginReadCsv() -> bool
+        {
+            if (Control::captureEnabled or Control::captureReading)
+            {
+                log_d("capture busy");
+                return false;
+            }
+
+            Control::captureFile = SPIFFS.open("/capture.bin", FILE_READ);
+            if (not Control::captureFile)
+            {
+                log_e("capture file read error");
+                return false;
+            }
+
+            Control::captureReading = true;
+            return true;
+        }
+
+        auto headerLineCsv(std::string *str) -> bool
+        {
+            if (not Control::captureReading)
+            {
+                log_d("capture not reading");
+                return false;
+            }
+
+            *str = "+33;+90;0;-33;-90;180;stop;forward;backward;left;right;\n";
+            return true;
+        }
+
+        auto nextLineCsv(std::string *str) -> bool
+        {
+            if (not Control::captureReading)
+            {
+                log_d("capture not reading");
+                return false;
+            }
+
+            auto inputs{std::array<float, 6>{}};
+            auto manual{Manual::STOP};
+            if (not(Control::captureFile.read(reinterpret_cast<uint8_t *>(&inputs), sizeof(inputs)) and Control::captureFile.read(reinterpret_cast<uint8_t *>(&manual), sizeof(manual))))
+            {
+                log_d("capture read end");
+                return false;
+            }
+
+            auto oss{std::ostringstream{}};
+
+            for (auto n{0}; n < 6; ++n)
+            {
+                oss << std::fixed << std::setprecision(2) << inputs[n] << ';';
+            }
+
+            for (auto n{0}; n < 5; ++n)
+            {
+                oss << (static_cast<int>(manual) == n ? '1' : '0') << ';';
+            }
+
+            oss << '\n';
+
+            *str = oss.str();
+            return true;
+        }
+
+        auto endReadCsv() -> void
+        {
+            if (not Control::captureReading)
+            {
+                log_d("capture not reading");
+                return;
+            }
+
+            Control::captureFile.close();
+            Control::captureReading = false;
+        }
+    } // namespace Capture
+
 } // namespace Control

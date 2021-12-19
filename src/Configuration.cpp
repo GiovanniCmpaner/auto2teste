@@ -14,7 +14,7 @@
 #include "Peripherals.hpp"
 
 static const Configuration defaultCfg{
-    {{1.00f},
+    {{0.50f},
      {-166.67f, 0.0417f},
      {{0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f}},
      {{0.0f, 0.0f, 0.0f}, {1.0f, 1.0f, 1.0f}},

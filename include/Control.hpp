@@ -1,5 +1,9 @@
 #pragma once
 
+#include <array>
+#include <cstdint>
+#include <functional>
+
 enum class Mode
 {
     MANUAL = 0,
@@ -29,4 +33,16 @@ namespace Control
     auto mode(Mode modeValue) -> void;
     auto action(Manual manualValue) -> void;
     auto action(Auto autoValue) -> void;
+
+    namespace Capture
+    {
+        auto enable() -> bool;
+        auto disable() -> void;
+        auto clear() -> bool;
+        auto beginReadCsv() -> bool;
+        auto headerLineCsv(std::string *str) -> bool;
+        auto nextLineCsv(std::string *str) -> bool;
+        auto endReadCsv() -> void;
+    } // namespace Capture
+
 } // namespace Control
