@@ -90,13 +90,7 @@ namespace Control
             else
             {
                 Control::move(Control::manualValue);
-
-                if (Control::captureEnabled)
-                {
-                    const auto inputs{Control::inputs()};
-                    Control::captureFile.write(reinterpret_cast<const uint8_t *>(&inputs), sizeof(inputs));
-                    Control::captureFile.write(reinterpret_cast<const uint8_t *>(&Control::manualValue), sizeof(Control::manualValue));
-                }
+                Control::Capture::save();
             }
         }
 
@@ -140,8 +134,6 @@ namespace Control
         log_d("begin");
 
         // Nothing
-        Capture::enable();
-        Capture::disable();
 
         log_d("end");
     }
@@ -201,8 +193,6 @@ namespace Control
                 return false;
             }
 
-            Control::captureFile.write(reinterpret_cast<const uint8_t *>("teste"), 5);
-
             Control::captureEnabled = true;
             return true;
         }
@@ -228,6 +218,19 @@ namespace Control
             }
 
             SPIFFS.remove("/capture.bin");
+            return true;
+        }
+
+        auto save() -> bool
+        {
+            if (not Control::captureEnabled)
+            {
+                return false;
+            }
+
+            const auto inputs{Control::inputs()};
+            Control::captureFile.write(reinterpret_cast<const uint8_t *>(&inputs), sizeof(inputs));
+            Control::captureFile.write(reinterpret_cast<const uint8_t *>(&Control::manualValue), sizeof(Control::manualValue));
             return true;
         }
 

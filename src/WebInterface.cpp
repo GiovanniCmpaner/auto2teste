@@ -150,27 +150,35 @@ namespace WebInterface
                 if (not(Control::Capture::beginReadCsv() and Control::Capture::headerLineCsv(&line)))
                 {
                     log_d("capture error");
+                    request->send(500, "text/plain", "Capture busy");
                     return;
                 }
 
                 request->sendChunked("text/csv", [](uint8_t *buffer, size_t maxLen, size_t index) -> size_t
                 {
-                    if (lineIndex == line.size())
-                    {
-                        lineIndex = 0;
+                    auto bufferIndex{0};
 
-                        if (not Control::Capture::nextLineCsv(&line))
+                    while (bufferIndex < maxLen)
+                    {
+                        if (lineIndex == line.size())
                         {
-                            Control::Capture::endReadCsv();
-                            return 0;
+                            lineIndex = 0;
+
+                            if (not Control::Capture::nextLineCsv(&line))
+                            {
+                                line.clear();
+                                Control::Capture::endReadCsv();
+                                break;
+                            }
                         }
+
+                        const auto lineLength{std::min(maxLen - bufferIndex, line.size() - lineIndex)};
+                        std::memcpy(buffer + bufferIndex, line.data() + lineIndex, lineLength);
+                        bufferIndex += lineLength;
+                        lineIndex += lineLength;
                     }
 
-                    const auto actualLength{std::min(maxLen, line.size() - lineIndex)};
-                    std::memcpy(buffer, line.data() + lineIndex, actualLength);
-                    lineIndex += actualLength;
-
-                    return actualLength;
+                    return bufferIndex;
                 });
             }
         } // namespace Get

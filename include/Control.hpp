@@ -4,6 +4,9 @@
 #include <cstdint>
 #include <functional>
 
+#include <Arduino.h>
+#include <ArduinoJson.hpp>
+
 enum class Mode
 {
     MANUAL = 0,
@@ -39,6 +42,8 @@ namespace Control
         auto enable() -> bool;
         auto disable() -> void;
         auto clear() -> bool;
+        auto save() -> bool;
+
         auto beginReadCsv() -> bool;
         auto headerLineCsv(std::string *str) -> bool;
         auto nextLineCsv(std::string *str) -> bool;

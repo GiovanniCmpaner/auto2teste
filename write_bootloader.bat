@@ -1,2 +1,0 @@
-"C:\Users\Giovanni\.platformio\penv\Scripts\python.exe" "C:\Users\Giovanni\.platformio\packages\tool-esptoolpy\esptool.py" --chip esp32s2 --port "COM5" --baud 921600 write_flash 0x1000 C:\Users\Giovanni\.platformio\packages\framework-arduinoespressif32\tools\sdk\esp32s2\bin\bootloader_qio_80m.bin
-pause
