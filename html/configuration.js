@@ -23,7 +23,7 @@ function handleFiles()
 		}
 		else if (submitter == "model_download")
 		{
-			window.location.href = "model.tflite";
+      window.open("model.tflite");
 		}
 	});
 
@@ -52,7 +52,7 @@ function handleFiles()
 		}
 		else if (submitter == "configuration_download")
 		{
-			window.location.href = "configuration.json";
+      window.open("configuration.json");
 		}
 	});
 }

@@ -89,12 +89,12 @@ function updateCharts(sensors)
 
 function updateValues(sensors)
 {
-	smoothValue("#distances_0", sensors.dist["0"]);
-	smoothValue("#distances_1", sensors.dist["33"]);
-	smoothValue("#distances_2", sensors.dist["-33"]);
-	smoothValue("#distances_3", sensors.dist["90"]);
-	smoothValue("#distances_4", sensors.dist["-90"]);
-	smoothValue("#distances_5", sensors.dist["180"]);
+	$("#distances_0").prop("value", sensors.dist["33"].toFixed(3));
+	$("#distances_1").prop("value", sensors.dist["90"].toFixed(3));
+	$("#distances_2").prop("value", sensors.dist["0"].toFixed(3));
+	$("#distances_3").prop("value", sensors.dist["-33"].toFixed(3));
+	$("#distances_4").prop("value", sensors.dist["-90"].toFixed(3));
+	$("#distances_5").prop("value", sensors.dist["180"].toFixed(3));
 
 	$("#color_name").prop("value", sensors.color["name"]);
 	$("#color_r").prop("value", sensors.color["r"].toFixed(0));
@@ -129,22 +129,22 @@ function createDistancesChart()
 		{
 			datasets: [
 			{
-				label: '0',
+				label: '33',
 				pointBackgroundColor: 'green',
 				borderColor: 'green'
 			},
 			{
-				label: '33',
+				label: '90',
 				pointBackgroundColor: 'blue',
 				borderColor: 'blue'
 			},
 			{
-				label: '-33',
+				label: '0',
 				pointBackgroundColor: 'red',
 				borderColor: 'red'
 			},
 			{
-				label: '90',
+				label: '-33',
 				pointBackgroundColor: 'yellow',
 				borderColor: 'yellow'
 			},
@@ -215,10 +215,10 @@ function updateDistancesChart(distances)
 		distancesChart.data.labels.shift();
 	}
 
-	distancesChart.data.datasets[0].data.push((distances["0"] <= +9999.9 ? distances["0"] : null));
-	distancesChart.data.datasets[1].data.push((distances["33"] <= +9999.9 ? distances["33"] : null));
-	distancesChart.data.datasets[2].data.push((distances["-33"] <= +9999.9 ? distances["-33"] : null));
-	distancesChart.data.datasets[3].data.push((distances["90"] <= +9999.9 ? distances["90"] : null));
+	distancesChart.data.datasets[0].data.push((distances["33"] <= +9999.9 ? distances["33"] : null));
+	distancesChart.data.datasets[1].data.push((distances["90"] <= +9999.9 ? distances["90"] : null));
+	distancesChart.data.datasets[2].data.push((distances["0"] <= +9999.9 ? distances["0"] : null));
+	distancesChart.data.datasets[3].data.push((distances["-33"] <= +9999.9 ? distances["-33"] : null));
 	distancesChart.data.datasets[4].data.push((distances["-90"] <= +9999.9 ? distances["-90"] : null));
 	distancesChart.data.datasets[5].data.push((distances["180"] <= +9999.9 ? distances["0"] : null));
 

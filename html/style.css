@@ -98,6 +98,10 @@ table th, table td{
   display: inline-block;
 }
 
+#capture {
+  display: inline-block;
+}
+
 #manual {
 	visibility: visible;
 }

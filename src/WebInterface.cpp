@@ -155,31 +155,31 @@ namespace WebInterface
                 }
 
                 request->sendChunked("text/csv", [](uint8_t *buffer, size_t maxLen, size_t index) -> size_t
-                {
-                    auto bufferIndex{0};
+                                     {
+                                         auto bufferIndex{0};
 
-                    while (bufferIndex < maxLen)
-                    {
-                        if (lineIndex == line.size())
-                        {
-                            lineIndex = 0;
+                                         while (bufferIndex < maxLen)
+                                         {
+                                             if (lineIndex == line.size())
+                                             {
+                                                 lineIndex = 0;
 
-                            if (not Control::Capture::nextLineCsv(&line))
-                            {
-                                line.clear();
-                                Control::Capture::endReadCsv();
-                                break;
-                            }
-                        }
+                                                 if (not Control::Capture::nextLineCsv(&line))
+                                                 {
+                                                     line.clear();
+                                                     Control::Capture::endReadCsv();
+                                                     break;
+                                                 }
+                                             }
 
-                        const auto lineLength{std::min(maxLen - bufferIndex, line.size() - lineIndex)};
-                        std::memcpy(buffer + bufferIndex, line.data() + lineIndex, lineLength);
-                        bufferIndex += lineLength;
-                        lineIndex += lineLength;
-                    }
+                                             const auto lineLength{std::min(maxLen - bufferIndex, line.size() - lineIndex)};
+                                             std::memcpy(buffer + bufferIndex, line.data() + lineIndex, lineLength);
+                                             bufferIndex += lineLength;
+                                             lineIndex += lineLength;
+                                         }
 
-                    return bufferIndex;
-                });
+                                         return bufferIndex;
+                                     });
             }
         } // namespace Get
 
@@ -434,7 +434,7 @@ namespace WebInterface
                         {
                             Control::action(Manual::STOP);
                         }
-                        else if (info->len == 5 and strncmp(text, "manual", 5) == 0)
+                        else if (info->len == 6 and strncmp(text, "manual", 6) == 0)
                         {
                             Control::mode(Mode::MANUAL);
                         }

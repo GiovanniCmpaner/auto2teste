@@ -236,7 +236,7 @@ namespace Sensors
                         const auto reading{distanceSensor.readRangeResult()};
                         if (reading < 2000)
                         {
-                            distance.second = (reading / 1000.0f) * cfg.calibration.distance.factor[n] + cfg.calibration.distance.bias[n];
+                            distance.second = std::clamp((reading / 1000.0f) * cfg.calibration.distance.factor[n] + cfg.calibration.distance.bias[n], 0.0f, 2.0f);
                         }
                         else
                         {

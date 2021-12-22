@@ -180,6 +180,8 @@ namespace Control
     {
         auto enable() -> bool
         {
+            log_d("capture enable");
+
             if (Control::captureEnabled or Control::captureReading)
             {
                 log_d("capture busy");
@@ -199,6 +201,8 @@ namespace Control
 
         auto disable() -> void
         {
+            log_d("capture disable");
+
             if (not Control::captureEnabled)
             {
                 log_d("capture not enabled");
@@ -211,6 +215,8 @@ namespace Control
 
         auto clear() -> bool
         {
+            log_d("capture clear");
+
             if (Control::captureEnabled or Control::captureReading)
             {
                 log_d("capture busy");
@@ -285,7 +291,7 @@ namespace Control
 
             for (auto n{0}; n < 6; ++n)
             {
-                oss << std::fixed << std::setprecision(2) << inputs[n] << ';';
+                oss << std::fixed << std::setprecision(3) << inputs[n] << ';';
             }
 
             for (auto n{0}; n < 5; ++n)
