@@ -20,7 +20,7 @@ static const Configuration defaultCfg{
         .gyroscope = {.bias = {0.0f, 0.0f, 0.0f}, .factor = {1.0f, 1.0f, 1.0f}},
         .accelerometer = {.bias = {0.0f, 0.0f, 0.0f}, .factor = {1.0f, 1.0f, 1.0f}},
         .magnetometer = {.bias = {0.0f, 0.0f, 0.0f}, .factor = {1.0f, 1.0f, 1.0f}},
-        .distance = {.bias = {-0.026785f, -0.027750f, -0.021368f, -0.046234f, -0.017432f, -0.029870f}, .factor = {1.070625f, 1.012645f, 0.863778f, 1.027742f, 0.990019f, 1.021581f}},
+        .distance = {.bias = {-0.020738f, -0.023718f, -0.025331f, -0.043292f, -0.015682f, -0.027025f}, .factor = {1.003176f, 0.968107f, 0.984809f, 0.987616f, 0.981429f, 0.986715f}},
         .color = {.target = 520.0f, .threshold = {115.0f, 154.0f, 200.0f}}},
     .station = {.enabled = true, .mac = {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED}, .ip = {192, 168, 1, 210}, .netmask = {255, 255, 255, 0}, .gateway = {192, 168, 1, 1}, .port = 80, .user = "WORKGROUP", .password = "49WNN7F3CD@22"},
     .accessPoint = {.enabled = false, .mac = {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED}, .ip = {192, 168, 1, 210}, .netmask = {255, 255, 255, 0}, .gateway = {192, 168, 1, 1}, .port = 80, .user = "Auto2", .password = "4ut@Con7r0L", .duration = 30}};

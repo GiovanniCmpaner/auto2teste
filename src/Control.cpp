@@ -234,9 +234,12 @@ namespace Control
                 return false;
             }
 
-            const auto inputs{Control::inputs()};
-            Control::captureFile.write(reinterpret_cast<const uint8_t *>(&inputs), sizeof(inputs));
-            Control::captureFile.write(reinterpret_cast<const uint8_t *>(&Control::manualValue), sizeof(Control::manualValue));
+            if (Control::manualValue != Manual::STOP)
+            {
+                const auto inputs{Control::inputs()};
+                Control::captureFile.write(reinterpret_cast<const uint8_t *>(&inputs), sizeof(inputs));
+                Control::captureFile.write(reinterpret_cast<const uint8_t *>(&Control::manualValue), sizeof(Control::manualValue));
+            }
             return true;
         }
 
