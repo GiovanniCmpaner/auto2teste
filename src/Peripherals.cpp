@@ -43,8 +43,8 @@ namespace Peripherals
             digitalWrite(xshut, LOW);
         }
 
-        //pinMode(LED::CTRL, OUTPUT);
-        //digitalWrite(LED::CTRL, LOW);
+        pinMode(LED::CTRL, OUTPUT);
+        digitalWrite(LED::CTRL, LOW);
 
         Distances::I2C.setPins(Distances::SDA, Distances::SCL);
         Color::I2C.setPins(Color::SDA, Color::SCL);

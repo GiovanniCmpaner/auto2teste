@@ -10,6 +10,4 @@ namespace Motors
     auto right() -> void;
     auto stop() -> void;
 
-    auto speed(float speedPercent) -> void;
-
 } // namespace Motors

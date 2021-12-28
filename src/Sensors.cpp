@@ -20,7 +20,7 @@ auto text(Color color) -> const char *
 {
     switch (color)
     {
-        case Color::BLACK:
+        default:
             return "black";
         case Color::RED:
             return "red";
@@ -36,8 +36,6 @@ auto text(Color color) -> const char *
             return "cyan";
         case Color::WHITE:
             return "white";
-        default:
-            return "unknown";
     }
 }
 
@@ -50,8 +48,8 @@ namespace Sensors
         auto gyroAccelMagSensor{MPU9250{Peripherals::GyroAccelMag::I2C, Peripherals::GyroAccelMag::ADDRESS}};
 
         auto distanceValues{std::array<std::pair<int, float>, 6>{}};
-        auto colorValues{std::array<float, 4>{}};
-        auto colorName{"black"};
+        auto colorChannels{std::array<float, 4>{}};
+        auto colorValue{Color::BLACK};
         auto rotationValues{std::array<float, 3>{}};
         auto accelerationValues{std::array<float, 3>{}};
         auto magneticValues{std::array<float, 3>{}};
@@ -59,6 +57,7 @@ namespace Sensors
         auto batteryValue{float{}};
 
         auto readTimer{0UL};
+        auto ledBrightness{0};
 
         auto initColor() -> void
         {
@@ -73,9 +72,7 @@ namespace Sensors
                 colorSensor.enableColor();
             }
 
-            ledcSetup(1, 10000, 8);
-            ledcAttachPin(Peripherals::LED::CTRL, 1);
-            ledcWrite(1, 0);
+            analogWrite(Peripherals::LED::CTRL, 0);
         }
 
         auto initGyroAccelMag() -> void
@@ -129,69 +126,69 @@ namespace Sensors
         {
             if (Sensors::colorSensor.colorDataReady())
             {
-                uint16_t r, g, b, c;
-                Sensors::colorSensor.getColorData(&r, &g, &b, &c);
+                {
+                    uint16_t r, g, b, c;
+                    Sensors::colorSensor.getColorData(&r, &g, &b, &c);
 
-                static const auto smoothingFactor{0.10f};
-                Sensors::colorValues[0] = (r * smoothingFactor) + (1 - smoothingFactor) * Sensors::colorValues[0];
-                Sensors::colorValues[1] = (g * smoothingFactor) + (1 - smoothingFactor) * Sensors::colorValues[1];
-                Sensors::colorValues[2] = (b * smoothingFactor) + (1 - smoothingFactor) * Sensors::colorValues[2];
-                Sensors::colorValues[3] = (c * smoothingFactor) + (1 - smoothingFactor) * Sensors::colorValues[3];
+                    static const auto smoothingFactor{0.10f};
+                    Sensors::colorChannels[0] = (r * smoothingFactor) + (1 - smoothingFactor) * Sensors::colorChannels[0];
+                    Sensors::colorChannels[1] = (g * smoothingFactor) + (1 - smoothingFactor) * Sensors::colorChannels[1];
+                    Sensors::colorChannels[2] = (b * smoothingFactor) + (1 - smoothingFactor) * Sensors::colorChannels[2];
+                    Sensors::colorChannels[3] = (c * smoothingFactor) + (1 - smoothingFactor) * Sensors::colorChannels[3];
+                }
 
-                const auto currentDuty{ledcRead(1)};
-
-                const auto min{cfg.calibration.color.target};
+                const auto min{static_cast<uint16_t>(cfg.calibration.color.target)};
                 const auto max{static_cast<uint16_t>(cfg.calibration.color.target * 1.2f)};
-                if (c < min and currentDuty < 255)
+                if (Sensors::colorChannels[3] < min and Sensors::ledBrightness < 255)
                 {
-                    ledcWrite(1, currentDuty + 15);
+                    analogWrite(Peripherals::LED::CTRL, Sensors::ledBrightness += 15);
                 }
-                else if (c > max and currentDuty > 0)
+                else if (Sensors::colorChannels[3] > max and Sensors::ledBrightness > 0)
                 {
-                    ledcWrite(1, currentDuty - 15);
+                    analogWrite(Peripherals::LED::CTRL, Sensors::ledBrightness -= 15);
                 }
 
-                const auto scalingFactor(cfg.calibration.color.target / static_cast<float>(c));
-                if ((Sensors::colorValues[0] * scalingFactor) > cfg.calibration.color.threshold[0])
+                const auto scalingFactor(cfg.calibration.color.target / Sensors::colorChannels[3]);
+                if ((Sensors::colorChannels[0] * scalingFactor) > cfg.calibration.color.threshold[0])
                 {
-                    if ((Sensors::colorValues[1] * scalingFactor) > cfg.calibration.color.threshold[1])
+                    if ((Sensors::colorChannels[1] * scalingFactor) > cfg.calibration.color.threshold[1])
                     {
-                        if ((Sensors::colorValues[2] * scalingFactor) > cfg.calibration.color.threshold[2])
+                        if ((Sensors::colorChannels[2] * scalingFactor) > cfg.calibration.color.threshold[2])
                         {
-                            colorName = "white";
+                            colorValue = Color::WHITE;
                         }
                         else
                         {
-                            colorName = "yellow";
+                            colorValue = Color::YELLOW;
                         }
                     }
-                    else if ((Sensors::colorValues[2] * scalingFactor) > cfg.calibration.color.threshold[2])
+                    else if ((Sensors::colorChannels[2] * scalingFactor) > cfg.calibration.color.threshold[2])
                     {
-                        colorName = "magenta";
+                        colorValue = Color::MAGENTA;
                     }
                     else
                     {
-                        colorName = "red";
+                        colorValue = Color::RED;
                     }
                 }
-                else if ((Sensors::colorValues[1] * scalingFactor) > cfg.calibration.color.threshold[1])
+                else if ((Sensors::colorChannels[1] * scalingFactor) > cfg.calibration.color.threshold[1])
                 {
-                    if ((Sensors::colorValues[2] * scalingFactor) > cfg.calibration.color.threshold[2])
+                    if ((Sensors::colorChannels[2] * scalingFactor) > cfg.calibration.color.threshold[2])
                     {
-                        colorName = "cyan";
+                        colorValue = Color::CYAN;
                     }
                     else
                     {
-                        colorName = "green";
+                        colorValue = Color::GREEN;
                     }
                 }
-                else if ((Sensors::colorValues[2] * scalingFactor) > cfg.calibration.color.threshold[2])
+                else if ((Sensors::colorChannels[2] * scalingFactor) > cfg.calibration.color.threshold[2])
                 {
-                    colorName = "blue";
+                    colorValue = Color::BLUE;
                 }
                 else
                 {
-                    colorName = "black";
+                    colorValue = Color::BLACK;
                 }
             }
         }
@@ -255,8 +252,9 @@ namespace Sensors
 
         auto readBattery() -> void
         {
-            //const auto reading{analogRead(Peripherals::Battery::VIN)};
+            const auto reading{analogRead(Peripherals::Battery::VIN)};
             //Sensors::batteryValue = std::clamp(reading * cfg.calibration.battery.factor + cfg.calibration.battery.bias, 0.0f, 100.0f);
+            Sensors::batteryValue = reading * cfg.calibration.battery.factor + cfg.calibration.battery.bias;
         }
     } // namespace
 
@@ -296,7 +294,7 @@ namespace Sensors
         log_d("rotation = %.2f, %.2f, %.2f (%s)", Sensors::rotationValues[0], Sensors::rotationValues[1], Sensors::rotationValues[2], Sensors::rotationUnit);
         log_d("temperature = %.2f (%s)", Sensors::temperatureValue, Sensors::temperatureUnit);
         log_d("battery = %.2f (%s)", Sensors::batteryValue, Sensors::batteryUnit);
-        log_d("color = %.2f, %.2f, %.2f", Sensors::colorValues[0], Sensors::colorValues[1], Sensors::colorValues[2]);
+        log_d("color = %.2f, %.2f, %.2f", Sensors::colorChannels[0], Sensors::colorChannels[1], Sensors::colorChannels[2]);
         for (auto [angle, distanceValue] : Sensors::distanceValues)
         {
             log_d("distance[ %d (%s) ] = %.3f (%s)", angle, Sensors::angleUnit, distanceValue, Sensors::distanceUnit);
@@ -306,11 +304,6 @@ namespace Sensors
     auto distances() -> std::array<std::pair<int, float>, 6>
     {
         return Sensors::distanceValues;
-    }
-
-    auto colors() -> std::array<float, 4>
-    {
-        return Sensors::colorValues;
     }
 
     auto rotation() -> std::array<float, 3>
@@ -338,6 +331,11 @@ namespace Sensors
         return Sensors::batteryValue;
     }
 
+    auto color() -> Color
+    {
+        return Sensors::colorValue;
+    }
+
     auto serialize(ArduinoJson::JsonVariant &json) -> void
     {
         {
@@ -349,11 +347,11 @@ namespace Sensors
         }
         {
             auto color{json["color"]};
-            color["r"] = Sensors::colorValues[0];
-            color["g"] = Sensors::colorValues[1];
-            color["b"] = Sensors::colorValues[2];
-            color["c"] = Sensors::colorValues[3];
-            color["name"] = Sensors::colorName;
+            color["r"] = Sensors::colorChannels[0];
+            color["g"] = Sensors::colorChannels[1];
+            color["b"] = Sensors::colorChannels[2];
+            color["c"] = Sensors::colorChannels[3];
+            color["name"] = text(Sensors::colorValue);
         }
         {
             auto rotation{json["rot"]};

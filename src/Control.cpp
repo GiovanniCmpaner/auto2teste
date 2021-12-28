@@ -32,15 +32,12 @@ namespace Control
             auto inputs{std::array<float, 6>{}};
 
             const auto distances{Sensors::distances()};
-            const auto colors{Sensors::colors()};
-
             inputs[0] = distances[0].second;
             inputs[1] = distances[1].second;
             inputs[2] = distances[2].second;
             inputs[3] = distances[3].second;
             inputs[4] = distances[4].second;
             inputs[5] = distances[5].second;
-            //inputs[6] = colors;
 
             return inputs;
         }
@@ -96,6 +93,11 @@ namespace Control
 
         auto automatic(uint64_t syncTimer) -> void
         {
+            //if (Sensors::color() == Color::RED)
+            //{
+            //    Control::autoValue = Auto::STOP;
+            //}
+
             switch (Control::autoValue)
             {
                 case Auto::START:

@@ -10,9 +10,7 @@ namespace Motors
     {
         log_d("begin");
 
-        ledcSetup(0, 10000, 8);
-        ledcAttachPin(Peripherals::Motors::PWM, 0);
-        ledcWrite(0, cfg.calibration.motor.speed * 255.0f);
+        analogWrite(Peripherals::Motors::PWM, cfg.calibration.motor.speed * 255.0f);
 
         digitalWrite(Peripherals::Motors::STBY, HIGH);
 
@@ -87,11 +85,6 @@ namespace Motors
         digitalWrite(Peripherals::Motors::CIN2, LOW);
         digitalWrite(Peripherals::Motors::DIN1, LOW);
         digitalWrite(Peripherals::Motors::DIN2, LOW);
-    }
-
-    auto speed(float speedPercent) -> void
-    {
-        //ledcWrite(0, speedPercent / 100.0 * 1023.0);
     }
 
 } // namespace Motors
