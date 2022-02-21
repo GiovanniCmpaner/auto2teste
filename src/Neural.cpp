@@ -23,7 +23,7 @@ namespace Neural
         auto errorReporter{static_cast<tflite::ErrorReporter *>(nullptr)};
         auto model{static_cast<const tflite::Model *>(nullptr)};
         auto interpreter{static_cast<tflite::MicroInterpreter *>(nullptr)};
-        auto tensorArena{std::array<uint8_t, 2 * 1024>{}};
+        auto tensorArena{std::array<uint8_t, 3 * 1024>{}};
 
         auto inputTensor{static_cast<TfLiteTensor *>(nullptr)};
         auto outputTensor{static_cast<TfLiteTensor *>(nullptr)};
